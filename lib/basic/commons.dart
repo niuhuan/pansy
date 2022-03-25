@@ -38,22 +38,22 @@ Future<bool> confirmDialog(
           context: context,
           builder: (context) => AlertDialog(
                 title: Text(title),
-                content: new SingleChildScrollView(
-                  child: new ListBody(
+                content: SingleChildScrollView(
+                  child: ListBody(
                     children: <Widget>[
-                      new Text(content),
+                      Text(content),
                     ],
                   ),
                 ),
                 actions: <Widget>[
-                  new MaterialButton(
-                    child: new Text('取消'),
+                  MaterialButton(
+                    child: const Text('取消'),
                     onPressed: () {
                       Navigator.of(context).pop(false);
                     },
                   ),
-                  new MaterialButton(
-                    child: new Text('确定'),
+                  MaterialButton(
+                    child: const Text('确定'),
                     onPressed: () {
                       Navigator.of(context).pop(true);
                     },
@@ -69,16 +69,16 @@ Future alertDialog(BuildContext context, String title, String content) {
       context: context,
       builder: (context) => AlertDialog(
             title: Text(title),
-            content: new SingleChildScrollView(
-              child: new ListBody(
+            content: SingleChildScrollView(
+              child: ListBody(
                 children: <Widget>[
-                  new Text(content),
+                  Text(content),
                 ],
               ),
             ),
             actions: <Widget>[
-              new MaterialButton(
-                child: new Text('确定'),
+              MaterialButton(
+                child: const Text('确定'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -105,7 +105,7 @@ Future<T?> chooseListDialog<T>(
   List<Widget> widgets = [];
   if (tips != null) {
     widgets.add(Container(
-      padding: EdgeInsets.fromLTRB(15, 5, 15, 15),
+      padding: const EdgeInsets.fromLTRB(15, 5, 15, 15),
       child: Text(tips),
     ));
   }
@@ -217,7 +217,6 @@ String add0(int num, int len) {
   }
   return rsp;
 }
-
 
 /// 格式化时间 2012-34-56
 String formatTimeToDate(String str) {

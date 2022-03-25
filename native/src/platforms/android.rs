@@ -1,7 +1,7 @@
+use crate::init_root;
 use jni::objects::{JClass, JString};
 use jni::JNIEnv;
 use std::ffi::CStr;
-use native::init_root;
 
 #[no_mangle]
 pub unsafe extern "C" fn Java_niuhuan_pansy_Jni_setRoot(env: JNIEnv, _: JClass, path: JString) {
