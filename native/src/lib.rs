@@ -47,5 +47,5 @@ pub(crate) fn get_root() -> &'static String {
 }
 
 pub(crate) fn get_network_image_dir() -> &'static String {
-    ROOT.get().unwrap()
+    NETWORK_IMAGE_DIR.get().unwrap()
 }

@@ -10,7 +10,7 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 anyhow = "1"
-flutter_rust_bridge = "1"
+flutter_rust_bridge = { path = "../../flutter_rust_bridge/frb_rust" }
 once_cell = "1"
 lazy_static = "1"
 pixirust = { git = "https://github.com/niuhuan/pixirust.git", branch = "master" }
@@ -27,7 +27,7 @@ hex = "0.4"
 base64 = "0.13"
 async_once = "0.2"
 tokio = { version = "1", features = ["full"] }
-image = { version = "0", features = ["jpeg", "gif", "webp", "bmp", "png", "jpeg_rayon" ] }
+image = { version = "0", features = ["jpeg", "gif", "webp", "bmp", "png", "jpeg_rayon"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0"

@@ -66,6 +66,7 @@ pub fn get_in_china() -> bool {
 }
 
 pub fn per_in_china() {
+    println!("I AM IN RUST");
     block_on(async {
         load_in_china().await;
     });

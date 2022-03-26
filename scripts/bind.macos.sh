@@ -9,5 +9,5 @@ flutter_rust_bridge_codegen \
     --dart-output lib/bridge_generated.dart \
     --c-output macos/Runner/bridge_generated.h \
     --rust-crate-dir native \
-    --llvm-path $LLVM_HOME \
+    --llvm-path "$LLVM_HOME" \
     --class-name Native

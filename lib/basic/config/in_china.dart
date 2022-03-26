@@ -10,6 +10,7 @@ Future setInChina(bool value) async {
 }
 
 Future initInChina() async {
+  print("I AM IN DART");
   await api.perInChina();
   _inChina = await api.getInChina();
 }
