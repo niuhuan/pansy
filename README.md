@@ -25,6 +25,7 @@ PANSY
 - [rust](https://github.com/rust-lang/rust)
 - [flutter](https://github.com/flutter/flutter)
 - [flutter_rust_bridge](https://github.com/fzyzcjy/flutter_rust_bridge) 
+  - Clone form **github** and run " ***cargo install --path .*** " on code gen.
 
 ![](https://raw.githubusercontent.com/fzyzcjy/flutter_rust_bridge/master/book/logo.png)
 
