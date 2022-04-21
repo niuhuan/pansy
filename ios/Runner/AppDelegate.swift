@@ -7,31 +7,42 @@ import Flutter
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-    let chars = documentsPath.cString(using: String.Encoding.utf8)
-    set_root(chars)
       
-      FlutterMethodChannel.init(name: "cross", binaryMessenger: controller as! FlutterBinaryMessenger).setMethodCallHandler { (call, result) in
+      let controller = self.window.rootViewController as! FlutterViewController
+      let channel = FlutterMethodChannel.init(name: "cross", binaryMessenger: controller as! FlutterBinaryMessenger)
+      
+      channel.setMethodCallHandler { (call, result) in
           Thread {
-              switch (call.method){
-              case "saveImageFileToGallery":
-                  if let path = call.arguments as? String{
+              if call.method == "root" {
+                  
+                  let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+                  
+                  result(documentsPath)
+                  
+              }
+              else if call.method == "saveImageToGallery"{
+                  if let args = call.arguments as? String{
+                      
                       do {
-                          let fileURL: URL = URL(fileURLWithPath: path)
-                          let imageData = try Data(contentsOf: fileURL)
+                          let fileURL: URL = URL(fileURLWithPath: args)
+                              let imageData = try Data(contentsOf: fileURL)
+                          
                           if let uiImage = UIImage(data: imageData) {
                               UIImageWriteToSavedPhotosAlbum(uiImage, nil, nil, nil)
                               result("OK")
                           }else{
                               result(FlutterError(code: "", message: "Error loading image ", details: ""))
                           }
+                          
                       } catch {
-                          result(FlutterError(code: "", message: "Error loading image : \(error)", details: ""))
+                              result(FlutterError(code: "", message: "Error loading image : \(error)", details: ""))
                       }
+                      
                   }else{
                       result(FlutterError(code: "", message: "params error", details: ""))
                   }
-              default:
+              }
+              else{
                   result(FlutterMethodNotImplemented)
               }
           }.start()

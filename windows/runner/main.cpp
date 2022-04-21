@@ -4,22 +4,9 @@
 
 #include "flutter_window.h"
 #include "utils.h"
-#include "native.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
-
-    wchar_t awBuffer[2048];
-    GetCurrentDirectory(2048, awBuffer) ;
-    if (awBuffer[wcslen(awBuffer) - 1] != L'\\') {
-        wcscat_s(awBuffer, 2048, L"\\");
-    }
-    wcscat_s(awBuffer, 2048, L"data/application");
-    char buffer[4096];
-    size_t i;
-    wcstombs_s(&i,buffer,4096, awBuffer,2048 );
-    set_root(buffer);
-
   // Attach to console when present (e.g., 'flutter run') or create a
   // new console when running with a debugger.
   if (!::AttachConsole(ATTACH_PARENT_PROCESS) && ::IsDebuggerPresent()) {
@@ -39,8 +26,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
-  Win32Window::Size size(1280, 720);
-  if (!window.CreateAndShow(L"flutter_rust_bridge_template", origin, size)) {
+  Win32Window::Size size(480, 720);
+  if (!window.CreateAndShow(L"pansy", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

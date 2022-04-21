@@ -5,6 +5,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pansy/screens/app_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
 
+import '../cross.dart';
+
 class InitScreen extends StatefulWidget {
   const InitScreen({Key? key}) : super(key: key);
 
@@ -20,6 +22,7 @@ class _InitScreenState extends State<InitScreen> {
   }
 
   Future<void> _init() async {
+    await api.init(root: await cross.root());
     await initInChina();
     setPixivLogin(await api.preLogin());
     Navigator.of(context).pushReplacement(MaterialPageRoute(

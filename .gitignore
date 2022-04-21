@@ -54,3 +54,5 @@ macos/Runner/native.h
 windows/Runner/native.h
 native/src/bridge_generated.rs
 lib/bridge_generated.dart
+
+*.a

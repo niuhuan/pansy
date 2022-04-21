@@ -1,4 +1,4 @@
-package niuhuan.pansy
+package niuhuan.dasiy
 
 import android.content.ContentValues
 import android.graphics.Bitmap
@@ -8,32 +8,20 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
-import android.util.Log
+import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
+import io.flutter.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.util.concurrent.Executors
 
-class MainActivity : FlutterActivity() {
+class MainActivity: FlutterActivity() {
 
+    private val pool = Executors.newCachedThreadPool { runnable ->
+        Thread(runnable).also { it.isDaemon = true }
+    }
     private val uiThreadHandler = Handler(Looper.getMainLooper())
-    private val pool = Executors.newCachedThreadPool { runnable -> Thread(runnable).also { it.isDaemon = true } }
-
-    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
-        Jni.setRoot(context.filesDir.absolutePath)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "cross").setMethodCallHandler(this::cross)
-        super.configureFlutterEngine(flutterEngine)
-    }
-
-    private fun cross(call: MethodCall, result: MethodChannel.Result) {
-        result.withCoroutine {
-            when (call.method) {
-                "saveImageFileToGallery" -> saveImageFileToGallery(call.arguments<String>())
-                else -> result.notImplemented()
-            }
-        }
-    }
 
     private val notImplementedToken = Any()
     private fun MethodChannel.Result.withCoroutine(exec: () -> Any?) {
@@ -63,7 +51,24 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun saveImageFileToGallery(path: String) {
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        // Method Channel
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "cross").setMethodCallHandler { call, result ->
+            result.withCoroutine {
+                when (call.method) {
+                    "root" -> context!!.filesDir.absolutePath
+                    "saveImageToGallery" -> saveImageToGallery(call.arguments as String)
+                    else -> {
+                        notImplementedToken
+                    }
+                }
+            }
+        }
+    }
+
+    private fun saveImageToGallery(path: String) {
         BitmapFactory.decodeFile(path)?.let { bitmap ->
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, System.currentTimeMillis().toString())

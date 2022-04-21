@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "flutter_rust_bridge_template" "\0"
+            VALUE "CompanyName", "niuhuan" "\0"
+            VALUE "FileDescription", "pansy" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "flutter_rust_bridge_template" "\0"
+            VALUE "InternalName", "pansy" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "flutter_rust_bridge_template.exe" "\0"
-            VALUE "ProductName", "flutter_rust_bridge_template" "\0"
+            VALUE "OriginalFilename", "pansy.exe" "\0"
+            VALUE "ProductName", "pansy" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

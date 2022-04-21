@@ -10,6 +10,51 @@ use std::future::Future;
 use std::path::Path;
 use std::time::Duration;
 
+pub fn desktop_root() -> Result<String> {
+    #[cfg(target_os = "windows")]
+    {
+        Ok(join_paths(vec![
+            std::env::current_exe()?
+                .parent()
+                .with_context(|| "error")?
+                .to_str()
+                .with_context(|| "error")?,
+            "data",
+        ]))
+    }
+    #[cfg(target_os = "macos")]
+    {
+        let home = std::env::var_os("HOME")
+            .with_context(|| "error")?
+            .to_str()
+            .with_context(|| "error")?
+            .to_string();
+        Ok(join_paths(vec![
+            home.as_str(),
+            "Library",
+            "Application Support",
+            "niuhuan",
+            "daisy",
+        ]))
+    }
+    #[cfg(target_os = "linux")]
+    {
+        let home = std::env::var_os("HOME")
+            .with_context(|| "error")?
+            .to_str()
+            .with_context(|| "error")?
+            .to_string();
+        Ok(join_paths(vec![home.as_str(), ".niuhuan", "daisy"]))
+    }
+    #[cfg(not(any(target_os = "linux", target_os = "windows", target_os = "macos")))]
+    panic!("未支持的平台")
+}
+
+pub fn init(root:String)->Result<()>{
+    crate::init_root(&root);
+    Ok(())
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct LoginByCodeQuery {
     pub code: String,

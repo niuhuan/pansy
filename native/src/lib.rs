@@ -6,7 +6,6 @@ use once_cell::sync::OnceCell;
 
 mod api;
 mod bridge_generated;
-mod platforms;
 
 mod entities;
 mod local;
