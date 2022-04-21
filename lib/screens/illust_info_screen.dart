@@ -1,8 +1,9 @@
+import 'dart:convert';
+
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/cross.dart';
-import 'package:pansy/screens/illust_gallery_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../types.dart';
 import 'components/empty_app_bar.dart';
@@ -19,6 +20,11 @@ class IllustInfoScreen extends StatefulWidget {
 }
 
 class _IllustInfoScreenState extends State<IllustInfoScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,16 +61,6 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
                   );
                 }
                 pic = GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (BuildContext context) {
-                        return IllustGalleryScreen(
-                          metas.map((e) => MetaPage(e)).toList(),
-                          i,
-                        );
-                      }),
-                    );
-                  },
                   onLongPress: () async {
                     int? action = await chooseMapDialog(
                       context,

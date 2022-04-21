@@ -7,4 +7,4 @@ flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bri
 
 cd native
 
-cargo ndk -o ../android/app/src/main/jniLibs --llvm-path "$LLVM_HOME" -t arm64-v8a build
+cargo ndk -o ../android/app/src/main/jniLibs -t arm64-v8a build

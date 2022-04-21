@@ -5,8 +5,10 @@ import 'package:pansy/ffi.dart';
 
 
 Future<IllustRecommendedResponse> illustPageByUrl(String url) async {
+  var j = await api.requestUrl(params: url);
+  print(j);
   return IllustRecommendedResponse.fromJson(
-    jsonDecode(await api.requestUrl(params: url)),
+    jsonDecode(j),
   );
 }
 
