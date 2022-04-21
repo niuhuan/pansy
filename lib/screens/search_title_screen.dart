@@ -5,19 +5,27 @@ import 'package:pansy/screens/search_screen.dart';
 
 import '../types.dart';
 
-class PixivSearchScreen extends StatefulWidget {
-  const PixivSearchScreen({Key? key}) : super(key: key);
+class SearchTitleScreen extends StatefulWidget {
+  const SearchTitleScreen({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _PixivSearchScreenState();
+  State<StatefulWidget> createState() => _SearchTitleScreenState();
 }
 
-class _PixivSearchScreenState extends State<PixivSearchScreen>
+class _SearchTitleScreenState extends State<SearchTitleScreen>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
+  final _editController = TextEditingController();
+  var _mode = ILLUST_SEARCH_MODE_TITLE_AND_CAPTION;
   Future<IllustTrendingTags> _future = illustTrendingTags();
+
+  @override
+  void dispose() {
+    _editController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +48,13 @@ class _PixivSearchScreenState extends State<PixivSearchScreen>
                   (e) => GestureDetector(
                     onTap: () {
                       Navigator.of(context).push(
-                          MaterialPageRoute(builder: (BuildContext context) {
-                        return SearchScreen(
-                          mode: ILLUST_SEARCH_MODE_EXACT_MATCH_FOR_TAGS,
-                          word: e.tag,
-                        );
-                      }));
+                        MaterialPageRoute(builder: (BuildContext context) {
+                          return SearchScreen(
+                            mode: ILLUST_SEARCH_MODE_EXACT_MATCH_FOR_TAGS,
+                            word: e.tag,
+                          );
+                        }),
+                      );
                     },
                     child: SizedBox(
                       width: size,
@@ -80,6 +89,65 @@ class _PixivSearchScreenState extends State<PixivSearchScreen>
                 .toList();
             return ListView(
               children: [
+                Container(height: 10),
+                Row(children: [
+                  SizedBox(
+                    width: 50,
+                    child: MaterialButton(
+                      onPressed: () async {
+                        var mode = await chooseMode(context);
+                        if (mode != null) {
+                          setState(() {
+                            _mode = mode;
+                          });
+                        }
+                      },
+                      child: Column(
+                        children: [
+                          const Icon(Icons.style,size: 20),
+                          Container(height: 2),
+                          Text(
+                            tagModeNameAlias(_mode),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: SizedBox(
+                      height: 40,
+                      child: TextFormField(
+                        controller: _editController,
+                        onChanged: (_) {
+                          setState(() {});
+                        },
+                        decoration: const InputDecoration(
+                          border: UnderlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      _editController.text = _editController.text.trim();
+                      if (_editController.text.isNotEmpty) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (BuildContext context) {
+                            return SearchScreen(
+                              mode: _mode,
+                              word: _editController.text,
+                            );
+                          }),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.search,size: 24),
+                  ),
+                ]),
                 Container(height: 10),
                 Wrap(
                   alignment: WrapAlignment.spaceEvenly,

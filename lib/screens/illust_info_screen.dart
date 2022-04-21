@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:pansy/screens/illust_gallery_screen.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../types.dart';
 import 'components/empty_app_bar.dart';
 import 'components/pixiv_image.dart';
@@ -66,9 +66,14 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
                     );
                   },
                   onLongPress: () async {
-                    String? action =
-                        await chooseListDialog(context, "请选择", ["保存图片"]);
-                    if ("保存图片" == action) {
+                    int? action = await chooseMapDialog(
+                      context,
+                      {
+                        AppLocalizations.of(context)!.downloadAndSaveOrigin: 1,
+                      },
+                      AppLocalizations.of(context)!.choose,
+                    );
+                    if (1 == action) {
                       await savePixivImage(metas[i].original, context);
                     }
                   },
@@ -112,10 +117,6 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              ShadowIconButton(
-                icon: Icons.share,
-                onPressed: () {},
-              ),
               ShadowIconButton(
                 icon: Icons.more_vert,
                 onPressed: () {},

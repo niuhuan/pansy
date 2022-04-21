@@ -1,0 +1,15 @@
+{
+  "inChineseNetwork": "I am in chinese network",
+  "login": "Login",
+  "logging": "Logging",
+  "openLoginUrl": "Open login URL",
+  "search": "search",
+  "discovery": "discovery",
+  "hots": "hots",
+  "chooseMatchMode": "Choose match mode",
+  "partial_match_for_tags": "Partial match for tags",
+  "exact_match_for_tags": "Exact match for tags",
+  "title_and_caption": "Title and caption",
+  "choose": "Choose",
+  "downloadAndSaveOrigin": "Download origin image and save"
+}

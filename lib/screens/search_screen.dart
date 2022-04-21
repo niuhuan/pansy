@@ -7,10 +7,38 @@ import 'package:pansy/basic/commons.dart';
 import '../ffi.dart';
 import 'components/content_builder.dart';
 import 'components/first_url_illust_flow.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 const ILLUST_SEARCH_MODE_PARTIAL_MATCH_FOR_TAGS = "partial_match_for_tags";
 const ILLUST_SEARCH_MODE_EXACT_MATCH_FOR_TAGS = "exact_match_for_tags";
 const ILLUST_SEARCH_MODE_TITLE_AND_CAPTION = "title_and_caption";
+
+String tagModeNameAlias(String mode) {
+  switch (mode) {
+    case ILLUST_SEARCH_MODE_PARTIAL_MATCH_FOR_TAGS:
+      return "PT";
+    case ILLUST_SEARCH_MODE_EXACT_MATCH_FOR_TAGS:
+      return "ET";
+    case ILLUST_SEARCH_MODE_TITLE_AND_CAPTION:
+      return "TAC";
+  }
+  return "";
+}
+
+Future<String?> chooseMode(BuildContext context) async {
+  return await chooseMapDialog(
+    context,
+    {
+      AppLocalizations.of(context)!.partial_match_for_tags:
+          ILLUST_SEARCH_MODE_PARTIAL_MATCH_FOR_TAGS,
+      AppLocalizations.of(context)!.exact_match_for_tags:
+          ILLUST_SEARCH_MODE_EXACT_MATCH_FOR_TAGS,
+      AppLocalizations.of(context)!.title_and_caption:
+          ILLUST_SEARCH_MODE_TITLE_AND_CAPTION,
+    },
+    AppLocalizations.of(context)!.chooseMatchMode,
+  );
+}
 
 class SearchScreen extends StatefulWidget {
   final String mode;
@@ -31,7 +59,7 @@ class _SearchScreenState extends State<SearchScreen> {
       TextEditingController(text: widget.word);
 
   late final SearchBar _searchBar = SearchBar(
-    hintText: '搜索',
+    hintText: AppLocalizations.of(context)!.search,
     controller: _textEditController,
     inBar: false,
     setState: setState,
@@ -52,25 +80,36 @@ class _SearchScreenState extends State<SearchScreen> {
       return AppBar(
         title: Text(" ${widget.word}"),
         actions: [
-          IconButton(
-            onPressed: () async {
-              String? mode = await chooseMapDialog(
-                  context,
-                  {
-                    "标签部分一致": "partial_match_for_tags",
-                    "标签完全一致": "exact_match_for_tags",
-                    "标题说明文": "title_and_caption",
-                  },
-                  "选择匹配模式");
-              if (mode != null && mode != widget.mode) {
-                Navigator.of(context).pushReplacement(
+          Column(children: [
+            Expanded(child: Container()),
+            MaterialButton(
+              minWidth: 50,
+              textColor: Colors.white,
+              onPressed: () async {
+                String? mode = await chooseMode(context);
+                if (mode != null && mode != widget.mode) {
+                  Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (BuildContext context) {
-                  return SearchScreen(mode: mode, word: widget.word);
-                }));
-              }
-            },
-            icon: const Icon(Icons.style),
-          ),
+                      return SearchScreen(mode: mode, word: widget.word);
+                    }),
+                  );
+                }
+              },
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.style,
+                    size: 20,
+                  ),
+                  Text(
+                    tagModeNameAlias(widget.mode),
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(child: Container()),
+          ],),
           _searchBar.getSearchAction(context),
         ],
       );

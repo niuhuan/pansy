@@ -11,6 +11,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.17.0
+
   cupertino_icons: ^1.0.2
   flutter_rust_bridge:
     path: ../flutter_rust_bridge/frb_dart
@@ -39,6 +43,7 @@ dev_dependencies:
   flutter_lints: ^1.0.0
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - lib/assets/

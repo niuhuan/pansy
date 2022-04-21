@@ -1,0 +1,15 @@
+{
+  "inChineseNetwork": "对中国大陆网络优化",
+  "login": "登录",
+  "logging": "登录中",
+  "openLoginUrl": "打开登录链接",
+  "search": "搜索",
+  "discovery": "发现",
+  "hots": "热门",
+  "chooseMatchMode": "选择匹配模式",
+  "partial_match_for_tags": "标签部分匹配",
+  "exact_match_for_tags": "标签完全一致",
+  "title_and_caption": "标题或内容中匹配",
+  "choose": "请选择",
+  "downloadAndSaveOrigin": "下载原图并保存到本地"
+}

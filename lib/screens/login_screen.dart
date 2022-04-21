@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pansy/ffi.dart';
 import 'package:pansy/screens/components/content_builder.dart';
 import 'package:pansy/states/pixiv_login.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   final String verify;
@@ -36,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
         successBuilder: (BuildContext context, AsyncSnapshot<void> snapshot) {
           return Container();
         },
-        loadingLabel: "登录中",
+        loadingLabel: AppLocalizations.of(context)!.logging,
       ),
     );
   }

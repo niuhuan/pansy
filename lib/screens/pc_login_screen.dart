@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:pansy/bridge_generated.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'login_screen.dart';
 
 class PcLoginScreen extends StatefulWidget {
@@ -18,11 +18,11 @@ class _PcLoginScreenState extends State<PcLoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('登录'),
+        title: Text(AppLocalizations.of(context)!.login),
       ),
       body: ListView(children: [
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           child: Text(
             '1. 请您打开VPN或代理, 然后点击下面的打开登录链接\n'
             '2. 打开浏览器后按F12呼出浏览器的调试菜单, 找到network或网络\n'
@@ -32,7 +32,7 @@ class _PcLoginScreenState extends State<PcLoginScreen> {
           ),
         ),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           child: MaterialButton(
             color: Theme.of(context).colorScheme.secondary,
             textColor: Theme.of(context).scaffoldBackgroundColor,
@@ -40,8 +40,8 @@ class _PcLoginScreenState extends State<PcLoginScreen> {
               openUrl(widget.verifyUrl.url);
             },
             child: Container(
-              padding: EdgeInsets.all(10),
-              child: Text('打开登录链接'),
+              padding: const EdgeInsets.all(10),
+              child: Text(AppLocalizations.of(context)!.openLoginUrl),
             ),
           ),
         ),

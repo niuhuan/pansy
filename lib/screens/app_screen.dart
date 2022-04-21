@@ -6,6 +6,7 @@ import 'package:pansy/screens/search_title_screen.dart';
 import 'package:pansy/screens/discovery_screen.dart';
 import 'package:pansy/screens/hots_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AppScreen extends StatefulWidget {
   const AppScreen({Key? key}) : super(key: key);
@@ -36,22 +37,22 @@ class _AppScreenState extends State<AppScreen>
     setState(() {});
   }
 
-  final _screens = [
+  late final _screens = [
     AppScreenData(
-      PixivSearchScreen(),
-      '搜索',
+      const SearchTitleScreen(),
+      AppLocalizations.of(context)!.search,
       Icons.widgets_outlined,
       Icons.widgets,
     ),
     AppScreenData(
-      DiscoveryScreen(),
-      '发现',
+      const DiscoveryScreen(),
+      AppLocalizations.of(context)!.discovery,
       Icons.web_outlined,
       Icons.web,
     ),
     AppScreenData(
-      HotsScreen(),
-      '热门',
+      const HotsScreen(),
+      AppLocalizations.of(context)!.hots,
       Icons.local_fire_department_outlined,
       Icons.local_fire_department_rounded,
     ),
@@ -135,14 +136,14 @@ class _AppScreenState extends State<AppScreen>
                   onPressed: () async {
                     pixivLoginAction(context);
                   },
-                  child: const Text('登录'),
+                  child: Text(AppLocalizations.of(context)!.login),
                 ),
                 Container(height: 30),
                 const Divider(),
                 Row(
                   children: [
                     Expanded(child: Container()),
-                    const Text("对中国大陆网络优化"),
+                    Text(AppLocalizations.of(context)!.inChineseNetwork),
                     Switch(
                       value: inChina,
                       onChanged: (value) async {
