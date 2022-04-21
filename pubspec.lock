@@ -70,7 +70,7 @@ packages:
       name: date_format
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.5"
+    version: "2.0.6"
   decorated_icon:
     dependency: "direct main"
     description:
@@ -98,7 +98,7 @@ packages:
       name: extended_image_library
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.2"
+    version: "3.1.4"
   extended_list_library:
     dependency: transitive
     description:
@@ -168,9 +168,9 @@ packages:
   flutter_rust_bridge:
     dependency: "direct main"
     description:
-      name: flutter_rust_bridge
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../flutter_rust_bridge/frb_dart"
+      relative: true
+    source: path
     version: "1.23.0"
   flutter_search_bar:
     dependency: "direct main"
@@ -515,7 +515,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.4.4"
+    version: "2.5.1"
   xdg_directories:
     dependency: transitive
     description:
