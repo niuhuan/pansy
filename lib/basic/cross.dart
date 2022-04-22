@@ -18,7 +18,7 @@ class _Cross {
   final _channel = const MethodChannel("cross");
 
   Future saveImageFileToGallery(String path) {
-    return _channel.invokeMethod("saveImageFileToGallery", path);
+    return _channel.invokeMethod("saveImageToGallery", path);
   }
 }
 
