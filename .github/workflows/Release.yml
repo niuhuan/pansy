@@ -58,8 +58,8 @@ jobs:
       fail-fast: false
       matrix:
         config:
-#          - target: linux
-#            host: ubuntu-latest
+          - target: linux
+            host: ubuntu-latest
           - target: windows
             host: windows-latest
           - target: macos
@@ -250,20 +250,20 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
-          cd pansy
+          sudo apt-get update
+          sudo apt install -y ninja-build liblzma-dev libgtk-3-dev libgl1-mesa-dev xorg-dev
           curl -JOL https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod a+x appimagetool-x86_64.AppImage
-          mkdir -p ${GITHUB_WORKSPACE}/bin
-          mv appimagetool-x86_64.AppImage ${GITHUB_WORKSPACE}/bin/appimagetool
-          echo ::add-path::${GITHUB_WORKSPACE}/bin
-          sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-dev xorg-dev
-          curl -JOL https://github.com/junmer/source-han-serif-ttf/raw/master/SubsetTTF/CN/SourceHanSerifCN-Regular.ttf
-          mkdir -p fonts
-          mv SourceHanSerifCN-Regular.ttf fonts/Roboto.ttf
-          cat ci/linux_font.yaml >> pubspec.yaml
+          mv appimagetool-x86_64.AppImage appimagetool
+          cd pansy
+          echo > native/src/bridge_generated.rs
+          flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
           flutter config --enable-linux-desktop
-          flutter build linux
+          flutter build linux --release
+          mv build/linux/x64/release/bundle/{pansy,AppRun}
+          cp linux/appimage/* build/linux/x64/release/bundle/
+          ../appimagetool build/linux/x64/release/bundle/
+          mv *.AppImage build/linux.AppImage
 
       - name: build (windows)
         if: steps.check_asset.outputs.skip_build != 'true' && matrix.config.target == 'windows'
