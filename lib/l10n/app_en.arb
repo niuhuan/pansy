@@ -11,5 +11,12 @@
   "exact_match_for_tags": "Exact match for tags",
   "title_and_caption": "Title and caption",
   "choose": "Choose",
-  "downloadAndSaveOrigin": "Download origin image and save"
+  "downloadAndSaveOrigin": "Download origin image and save",
+  "success": "Success",
+  "failed": "Failed",
+  "copy": "Copy",
+  "copied": "Copied",
+  "ok": "Ok",
+  "copyLoginUrl": "Copy login url",
+  "pcLoginNotice": "1. Open VPN or proxy, click \"Open login url\"\n2. Press f12 in browser, click network menu item\n3. find url pixiv:// after login \n4. copy code (code=*CODE*&via=login)"
 }

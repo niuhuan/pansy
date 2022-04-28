@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/config/in_china.dart';
 import 'package:pansy/ffi.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pansy/screens/app_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
 

@@ -24,10 +24,7 @@ class _PcLoginScreenState extends State<PcLoginScreen> {
         Container(
           padding: const EdgeInsets.all(10),
           child: Text(
-            '1. 请您打开VPN或代理, 然后点击下面的打开登录链接\n'
-            '2. 打开浏览器后按F12呼出浏览器的调试菜单, 找到network或网络\n'
-            '3. 您登录成功后将显示红色pixiv开头的url \n'
-            '4. 请将CODE部分填入下面的位置点击确定 (code=*CODE*&via=login)',
+            AppLocalizations.of(context)!.pcLoginNotice,
             style: TextStyle(fontSize: 16),
           ),
         ),
@@ -46,7 +43,7 @@ class _PcLoginScreenState extends State<PcLoginScreen> {
           ),
         ),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           child: MaterialButton(
             color: Theme.of(context).colorScheme.secondary,
             textColor: Theme.of(context).scaffoldBackgroundColor,
@@ -54,13 +51,13 @@ class _PcLoginScreenState extends State<PcLoginScreen> {
               copyToClipBoard(context, widget.verifyUrl.url);
             },
             child: Container(
-              padding: EdgeInsets.all(10),
-              child: Text('复制登录链接'),
+              padding: const EdgeInsets.all(10),
+              child: Text(AppLocalizations.of(context)!.copyLoginUrl),
             ),
           ),
         ),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           child: TextField(
             controller: _inputController,
             decoration: const InputDecoration(
@@ -69,7 +66,7 @@ class _PcLoginScreenState extends State<PcLoginScreen> {
           ),
         ),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           child: MaterialButton(
             color: Theme.of(context).colorScheme.secondary,
             textColor: Theme.of(context).scaffoldBackgroundColor,
@@ -82,8 +79,8 @@ class _PcLoginScreenState extends State<PcLoginScreen> {
               }));
             },
             child: Container(
-              padding: EdgeInsets.all(10),
-              child: Text('确认'),
+              padding: const EdgeInsets.all(10),
+              child: Text(AppLocalizations.of(context)!.ok),
             ),
           ),
         ),
@@ -91,5 +88,5 @@ class _PcLoginScreenState extends State<PcLoginScreen> {
     );
   }
 
-  var _inputController = TextEditingController();
+  static final _inputController = TextEditingController();
 }
