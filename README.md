@@ -4,7 +4,7 @@ English | [简体中文](README-zh.md)
 
 A beautiful illustration clients, support mac, windows, linux, ios, Android.
 
-## 软件截图
+## Screenshoots
 
 #### Discovery and Ranks
 
