@@ -20,11 +20,11 @@ serde_derive = "1.0"
 serde_json = "1.0"
 openssl = { version = "0.10", features = ["vendored"] }
 chrono = "0.4"
-sea-orm = { version = "0.6", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"], default-features = false }
+sea-orm = { version = "0.10", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"], default-features = false }
 bytes = "1.1"
 md5 = "0.7"
 hex = "0.4"
-base64 = "0.13"
+base64 = "0.21"
 async_once = "0.2"
 tokio = { version = "1", features = ["full"] }
 image = { version = "0", features = ["jpeg", "gif", "webp", "bmp", "png", "jpeg_rayon"] }

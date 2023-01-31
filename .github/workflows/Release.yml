@@ -5,7 +5,7 @@ on:
 
 env:
   flutter_channel: 'stable'
-  flutter_version: '2.10.3'
+  flutter_version: '3.3.10'
   LLVM_VERSION: '10.0'
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
@@ -111,6 +111,7 @@ jobs:
         with:
           repository: 'fzyzcjy/flutter_rust_bridge'
           path: 'flutter_rust_bridge'
+          ref: 'v1.54.0'
 
       - name: Install flutter_rust_bridge
         if: steps.check_asset.outputs.skip_build != 'true'
