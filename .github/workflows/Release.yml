@@ -190,6 +190,7 @@ jobs:
         run: |
           rustup target install aarch64-apple-ios
           cd pansy
+          flutter pub get
           echo > lib/bridge_generated.dart
           echo > ios/Runner/bridge_generated.h
           echo > native/src/bridge_generated.rs
@@ -216,6 +217,7 @@ jobs:
         run: |
           rustup target install aarch64-linux-android
           cd pansy
+          flutter pub get
           echo > native/src/bridge_generated.rs
           flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
           cd native
@@ -228,6 +230,7 @@ jobs:
         run: |
           rustup target install armv7-linux-androideabi
           cd pansy
+          flutter pub get
           echo > native/src/bridge_generated.rs
           flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
           cd native
@@ -240,6 +243,7 @@ jobs:
         run: |
           rustup target install x86_64-linux-android
           cd pansy
+          flutter pub get
           echo > native/src/bridge_generated.rs
           flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
           cd native
@@ -253,11 +257,12 @@ jobs:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           sudo apt-get update
-          sudo apt install -y ninja-build liblzma-dev libgtk-3-dev libgl1-mesa-dev xorg-dev
+          sudo apt install -y ninja-build liblzma-dev libgtk-3-dev libgl1-mesa-dev xorg-dev libfuse2
           curl -JOL https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod a+x appimagetool-x86_64.AppImage
           mv appimagetool-x86_64.AppImage appimagetool
           cd pansy
+          flutter pub get
           echo > native/src/bridge_generated.rs
           flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
           flutter config --enable-linux-desktop
@@ -271,6 +276,7 @@ jobs:
         if: steps.check_asset.outputs.skip_build != 'true' && matrix.config.target == 'windows'
         run: |
           cd pansy
+          flutter pub get
           echo $null > native/src/bridge_generated.rs
           flutter_rust_bridge_codegen --rust-crate-dir native --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart --class-name Native
           flutter config --enable-windows-desktop
@@ -283,6 +289,7 @@ jobs:
         if: steps.check_asset.outputs.skip_build != 'true' && matrix.config.target == 'macos'
         run: |
           cd pansy
+          flutter pub get
           echo > native/src/bridge_generated.rs
           flutter_rust_bridge_codegen \
               --rust-input native/src/api.rs \
