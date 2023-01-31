@@ -65,7 +65,7 @@ jobs:
           - target: macos
             host: macos-latest
           - target: ios
-            host: macos-latest
+            host: macos-11
           - target: android-arm32
             host: ubuntu-latest
           - target: android-arm64
