@@ -1,1 +1,1 @@
-- Fix channel method name exception at save image to gallery
+- Fix android 12 login
