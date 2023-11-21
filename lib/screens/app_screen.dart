@@ -164,10 +164,41 @@ class _AppScreenState extends State<AppScreen>
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Icon(Icons.menu),
+        title: _leading(),
         actions: _screens.map(_actionButton).toList(),
       ),
       body: _pageView,
+    );
+  }
+
+  Widget _leading() {
+    return PopupMenuButton<int>(
+      icon: const Icon(Icons.menu),
+      itemBuilder: (BuildContext context) {
+        return [
+          PopupMenuItem(
+            value: 1,
+            child: Row(
+              children: [
+                Icon(Icons.settings, color: Colors.grey.shade600),
+                Container(width: 10),
+                Text(AppLocalizations.of(context)!.settings),
+              ],
+            ),
+          ),
+          PopupMenuItem(
+            value: 2,
+            child: Row(
+              children: [
+                Icon(Icons.download, color: Colors.grey.shade600),
+                Container(width: 10),
+                Text(AppLocalizations.of(context)!.downloads),
+              ],
+            ),
+          ),
+        ];
+      },
+      onSelected: (value) {},
     );
   }
 }
