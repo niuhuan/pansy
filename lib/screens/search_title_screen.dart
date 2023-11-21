@@ -92,7 +92,7 @@ class _SearchTitleScreenState extends State<SearchTitleScreen>
                 Container(height: 10),
                 Row(children: [
                   SizedBox(
-                    width: 50,
+                    width: 80,
                     child: MaterialButton(
                       onPressed: () async {
                         var mode = await chooseMode(context);
@@ -131,6 +131,7 @@ class _SearchTitleScreenState extends State<SearchTitleScreen>
                       ),
                     ),
                   ),
+                  Container(width: 10),
                   IconButton(
                     onPressed: () {
                       _editController.text = _editController.text.trim();
@@ -147,6 +148,7 @@ class _SearchTitleScreenState extends State<SearchTitleScreen>
                     },
                     icon: const Icon(Icons.search,size: 24),
                   ),
+                  Container(width: 10),
                 ]),
                 Container(height: 10),
                 Wrap(
@@ -154,7 +156,7 @@ class _SearchTitleScreenState extends State<SearchTitleScreen>
                   runSpacing: space / 3,
                   children: children,
                 ),
-                Container(height: 10),
+                Container(height: 20),
               ],
             );
           },

@@ -47,7 +47,7 @@ app.*.map.json
 native/target
 jniLibs
 
-ios/Runner/bridge_generated.h
+ios/Runner/sb..h
 ios/Runner/native.h
 macos/Runner/bridge_generated.h
 macos/Runner/native.h
@@ -56,3 +56,5 @@ native/src/bridge_generated.rs
 lib/bridge_generated.dart
 
 *.a
+bridge_generated.*
+

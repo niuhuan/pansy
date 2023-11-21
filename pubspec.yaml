@@ -6,15 +6,14 @@ publish_to: 'none'
 version: 0.0.3+3
 
 environment:
-  sdk: ">=2.16.0 <3.0.0"
+  sdk: ">=3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  intl: ^0.17.0
-
+  intl: ^0.18.1
   cupertino_icons: ^1.0.2
   flutter_rust_bridge:
     path: ../flutter_rust_bridge/frb_dart
@@ -40,7 +39,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^1.0.0
-  ffigen: 7.2.4
+  ffigen: ^8.0.0
 
 flutter:
   generate: true

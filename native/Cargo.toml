@@ -9,25 +9,25 @@ edition = "2021"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-anyhow = "1"
+anyhow = "1.0.75"
 flutter_rust_bridge = { path = "../../flutter_rust_bridge/frb_rust" }
-once_cell = "1"
-lazy_static = "1"
+once_cell = "1.18.0"
+lazy_static = "1.4.0"
 pixirust = { git = "https://github.com/niuhuan/pixirust.git", branch = "master" }
-libc = "0.2"
-serde = "1.0"
-serde_derive = "1.0"
-serde_json = "1.0"
-openssl = { version = "0.10", features = ["vendored"] }
-chrono = "0.4"
-sea-orm = { version = "0.10", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"], default-features = false }
-bytes = "1.1"
-md5 = "0.7"
-hex = "0.4"
-base64 = "0.21"
-async_once = "0.2"
-tokio = { version = "1", features = ["full"] }
-image = { version = "0", features = ["jpeg", "gif", "webp", "bmp", "png", "jpeg_rayon"] }
+libc = "0.2.150"
+serde = "1.0.193"
+serde_derive = "1.0.193"
+serde_json = "1.0.108"
+openssl = { version = "0.10.59", features = ["vendored"] }
+chrono = "0.4.31"
+sea-orm = { version = "0.12.6", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"], default-features = false }
+bytes = "1.5.0"
+md5 = "0.7.0"
+hex = "0.4.3"
+base64 = "0.21.5"
+async_once = "0.2.6"
+tokio = { version = "1.34.0", features = ["full"] }
+image = { version = "0.24.7", features = ["jpeg", "gif", "webp", "bmp", "png", "jpeg_rayon"] }
 
 [target.'cfg(target_os = "android")'.dependencies]
-jni = "0"
+jni = "0.21.1"

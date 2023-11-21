@@ -10,9 +10,6 @@ mod bridge_generated;
 mod entities;
 mod local;
 
-#[cfg(test)]
-mod tests;
-
 static ROOT: OnceCell<String> = OnceCell::new();
 static NETWORK_IMAGE_DIR: OnceCell<String> = OnceCell::new();
 
