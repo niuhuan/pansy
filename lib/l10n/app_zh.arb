@@ -1,4 +1,5 @@
 {
+  "permissionDenied": "无权限",
   "inChineseNetwork": "对中国大陆网络优化",
   "login": "登录",
   "logging": "登录中",

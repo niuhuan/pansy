@@ -58,6 +58,7 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "cross").setMethodCallHandler { call, result ->
             result.withCoroutine {
                 when (call.method) {
+                    "androidGetVersion" -> Build.VERSION.SDK_INT
                     "root" -> context!!.filesDir.absolutePath
                     "downloads_to" -> defaultPansyDir().absolutePath
                     "saveImageToGallery" -> saveImageToGallery(call.arguments as String)

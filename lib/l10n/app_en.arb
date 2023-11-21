@@ -1,4 +1,5 @@
 {
+  "permissionDenied": "Permission denied",
   "inChineseNetwork": "I am in chinese network",
   "login": "Login",
   "logging": "Logging",

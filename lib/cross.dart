@@ -38,6 +38,10 @@ class Cross {
     }
     throw "没有适配的平台";
   }
+
+  Future<int> androidGetVersion() async {
+    return await _channel.invokeMethod("androidGetVersion");
+  }
 }
 
 /// 打开web页面
