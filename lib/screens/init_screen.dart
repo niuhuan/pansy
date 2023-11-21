@@ -21,7 +21,10 @@ class _InitScreenState extends State<InitScreen> {
   }
 
   Future<void> _init() async {
-    await api.init(root: await cross.root());
+    await api.init(
+      root: await cross.root(),
+      downloadsTo: await cross.downloads(),
+    );
     await initInChina();
     setPixivLogin(await api.preLogin());
     Navigator.of(context).pushReplacement(MaterialPageRoute(

@@ -1,27 +1,30 @@
 use crate::get_root;
 use crate::local::join_paths;
-use async_once::AsyncOnce;
 use sea_orm::prelude::DatabaseConnection;
 use sea_orm::{ConnectionTrait, EntityTrait, Schema, Statement};
 use std::time::Duration;
+use once_cell::sync::OnceCell;
 use tokio::sync::Mutex;
 
 pub(crate) mod network_image;
 pub(crate) mod property;
 
-lazy_static::lazy_static! {
-    pub static ref IMAGE_CACHE_DB : AsyncOnce<Mutex<DatabaseConnection>> = AsyncOnce::new(async{
+static IMAGE_CACHE_DB: OnceCell<Mutex<DatabaseConnection>> = OnceCell::new();
+static PROPERTIES_DB: OnceCell<Mutex<DatabaseConnection>> = OnceCell::new();
+
+pub(crate) async fn init_databases(){
+    {
         let path = join_paths(vec![get_root().as_str(),"image_cache.db"]);
         let db = connect_db(&path).await;
         setup_image_cache_db(&db).await;
-        Mutex::new(db)
-    });
-    pub static ref PROPERTIES_DB : AsyncOnce<Mutex<DatabaseConnection>> = AsyncOnce::new(async{
+        IMAGE_CACHE_DB.set(Mutex::new(db)).unwrap();
+    }
+    {
         let path = join_paths(vec![get_root().as_str(),"properties.db"]);
         let db = connect_db(&path).await;
         setup_properties_db(&db).await;
-        Mutex::new(db)
-    });
+        PROPERTIES_DB.set(Mutex::new(db)).unwrap();
+    }
 }
 
 pub(crate) async fn connect_db(path: &str) -> DatabaseConnection {

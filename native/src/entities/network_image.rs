@@ -19,7 +19,7 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub(crate) async fn find_by_url(url: String) -> Result<Option<Model>, sea_orm::DbErr> {
     Entity::find_by_id(url)
-        .one(IMAGE_CACHE_DB.get().await.lock().await.deref())
+        .one(IMAGE_CACHE_DB.get().unwrap().lock().await.deref())
         .await
 }
 
@@ -29,7 +29,7 @@ pub(crate) async fn insert(url: String, path: String, cache_time: i64) -> Result
         path: Set(path),
         cache_time: Set(cache_time),
         ..Default::default()
-    }.insert(IMAGE_CACHE_DB.get().await.lock().await.deref()).await
+    }.insert(IMAGE_CACHE_DB.get().unwrap().lock().await.deref()).await
 }
 
 pub(crate) async fn init(db: &DatabaseConnection) {

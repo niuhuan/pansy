@@ -25,7 +25,7 @@ pub(crate) async fn init(db: &DatabaseConnection) {
 }
 
 pub(crate) async fn save_property(k: String, v: String) -> Result<(), DbErr> {
-    let db = PROPERTIES_DB.get().await.lock().await;
+    let db = PROPERTIES_DB.get().unwrap().lock().await;
     let in_db = Entity::find_by_id(k.clone()).one(db.deref()).await?;
     match in_db {
         Some(in_db) => {
@@ -49,7 +49,7 @@ pub(crate) async fn save_property(k: String, v: String) -> Result<(), DbErr> {
 
 pub(crate) async fn load_property(k: String) -> Result<String, DbErr> {
     let in_db: Option<Model> = Entity::find_by_id(k.clone())
-        .one(PROPERTIES_DB.get().await.lock().await.deref())
+        .one(PROPERTIES_DB.get().unwrap().lock().await.deref())
         .await?;
     Ok(in_db.unwrap_or(Model::default()).v)
 }

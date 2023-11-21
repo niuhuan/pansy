@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:date_format/date_format.dart';
+import 'package:decorated_icon/decorated_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/cross.dart';
@@ -20,11 +21,11 @@ class IllustInfoScreen extends StatefulWidget {
 }
 
 class _IllustInfoScreenState extends State<IllustInfoScreen> {
-
   @override
   void initState() {
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,10 +114,7 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              ShadowIconButton(
-                icon: Icons.more_vert,
-                onPressed: () {},
-              ),
+              _moreButton(),
             ],
           ),
         ),
@@ -172,6 +170,36 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _moreButton() {
+    return PopupMenuButton<int>(
+      icon: const DecoratedIcon(
+        Icons.more_vert,
+        size: 24,
+        shadows: [
+          BoxShadow(
+            color: Colors.black,
+            offset: Offset(1.0, 1.0),
+            blurRadius: 5.0,
+          ),
+        ],
+        color: Colors.white,
+      ),
+      itemBuilder: (BuildContext context) {
+        return [
+          PopupMenuItem(
+            child: Text(
+              AppLocalizations.of(context)!.downloadAllOriginalImagesToFiles,
+            ),
+            value: 1,
+          ),
+        ];
+      },
+      onSelected: (value) {
+        if (value == 1) {}
+      },
     );
   }
 }

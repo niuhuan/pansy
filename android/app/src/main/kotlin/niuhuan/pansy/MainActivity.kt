@@ -59,6 +59,7 @@ class MainActivity: FlutterActivity() {
             result.withCoroutine {
                 when (call.method) {
                     "root" -> context!!.filesDir.absolutePath
+                    "downloads_to" -> defaultPansyDir().absolutePath
                     "saveImageToGallery" -> saveImageToGallery(call.arguments as String)
                     else -> {
                         notImplementedToken
@@ -89,6 +90,19 @@ class MainActivity: FlutterActivity() {
                 }
             }
         }
+    }
+
+    fun storageRoot(): String {
+        return Environment.getExternalStorageDirectory().absolutePath
+    }
+
+    private fun downloadsDir(): File {
+        return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            ?: throw java.lang.IllegalStateException()
+    }
+
+    private fun defaultPansyDir(): File {
+        return File(downloadsDir(), "pansy")
     }
 
 }

@@ -11,12 +11,13 @@
   "exact_match_for_tags": "标签完全一致",
   "title_and_caption": "标题或内容中匹配",
   "choose": "请选择",
-  "downloadAndSaveOrigin": "下载原图并保存到本地",
+  "downloadAndSaveOrigin": "下载原图并保存到相册",
   "success": "成功",
   "failed": "失败",
   "copy": "复制",
   "copied": "已复制",
   "ok": "确认",
   "copyLoginUrl": "复制登录链接",
-  "pcLoginNotice": "1. 请您打开VPN或代理, 然后点击下面的打开登录链接\n2. 打开浏览器后按F12呼出浏览器的调试菜单, 找到network或网络\n3. 您登录成功后将显示红色pixiv开头的url\n4. 请将CODE部分填入下面的位置点击确定 (code=*CODE*&via=login)"
+  "pcLoginNotice": "1. 请您打开VPN或代理, 然后点击下面的打开登录链接\n2. 打开浏览器后按F12呼出浏览器的调试菜单, 找到network或网络\n3. 您登录成功后将显示红色pixiv开头的url\n4. 请将CODE部分填入下面的位置点击确定 (code=*CODE*&via=login)",
+  "downloadAllPicturesToFiles": "下载所有原图到文件"
 }

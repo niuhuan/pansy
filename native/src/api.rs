@@ -8,7 +8,6 @@ use anyhow::{Context, Result};
 use serde_derive::*;
 use std::future::Future;
 use std::path::Path;
-use std::time::Duration;
 
 pub fn desktop_root() -> Result<String> {
     #[cfg(target_os = "windows")]
@@ -50,8 +49,27 @@ pub fn desktop_root() -> Result<String> {
     panic!("未支持的平台")
 }
 
-pub fn init(root:String)->Result<()>{
-    crate::init_root(&root);
+// get downloads dir form env
+pub fn downloads_to() -> Result<String> {
+    #[cfg(any(target_os = "windows", target_os = "macos", target_os = "linux"))]
+    {
+        Ok(directories::UserDirs::new()
+            .unwrap()
+            .download_dir()
+            .unwrap()
+            .join("pansy")
+            .to_str()
+            .unwrap()
+            .to_owned())
+    }
+    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+    {
+        Err(anyhow::Error::msg("not support os"))
+    }
+}
+
+pub fn init(root: String, downloads_to: String) -> Result<()> {
+    crate::init_root(&root, &downloads_to);
     Ok(())
 }
 
@@ -73,15 +91,8 @@ pub struct IllustRankQuery {
     pub date: String,
 }
 
-lazy_static::lazy_static! {
-    static ref RUNTIME: tokio::runtime::Runtime = tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .thread_keep_alive(Duration::new(60, 0))
-        .max_blocking_threads(30).build().unwrap();
-}
-
-fn block_on<T>(f: impl Future<Output = T>) -> T {
-    RUNTIME.block_on(f)
+fn block_on<T>(f: impl Future<Output=T>) -> T {
+    crate::RUNTIME.block_on(f)
 }
 
 pub fn copy_image_to(src_path: String, to_dir: String) -> Result<()> {

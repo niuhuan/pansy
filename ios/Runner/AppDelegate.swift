@@ -16,9 +16,13 @@ import Flutter
               if call.method == "root" {
                   
                   let documentsPath = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)[0]
-                  
+
                   result(documentsPath)
                   
+              }
+              if call.method == "downloads_to" {
+                  let docDir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0];
+                  result(docDir + "/downloads")
               }
               else if call.method == "saveImageToGallery"{
                   if let args = call.arguments as? String{

@@ -21,6 +21,17 @@ class Cross {
     throw "没有适配的平台";
   }
 
+  Future<String> downloads() async {
+    if (Platform.isIOS) {
+      return await _channel.invokeMethod("downloads_to");
+    } else if (Platform.isAndroid) {
+      return await _channel.invokeMethod("downloads_to");
+    } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      return await api.downloadsTo();
+    }
+    throw "没有适配的平台";
+  }
+
   Future saveImageToGallery(String path) async {
     if (Platform.isAndroid || Platform.isIOS) {
       return await _channel.invokeMethod("saveImageToGallery", path);

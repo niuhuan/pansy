@@ -28,6 +28,7 @@ base64 = "0.21.5"
 async_once = "0.2.6"
 tokio = { version = "1.34.0", features = ["full"] }
 image = { version = "0.24.7", features = ["jpeg", "gif", "webp", "bmp", "png", "jpeg_rayon"] }
+directories = "5.0.1"
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "0.21.1"
