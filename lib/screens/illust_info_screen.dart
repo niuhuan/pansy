@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:date_format/date_format.dart';
 import 'package:decorated_icon/decorated_icon.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pansy/ffi.dart';
 import '../types.dart';
 import 'components/empty_app_bar.dart';
 import 'components/pixiv_image.dart';
@@ -197,8 +199,46 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
           ),
         ];
       },
-      onSelected: (value) {
-        if (value == 1) {}
+      onSelected: (value) async {
+        if (value == 1) {
+          List<AppendToDownload> metas = [];
+          if (widget.illust.metaPages.isNotEmpty) {
+            // 多张图片
+            var i = 0;
+            metas.addAll(widget.illust.metaPages.map((e) => AppendToDownload(
+                  illustId: widget.illust.id,
+                  illustTitle: widget.illust.title,
+                  illustType: widget.illust.type,
+                  imageIdx: i++,
+                  squareMedium: e.imageUrls.squareMedium,
+                  medium: e.imageUrls.medium,
+                  large: e.imageUrls.large,
+                  original: e.imageUrls.original,
+                )));
+          } else {
+            // 单张图片
+            metas.add(AppendToDownload(
+              illustId: widget.illust.id,
+              illustTitle: widget.illust.title,
+              illustType: widget.illust.type,
+              imageIdx: 0,
+              squareMedium: widget.illust.imageUrls.squareMedium,
+              medium: widget.illust.imageUrls.medium,
+              large: widget.illust.imageUrls.large,
+              original: widget.illust.metaSinglePage.originalImageUrl!,
+            ));
+          }
+          try {
+            await api.appendToDownload(values: metas);
+            defaultToast(context, AppLocalizations.of(context)!.success);
+          } catch (e, s) {
+            log("$e\n$s");
+            defaultToast(
+              context,
+              AppLocalizations.of(context)!.failed + "\n$e",
+            );
+          }
+        }
       },
     );
   }

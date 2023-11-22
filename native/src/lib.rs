@@ -39,6 +39,7 @@ pub(crate) fn init_root(path: &str, downloads_to: &str) {
     DOWNLOADS_DIR.set(downloads_to.to_owned()).unwrap();
     create_dir_if_not_exists(ROOT.get().unwrap());
     create_dir_if_not_exists(NETWORK_IMAGE_DIR.get().unwrap());
+    create_dir_if_not_exists(DOWNLOADS_DIR.get().unwrap());
     RUNTIME.block_on(init_databases());
     let _ = RUNTIME.spawn(download::download_demon());
 }
