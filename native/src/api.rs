@@ -57,7 +57,6 @@ pub fn downloads_to() -> Result<String> {
             .unwrap()
             .download_dir()
             .unwrap()
-            .join("Downloads")
             .join("pansy")
             .to_str()
             .unwrap()

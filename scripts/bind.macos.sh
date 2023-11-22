@@ -1,8 +1,6 @@
 
 cd "$( cd "$( dirname "$0"  )" && pwd  )/.."
 
-cbindgen native/src/platforms/non_android.rs -l c > macos/Runner/native.h
-
 touch native/src/bridge_generated.rs
 flutter_rust_bridge_codegen \
     --rust-input native/src/api.rs \

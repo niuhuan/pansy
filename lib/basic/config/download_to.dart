@@ -32,6 +32,7 @@ Future<bool> checkDownloadsTo(BuildContext context) async {
       try {
         await api.recreateDownloadsTo();
         await api.saveProperty(k: "recreate_downloads_to", v: "1");
+        return true;
       } catch (e, s) {
         defaultToast(
           context,
@@ -39,6 +40,30 @@ Future<bool> checkDownloadsTo(BuildContext context) async {
         );
         return false;
       }
+    }
+  } else if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    var recreateDownloadsTo =
+        await api.loadProperty(k: "recreate_downloads_to");
+    if (recreateDownloadsTo.isEmpty) {
+      final choose = await FilePicker.platform.getDirectoryPath(
+        dialogTitle: AppLocalizations.of(context)!.selectDownloadsTo,
+        initialDirectory: await api.downloadsTo(),
+        lockParentWindow: true,
+      );
+      if (choose != null) {
+        try {
+          await api.setDownloadsTo(newDownloadsTo: choose);
+          await api.saveProperty(k: "recreate_downloads_to", v: "1");
+          return true;
+        } catch (e, s) {
+          defaultToast(
+            context,
+            AppLocalizations.of(context)!.setDownloadsToFailed + '\n$e',
+          );
+          return false;
+        }
+      }
+      return true;
     }
   }
   return true;
