@@ -20,7 +20,7 @@
   "ok": "确认",
   "copyLoginUrl": "复制登录链接",
   "pcLoginNotice": "1. 请您打开VPN或代理, 然后点击下面的打开登录链接\n2. 打开浏览器后按F12呼出浏览器的调试菜单, 找到network或网络\n3. 您登录成功后将显示红色pixiv开头的url\n4. 请将CODE部分填入下面的位置点击确定 (code=*CODE*&via=login)",
-  "downloadAllPicturesToFiles": "下载所有原图到文件",
+  "downloadAllOriginalImagesToFiles": "下载所有原图到文件",
   "settings": "设置",
   "logout": "登出",
   "downloads": "下载",

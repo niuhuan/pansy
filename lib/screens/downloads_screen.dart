@@ -33,6 +33,15 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
         title: Text(
           AppLocalizations.of(context)!.downloads,
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () async {
+              await api.resetFailedDownloads();
+              _fetch();
+            },
+          ),
+        ],
       ),
       body: ListView(children: [
         ..._buildItems(),
@@ -67,13 +76,15 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                 Expanded(child: Container()),
                 Text(item.downloadStatus == 2 ? "下载失败" : "下载中"),
                 Expanded(child: Container()),
-                ...(item.downloadStatus == 2 ? [
-                  Text(
-                    item.errorMsg,
-                    maxLines: 1,
-                  ),
-                  Expanded(child: Container()),
-                ] : []),
+                ...(item.downloadStatus == 2
+                    ? [
+                        Text(
+                          item.errorMsg,
+                          maxLines: 1,
+                        ),
+                        Expanded(child: Container()),
+                      ]
+                    : []),
               ],
             ),
           ),
