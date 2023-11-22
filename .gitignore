@@ -58,3 +58,4 @@ lib/bridge_generated.dart
 *.a
 bridge_generated.*
 
+ci/target/

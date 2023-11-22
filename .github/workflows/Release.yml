@@ -177,7 +177,7 @@ jobs:
             platform-tools
             platforms;android-32
             build-tools;30.0.2
-            ndk;22.1.7171670
+            ndk;25.2.9519653
 
       - name: Set-Version (All)
         if: steps.check_asset.outputs.skip_build != 'true'
@@ -219,7 +219,13 @@ jobs:
           cd pansy
           flutter pub get
           echo > native/src/bridge_generated.rs
-          flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
+          flutter_rust_bridge_codegen \
+            --rust-input native/src/api.rs \
+            --dart-output lib/bridge_generated.dart \
+            --c-output ios/Runner/bridge_generated.h \
+            --rust-crate-dir native \
+            --llvm-path $LLVM_HOME \
+            --class-name Native
           cd native
           cargo ndk -o ../android/app/src/main/jniLibs -t arm64-v8a build --release
           cd ..

@@ -26,21 +26,6 @@ class _InitScreenState extends State<InitScreen> {
 
   Future<void> _init() async {
     await initPlatform();
-    if (Platform.isAndroid) {
-      late bool g;
-      if (androidVersion < 30) {
-        g = await Permission.storage.request().isGranted;
-      } else {
-        g = await Permission.manageExternalStorage.request().isGranted;
-      }
-      if (!g) {
-        defaultToast(
-          context,
-          AppLocalizations.of(context)!.permissionDenied,
-        );
-        exit(0);
-      }
-    }
     await api.init(
       root: await cross.root(),
       downloadsTo: await cross.downloads(),

@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:developer';
-
 import 'package:date_format/date_format.dart';
 import 'package:decorated_icon/decorated_icon.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +6,7 @@ import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pansy/ffi.dart';
+import '../basic/config/download_to.dart';
 import '../types.dart';
 import 'components/empty_app_bar.dart';
 import 'components/pixiv_image.dart';
@@ -201,6 +200,9 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
       },
       onSelected: (value) async {
         if (value == 1) {
+          if (!await checkDownloadsTo(context)) {
+            return;
+          }
           List<AppendToDownload> metas = [];
           if (widget.illust.metaPages.isNotEmpty) {
             // 多张图片

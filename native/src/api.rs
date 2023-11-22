@@ -1,9 +1,9 @@
-use crate::entities::network_image;
-use crate::{download, get_network_image_dir};
+use crate::entities::{network_image, property};
 use crate::local::{
     authed_client, get_in_china_, hash_lock, join_paths, load_in_china, load_token,
     no_authed_client, set_in_china_, set_token,
 };
+use crate::{download, get_network_image_dir};
 use anyhow::{Context, Result};
 use serde_derive::*;
 use std::future::Future;
@@ -57,6 +57,7 @@ pub fn downloads_to() -> Result<String> {
             .unwrap()
             .download_dir()
             .unwrap()
+            .join("Downloads")
             .join("pansy")
             .to_str()
             .unwrap()
@@ -71,6 +72,22 @@ pub fn downloads_to() -> Result<String> {
 pub fn init(root: String, downloads_to: String) -> Result<()> {
     crate::init_root(&root, &downloads_to);
     Ok(())
+}
+
+pub fn set_downloads_to(new_downloads_to: String) -> Result<()> {
+    block_on(crate::set_downloads_to(new_downloads_to))
+}
+
+pub fn save_property(k: String, v: String) -> Result<()> {
+    block_on(async move {
+        Ok(property::save_property(k, v).await?)
+    })
+}
+
+pub fn load_property(k: String) -> Result<String> {
+    block_on(async move {
+        Ok(property::load_property(k).await?)
+    })
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -91,7 +108,7 @@ pub struct IllustRankQuery {
     pub date: String,
 }
 
-fn block_on<T>(f: impl Future<Output=T>) -> T {
+fn block_on<T>(f: impl Future<Output = T>) -> T {
     crate::RUNTIME.block_on(f)
 }
 
@@ -247,9 +264,10 @@ pub struct Downloading {
     pub medium: String,
     pub large: String,
     pub original: String,
+    pub download_status: i32,
+    pub error_msg: String,
 }
 
 pub fn downloading_list() -> Result<Vec<Downloading>> {
     block_on(download::downloading_list())
 }
-

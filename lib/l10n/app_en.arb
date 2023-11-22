@@ -23,5 +23,8 @@
   "downloadAllOriginalImagesToFiles": "Download all original images to files",
   "settings": "Settings",
   "logout": "Logout",
-  "downloads": "Downloads"
+  "downloads": "Downloads",
+  "selectDownloadsTo": "Select downloads to",
+  "mustChooseDownloadsTo": "Must choose downloads to",
+  "setDownloadsToFailed": "Set downloads to failed"
 }

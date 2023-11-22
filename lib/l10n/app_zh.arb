@@ -23,5 +23,8 @@
   "downloadAllPicturesToFiles": "下载所有原图到文件",
   "settings": "设置",
   "logout": "登出",
-  "downloads": "下载"
+  "downloads": "下载",
+  "selectDownloadsTo": "选择下载位置",
+  "mustChooseDownloadsTo": "必须选择下位置",
+  "setDownloadsToFailed": "下载位置无法使用"
 }

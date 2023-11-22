@@ -72,6 +72,8 @@ pub(crate) async fn downloading_list() -> anyhow::Result<Vec<Downloading>> {
         medium: e.medium,
         large: e.large,
         original: e.original,
+        download_status: e.download_status,
+        error_msg: e.error_msg,
     }).collect())
 }
 

@@ -30,7 +30,7 @@ impl ActiveModelBehavior for ActiveModel {}
 pub(crate) async fn init(db: &DatabaseConnection) {
     create_table_if_not_exists(&db, Entity).await;
     if !index_exists(db, "download_image", "download_image_idx_append_time").await {
-        create_index_a(db, "download_image", vec!["append_time"], "download_image_idx_append_time", true).await;
+        create_index_a(db, "download_image", vec!["append_time"], "download_image_idx_append_time", false).await;
     }
 }
 

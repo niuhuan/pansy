@@ -2,6 +2,7 @@ import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/app_screen_data.dart';
 import 'package:pansy/basic/config/in_china.dart';
+import 'package:pansy/screens/downloads_screen.dart';
 import 'package:pansy/screens/search_title_screen.dart';
 import 'package:pansy/screens/discovery_screen.dart';
 import 'package:pansy/screens/hots_screen.dart';
@@ -198,7 +199,15 @@ class _AppScreenState extends State<AppScreen>
           ),
         ];
       },
-      onSelected: (value) {},
+      onSelected: (value) {
+        if (value == 1) {
+          // Navigator.pushNamed(context, '/settings');
+        } else if (value == 2) {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => const DownloadsScreen(),
+          ));
+        }
+      },
     );
   }
 }
