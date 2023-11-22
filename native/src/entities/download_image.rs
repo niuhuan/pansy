@@ -70,3 +70,11 @@ pub(crate) async fn reset_failed_downloads() -> anyhow::Result<()> {
         .exec(db.deref()).await?;
     Ok(())
 }
+
+pub(crate) async fn all() -> anyhow::Result<Vec<Model>> {
+    let db = DOWNLOADS_DB.get().unwrap().lock().await;
+    let models = Entity::find()
+        .order_by(Column::AppendTime, Order::Asc)
+        .all(db.deref()).await?;
+    Ok(models)
+}

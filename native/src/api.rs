@@ -237,3 +237,19 @@ pub fn reset_failed_downloads() -> Result<()> {
     block_on(download::reset_failed_downloads())
 }
 
+pub struct Downloading {
+    pub hash: String,
+    pub illust_id: i64,
+    pub illust_title: String,
+    pub illust_type: String,
+    pub image_idx: i64,
+    pub square_medium: String,
+    pub medium: String,
+    pub large: String,
+    pub original: String,
+}
+
+pub fn downloading_list() -> Result<Vec<Downloading>> {
+    block_on(download::downloading_list())
+}
+

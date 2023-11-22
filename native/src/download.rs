@@ -1,6 +1,6 @@
 use std::time;
 use image::EncodableLayout;
-use crate::api::AppendToDownload;
+use crate::api::{AppendToDownload, Downloading};
 use crate::DOWNLOADS_DIR;
 use crate::entities::download_image;
 use crate::local::{join_paths, no_authed_client};
@@ -59,5 +59,19 @@ pub async fn append_to_download(values: Vec<AppendToDownload>) -> anyhow::Result
 
 pub(crate) async fn reset_failed_downloads() -> anyhow::Result<()> {
     download_image::reset_failed_downloads().await
+}
+
+pub(crate) async fn downloading_list() -> anyhow::Result<Vec<Downloading>> {
+    Ok(download_image::all().await?.into_iter().map(|e| Downloading {
+        hash: e.hash,
+        illust_id: e.illust_id,
+        illust_title: e.illust_title,
+        illust_type: e.illust_type,
+        image_idx: e.image_idx,
+        square_medium: e.square_medium,
+        medium: e.medium,
+        large: e.large,
+        original: e.original,
+    }).collect())
 }
 
