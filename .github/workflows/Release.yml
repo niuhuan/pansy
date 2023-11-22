@@ -102,6 +102,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: rustfmt
           override: true
 
       - id: check_asset
