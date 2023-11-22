@@ -1,18 +1,18 @@
+use anyhow::Result;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json::Value;
-use anyhow::Result;
 
-const OWNER: &str = "niuhuan";
-const REPO: &str = "pansy";
-const UA: &str = "niuhuan pansy ci";
+use ci::common;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let gh_token = std::env::var("GH_TOKEN")?;
-    if gh_token.is_empty() {
-        panic!("Please set GH_TOKEN");
+    let repo = std::env::var("GITHUB_REPOSITORY")?;
+    if repo.is_empty() {
+        panic!("Can't got repo path");
     }
+
+    let app_name = repo.split('/').last().unwrap();
 
     let target = std::env::var("TARGET")?;
 
@@ -20,22 +20,18 @@ async fn main() -> Result<()> {
 
     let code = vs_code_txt.trim();
 
-    let release_file_name = match target.as_str() {
-        "macos" => format!("pansy-{}-macos-intel.dmg", code),
-        "ios" => format!("pansy-{}-ios-nosign.ipa", code),
-        "windows" => format!("pansy-{}-windows-x86_64.zip", code),
-        "linux" => format!("pansy-{}-linux-x86_64.AppImage", code),
-        "android-arm32" => format!("pansy-{}-android-arm32.apk", code),
-        "android-arm64" => format!("pansy-{}-android-arm64.apk", code),
-        "android-x86_64" => format!("pansy-{}-android-x86_64.apk", code),
-        un => panic!("unknown target : {}", un),
-    };
+    let release_file_name = common::asset_name(app_name, code, target.as_str());
 
-    let client = reqwest::ClientBuilder::new().user_agent(UA).build()?;
+    let client = reqwest::ClientBuilder::new()
+        .user_agent(common::UA)
+        .build()?;
 
-    let check_response = client.get(format!("https://api.github.com/repos/{}/{}/releases/tags/{}", OWNER, REPO, code))
-        .header("Authorization", format!("token {}", gh_token))
-        .send().await?;
+    let check_response = client
+        .get(format!(
+            "https://api.github.com/repos/{repo}/releases/tags/{code}"
+        ))
+        .send()
+        .await?;
 
     match check_response.status().as_u16() {
         200 => (),
@@ -48,7 +44,10 @@ async fn main() -> Result<()> {
     let release: Release = check_response.json().await?;
 
     let ass_names: Vec<String> = release.assets.iter().map(|a| a.name.clone()).collect();
-    println!("::set-output name=skip_build::{}", ass_names.contains(&release_file_name));
+    println!(
+        "::set-output name=skip_build::{}",
+        ass_names.contains(&release_file_name)
+    );
     Ok(())
 }
 

@@ -1,32 +1,31 @@
 use anyhow::Result;
+use ci::common;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
 use serde_json::Value;
 
-const OWNER: &str = "niuhuan";
-const REPO: &str = "pansy";
-const UA: &str = "niuhuan pansy ci";
-
 #[tokio::main]
 async fn main() -> Result<()> {
+    let gh_token = std::env::var("GITHUB_TOKEN")?;
+    if gh_token.is_empty() {
+        panic!("Please set GITHUB_TOKEN");
+    }
     // get ghToken
-    let gh_token = std::env::var("GH_TOKEN")?;
+
+    let repo = std::env::var("GITHUB_REPOSITORY")?;
+    if repo.is_empty() {
+        panic!("Can't got repo path");
+    }
+
+    let app_name = repo.split('/').last().unwrap();
+
     let target = std::env::var("TARGET")?;
 
     let vs_code_txt = tokio::fs::read_to_string("version.code.txt").await?;
 
     let code = vs_code_txt.trim();
 
-    let release_file_name = match target.as_str() {
-        "macos" => format!("pansy-{}-macos-intel.dmg", code),
-        "ios" => format!("pansy-{}-ios-nosign.ipa", code),
-        "windows" => format!("pansy-{}-windows-x86_64.zip", code),
-        "linux" => format!("pansy-{}-linux-x86_64.AppImage", code),
-        "android-arm32" => format!("pansy-{}-android-arm32.apk", code),
-        "android-arm64" => format!("pansy-{}-android-arm64.apk", code),
-        "android-x86_64" => format!("pansy-{}-android-x86_64.apk", code),
-        un => panic!("unknown target : {}", un),
-    };
+    let release_file_name = common::asset_name(app_name, code, target.as_str());
 
     let local_path = match target.as_str() {
         "macos" => "../build/macos.dmg",
@@ -39,12 +38,13 @@ async fn main() -> Result<()> {
         un => panic!("unknown target : {}", un),
     };
 
-    let client = reqwest::ClientBuilder::new().user_agent(UA).build()?;
+    let client = reqwest::ClientBuilder::new()
+        .user_agent(common::UA)
+        .build()?;
 
     let check_response = client
         .get(format!(
-            "https://api.github.com/repos/{}/{}/releases/tags/{}",
-            OWNER, REPO, code
+            "https://api.github.com/repos/{repo}/releases/tags/{code}"
         ))
         .header("Authorization", format!("token {}", gh_token))
         .send()
@@ -64,8 +64,8 @@ async fn main() -> Result<()> {
 
     let response = client
         .post(format!(
-            "https://uploads.github.com/repos/{}/{}/releases/{}/assets?name={}",
-            OWNER, REPO, release.id, release_file_name
+            "https://uploads.github.com/repos/{}/releases/{}/assets?name={}",
+            repo, release.id, release_file_name
         ))
         .header("Authorization", format!("token {}", gh_token))
         .header("Content-Type", "application/octet-stream")
