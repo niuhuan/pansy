@@ -354,13 +354,13 @@ jobs:
       - name: Sign APK (Android)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' )
         env:
-          ANDROID_JKS_BASE64: ${{ secrets.ANDROID_JKS_BASE64 }}
-          ANDROID_JKS_PASSWORD: ${{ secrets.ANDROID_JKS_PASSWORD }}
+          KEY_FILE_BASE64: ${{ secrets.KEY_FILE_BASE64 }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           cd pansy
-          echo $ANDROID_JKS_BASE64 > key.jks.base64
+          echo $KEY_FILE_BASE64 > key.jks.base64
           base64 -d key.jks.base64 > key.jks
-          echo $ANDROID_JKS_PASSWORD | $ANDROID_HOME/build-tools/30.0.2/apksigner sign --ks key.jks build/app/outputs/flutter-apk/app-release.apk
+          echo $KEY_PASSWORD | $ANDROID_HOME/build-tools/30.0.2/apksigner sign --ks key.jks build/app/outputs/flutter-apk/app-release.apk
 
       - name: Cargo ci build cache
         if: steps.check_asset.outputs.skip_build != 'true'
