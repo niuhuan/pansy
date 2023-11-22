@@ -6,6 +6,7 @@ import 'package:pansy/screens/downloads_screen.dart';
 import 'package:pansy/screens/search_title_screen.dart';
 import 'package:pansy/screens/discovery_screen.dart';
 import 'package:pansy/screens/hots_screen.dart';
+import 'package:pansy/screens/settings_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -201,7 +202,9 @@ class _AppScreenState extends State<AppScreen>
       },
       onSelected: (value) {
         if (value == 1) {
-          // Navigator.pushNamed(context, '/settings');
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => const SettingsScreen(),
+          ));
         } else if (value == 2) {
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => const DownloadsScreen(),
