@@ -221,10 +221,6 @@ jobs:
           rustup target install aarch64-apple-ios
           cd pansy
           flutter pub get
-          echo > lib/bridge_generated.dart
-          echo > ios/Runner/bridge_generated.h
-          echo > native/src/bridge_generated.rs
-          echo > native/src/bridge_generated.io.rs
           flutter_rust_bridge_codegen \
             --rust-input native/src/api.rs \
             --dart-output lib/bridge_generated.dart \
@@ -297,8 +293,6 @@ jobs:
           mv appimagetool-x86_64.AppImage appimagetool
           cd pansy
           flutter pub get
-          echo > native/src/bridge_generated.rs
-          echo > native/src/bridge_generated.io.rs
           flutter_rust_bridge_codegen \
             --rust-input native/src/api.rs \
             --dart-output lib/bridge_generated.dart \
@@ -316,7 +310,6 @@ jobs:
         run: |
           cd pansy
           flutter pub get
-          echo $null > native/src/bridge_generated.rs
           flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart --c-output ios/Runner/bridge_generated.h --rust-crate-dir native  --class-name Native
           flutter config --enable-windows-desktop
           flutter build windows
@@ -329,8 +322,6 @@ jobs:
         run: |
           cd pansy
           flutter pub get
-          echo > native/src/bridge_generated.rs
-          echo > native/src/bridge_generated.io.rs
           flutter_rust_bridge_codegen \
               --rust-input native/src/api.rs \
               --dart-output lib/bridge_generated.dart \
