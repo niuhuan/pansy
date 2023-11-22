@@ -110,6 +110,11 @@ jobs:
           cd pansy/ci
           cargo run --bin check-asset
 
+      - name: Install cargo-expand
+        if: steps.check_asset.outputs.skip_build != 'true'
+        run: |
+          cargo install cargo-expand --force
+
       - name: Check bridge
         if: steps.check_asset.outputs.skip_build != 'true'
         uses: actions/checkout@v3
