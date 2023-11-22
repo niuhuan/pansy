@@ -1,5 +1,6 @@
 use std::time;
 use image::EncodableLayout;
+use crate::api::AppendToDownload;
 use crate::DOWNLOADS_DIR;
 use crate::entities::download_image;
 use crate::local::{join_paths, no_authed_client};
@@ -35,3 +36,24 @@ async fn down(downloading: &download_image::Model) -> anyhow::Result<()> {
     tokio::fs::write(local, data).await?;
     Ok(())
 }
+
+pub async fn append_to_download(values: Vec<AppendToDownload>) -> anyhow::Result<()> {
+    download_image::batch_save(
+        values.into_iter().map(|e| download_image::Model {
+            hash: hex::encode(md5::compute(e.original.as_bytes()).0),
+            append_time: chrono::Local::now().timestamp(),
+            illust_id: e.illust_id,
+            illust_title: e.illust_title,
+            illust_type: e.illust_type,
+            image_idx: e.image_idx,
+            square_medium: e.square_medium,
+            medium: e.medium,
+            large: e.large,
+            original: e.original,
+            download_status: 0,
+            error_msg: String::default(),
+        })
+    ).await?;
+    Ok(())
+}
+

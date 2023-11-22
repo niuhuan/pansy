@@ -1,5 +1,5 @@
 use crate::entities::network_image;
-use crate::get_network_image_dir;
+use crate::{download, get_network_image_dir};
 use crate::local::{
     authed_client, get_in_china_, hash_lock, join_paths, load_in_china, load_token,
     no_authed_client, set_in_china_, set_token,
@@ -217,3 +217,19 @@ pub fn load_pixiv_image(url: String) -> Result<String> {
         Ok(join_paths(vec![get_network_image_dir().as_str(), &path]))
     })
 }
+
+pub struct AppendToDownload {
+    pub illust_id: i64,
+    pub illust_title: String,
+    pub illust_type: String,
+    pub image_idx: i64,
+    pub square_medium: String,
+    pub medium: String,
+    pub large: String,
+    pub original: String,
+}
+
+pub fn append_to_download(values: Vec<AppendToDownload>) -> Result<()> {
+    block_on(download::append_to_download(values))
+}
+

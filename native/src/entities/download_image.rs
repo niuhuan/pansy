@@ -1,6 +1,7 @@
 use std::ops::Deref;
 use sea_orm::entity::prelude::*;
-use sea_orm::{DeleteResult, EntityTrait, Order, QueryOrder, QuerySelect, UpdateResult};
+use sea_orm::{DeleteResult, EntityTrait, IntoActiveModel, Order, QueryOrder, QuerySelect, UpdateResult};
+use sea_orm::sea_query::OnConflict;
 use crate::entities::{create_index_a, create_table_if_not_exists, DOWNLOADS_DB, index_exists};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
@@ -51,4 +52,13 @@ pub(crate) async fn set_status_and_error_msg(hash: &str, status: i32, error_msg:
         .col_expr(Column::DownloadStatus, Expr::value(status))
         .col_expr(Column::ErrorMsg, Expr::value(error_msg))
         .exec(DOWNLOADS_DB.get().unwrap().lock().await.deref()).await?)
+}
+
+// batch_save
+pub(crate) async fn batch_save(values: impl Iterator<Item=Model>) -> anyhow::Result<()> {
+    let db = DOWNLOADS_DB.get().unwrap().lock().await;
+    Entity::insert_many(values.map(|e| e.into_active_model()))
+        .on_conflict(OnConflict::column(Column::Hash).do_nothing().to_owned())
+        .exec(db.deref()).await?;
+    Ok(())
 }
