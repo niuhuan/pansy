@@ -10,7 +10,6 @@ env:
   FLUTTER_VERSION: '3.13.9'
   FLUTTER_CHANNEL: 'stable'
   FRB_VERSION: 'v1.82.3'
-  GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 jobs:
 
@@ -49,10 +48,20 @@ jobs:
           repository: ${{ github.event.inputs.repo }}
           path: 'pansy'
 
+      - name: Cargo ci build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            pansy/ci/target/
+          key: ${{ runner.os }}-cargo-ci_target
+
       - name: Check release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd pansy/ci
-          cargo run --bin check-release
+          cargo run --release --bin check-release
+
 
   build_release_assets:
     name: Build release assets
@@ -69,7 +78,7 @@ jobs:
           - target: macos
             host: macos-latest
           - target: ios
-            host: macos-11
+            host: macos-latest
           - target: android-arm32
             host: ubuntu-latest
           - target: android-arm64
@@ -101,20 +110,22 @@ jobs:
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: rustfmt
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
           override: true
+
+      - name: Cargo ci build cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            pansy/ci/target/
+          key: ${{ runner.os }}-cargo-ci_target
 
       - id: check_asset
         name: Check asset
         run: |
           cd pansy/ci
-          cargo run --bin check-asset
-
-      - name: Install cargo-expand
-        if: steps.check_asset.outputs.skip_build != 'true'
-        run: |
-          cargo install cargo-expand --force
+          cargo run --release --bin check-asset
 
       - name: Check bridge
         if: steps.check_asset.outputs.skip_build != 'true'
@@ -131,6 +142,11 @@ jobs:
           cargo install --path . --force
           cd ../..
 
+      - name: Install cargo-expand
+        if: steps.check_asset.outputs.skip_build != 'true'
+        run: |
+          cargo install cargo-expand --force
+
       - name: Cache Flutter dependencies (Linux/Android)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' || matrix.config.target == 'linux' )
         uses: actions/cache@v3
@@ -140,28 +156,23 @@ jobs:
 
       - name: Setup flutter
         if: steps.check_asset.outputs.skip_build != 'true'
-        uses: subosito/flutter-action@v2.3.0
+        uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
           flutter-version: ${{ env.FLUTTER_VERSION }}
-
-      - name: Setup ffigen
-        if: steps.check_asset.outputs.skip_build != 'true'
-        run: |
-          dart pub global activate ffigen
-
-#      - name: Install LLVM and Clang (macos/ios)
-#        if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'macos' || matrix.config.target == 'ios' )
-#        uses: KyleMayes/install-llvm-action@v1
-#        with:
-#          version: ${{ env.LLVM_VERSION }}
-#          cached: ${{ steps.cache-llvm.outputs.cache-hit }}
+          architecture: x64
 
       - name: Install LLVM and Clang (Linux/Android)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' || matrix.config.target == 'linux' )
         run: |
           sudo apt update
           sudo apt install -y libclang-dev
+
+      - name: Install libfuse2 (Linux)
+        if: steps.check_asset.outputs.skip_build != 'true' && matrix.config.target == 'linux'
+        run: |
+          sudo apt update
+          sudo apt install -y libfuse2
 
       - name: Install cargo tools (non-android)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'macos' || matrix.config.target == 'windows' || matrix.config.target == 'linux' )
@@ -177,7 +188,7 @@ jobs:
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' )
         uses: actions/setup-java@v3
         with:
-          java-version: 8
+          java-version: 11
           distribution: 'zulu'
 
       - name: Setup android tools (Android)
@@ -196,6 +207,14 @@ jobs:
           cd pansy/ci
           cp version.code.txt ../lib/assets/version.txt
 
+      - name: Cargo native build cache
+        if: steps.check_asset.outputs.skip_build != 'true'
+        uses: actions/cache@v3
+        with:
+          path: |
+            pansy/native/target/
+          key: ${{ runner.os }}-cargo-native_target-${{ matrix.config.target }}
+
       - name: Install rust target and build (ios)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'ios')
         run: |
@@ -205,6 +224,7 @@ jobs:
           echo > lib/bridge_generated.dart
           echo > ios/Runner/bridge_generated.h
           echo > native/src/bridge_generated.rs
+          echo > native/src/bridge_generated.io.rs
           flutter_rust_bridge_codegen \
             --rust-input native/src/api.rs \
             --dart-output lib/bridge_generated.dart \
@@ -213,7 +233,7 @@ jobs:
             --class-name Native
           cargo build --manifest-path native/Cargo.toml --features= --lib --release --target=aarch64-apple-ios
           cp native/target/aarch64-apple-ios/release/libnative.a ios/Runner/
-          /usr/libexec/PlistBuddy -c 'Add :application-identifier string niuhuan.pansy' ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c 'Add :application-identifier string opensource.pansy' ios/Runner/Info.plist
           flutter build ios --no-simulator --no-codesign --release
           cd build
           rm -rf Payload
@@ -223,14 +243,30 @@ jobs:
           zip -r -9 nosign.ipa Payload
           cd ..
 
-      - name: Install rust target and build (Android-arm64)
-        if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm64')
+      - name: Install LLVM and Clang (Linux/Android)
+        if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' ) && !startsWith(matrix.config.flutter_version, '2')
         run: |
-          rustup target install aarch64-linux-android
           cd pansy
           flutter pub get
           echo > native/src/bridge_generated.rs
+          echo > native/src/bridge_generated.io.rs
           flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
+
+      - name: Install LLVM and Clang (Linux/Android)
+        if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' ) && startsWith(matrix.config.flutter_version, '2')
+        run: |
+          cd pansy
+          flutter pub get
+          echo > native/src/bridge_generated.rs
+          echo > native/src/bridge_generated.io.rs
+          flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart --llvm-path=/usr/lib/llvm-13
+
+      - name: Install rust target and build (Android-arm64)
+        if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm64')
+        run: |
+          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
+          rustup target install aarch64-linux-android
+          cd pansy
           cd native
           cargo ndk -o ../android/app/src/main/jniLibs -t arm64-v8a build --release
           cd ..
@@ -239,11 +275,9 @@ jobs:
       - name: Install rust target and build (Android-arm32)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32')
         run: |
+          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
           rustup target install armv7-linux-androideabi
           cd pansy
-          flutter pub get
-          echo > native/src/bridge_generated.rs
-          flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
           cd native
           cargo ndk -o ../android/app/src/main/jniLibs -t armeabi-v7a build --release
           cd ..
@@ -252,11 +286,9 @@ jobs:
       - name: Install rust target and build (Android-x86_64)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-x86_64')
         run: |
+          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
           rustup target install x86_64-linux-android
           cd pansy
-          flutter pub get
-          echo > native/src/bridge_generated.rs
-          flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
           cd native
           cargo ndk -o ../android/app/src/main/jniLibs -t x86_64 build --release
           cd ..
@@ -264,17 +296,16 @@ jobs:
 
       - name: Install dependencies and build (Linux)
         if: steps.check_asset.outputs.skip_build != 'true' && matrix.config.target == 'linux'
-        env:
-          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
           sudo apt-get update
-          sudo apt install -y ninja-build liblzma-dev libgtk-3-dev libgl1-mesa-dev xorg-dev libfuse2
+          sudo apt install -y ninja-build liblzma-dev libgtk-3-dev libgl1-mesa-dev xorg-dev
           curl -JOL https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod a+x appimagetool-x86_64.AppImage
           mv appimagetool-x86_64.AppImage appimagetool
           cd pansy
           flutter pub get
           echo > native/src/bridge_generated.rs
+          echo > native/src/bridge_generated.io.rs
           flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
           flutter config --enable-linux-desktop
           flutter build linux --release
@@ -302,17 +333,23 @@ jobs:
           cd pansy
           flutter pub get
           echo > native/src/bridge_generated.rs
+          echo > native/src/bridge_generated.io.rs
           flutter_rust_bridge_codegen \
               --rust-input native/src/api.rs \
               --dart-output lib/bridge_generated.dart \
               --c-output macos/Runner/bridge_generated.h \
               --rust-crate-dir native \
               --class-name Native
+          rustup target install x86_64-apple-darwin
+          rustup target install aarch64-apple-darwin
+          cargo build --manifest-path native/Cargo.toml --release --target x86_64-apple-darwin
+          cargo build --manifest-path native/Cargo.toml --release --target aarch64-apple-darwin
           flutter config --enable-macos-desktop
           flutter build macos
           cd build
           mkdir appimage
           mv macos/Build/Products/Release/pansy.app appimage/
+          lipo -create -output appimage/pansy.app/Contents/Frameworks/libnative.dylib ../native/target/x86_64-apple-darwin/release/libnative.dylib ../native/target/aarch64-apple-darwin/release/libnative.dylib
           ln -sf /Applications appimage/
           hdiutil create -volname pansy -srcfolder appimage -ov -format UDBZ macos.dmg
           cd ..
@@ -320,17 +357,27 @@ jobs:
       - name: Sign APK (Android)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' )
         env:
-          KEY_FILE_BASE64: ${{ secrets.KEY_FILE_BASE64 }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          ANDROID_JKS_BASE64: ${{ secrets.ANDROID_JKS_BASE64 }}
+          ANDROID_JKS_PASSWORD: ${{ secrets.ANDROID_JKS_PASSWORD }}
         run: |
           cd pansy
-          echo $KEY_FILE_BASE64 > key.jks.base64
+          echo $ANDROID_JKS_BASE64 > key.jks.base64
           base64 -d key.jks.base64 > key.jks
-          echo $KEY_PASSWORD | $ANDROID_HOME/build-tools/30.0.2/apksigner sign --ks key.jks build/app/outputs/flutter-apk/app-release.apk
+          echo $ANDROID_JKS_PASSWORD | $ANDROID_HOME/build-tools/30.0.2/apksigner sign --ks key.jks build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Cargo ci build cache
+        if: steps.check_asset.outputs.skip_build != 'true'
+        uses: actions/cache@v3
+        with:
+          path: |
+            pansy/ci/target/
+          key: ${{ runner.os }}-cargo-ci_target
 
       - name: Upload Asset (All)
         if: steps.check_asset.outputs.skip_build != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd pansy/ci
-          cargo run --bin upload-asset
+          cargo run --release --bin upload-asset
 
