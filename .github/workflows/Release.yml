@@ -243,26 +243,16 @@ jobs:
           zip -r -9 nosign.ipa Payload
           cd ..
 
-      - name: Gen bridge (Linux/Android)
-        if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' ) && !startsWith(matrix.config.flutter_version, '2')
+      - name: Gen bridge (Android)
+        if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' )
         run: |
           cd pansy
           flutter pub get
           flutter_rust_bridge_codegen \
             --rust-input native/src/api.rs \
             --dart-output lib/bridge_generated.dart \
-            --c-output ios/Runner/bridge_generated.h \
             --rust-crate-dir native \
             --class-name Native
-
-      - name: Install LLVM and Clang (Linux/Android)
-        if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' ) && startsWith(matrix.config.flutter_version, '2')
-        run: |
-          cd pansy
-          flutter pub get
-          echo > native/src/bridge_generated.rs
-          echo > native/src/bridge_generated.io.rs
-          flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart --llvm-path=/usr/lib/llvm-13
 
       - name: Install rust target and build (Android-arm64)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm64')
@@ -309,7 +299,11 @@ jobs:
           flutter pub get
           echo > native/src/bridge_generated.rs
           echo > native/src/bridge_generated.io.rs
-          flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
+          flutter_rust_bridge_codegen \
+            --rust-input native/src/api.rs \
+            --dart-output lib/bridge_generated.dart \
+            --rust-crate-dir native \
+            --class-name Native
           flutter config --enable-linux-desktop
           flutter build linux --release
           mv build/linux/x64/release/bundle/{pansy,AppRun}
@@ -323,7 +317,7 @@ jobs:
           cd pansy
           flutter pub get
           echo $null > native/src/bridge_generated.rs
-          flutter_rust_bridge_codegen --rust-crate-dir native --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart --class-name Native
+          flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart --c-output ios/Runner/bridge_generated.h --rust-crate-dir native  --class-name Native
           flutter config --enable-windows-desktop
           flutter build windows
           cd build/windows/runner/Release
