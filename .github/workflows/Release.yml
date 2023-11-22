@@ -4,9 +4,12 @@ on:
   workflow_dispatch:
 
 env:
-  flutter_channel: 'stable'
-  flutter_version: '3.3.10'
   LLVM_VERSION: '10.0'
+  RUST_TOOLCHAIN: nightly-2023-10-31
+  NDK_VERSION: 25.2.9519653
+  FLUTTER_VERSION: '3.13.9'
+  FLUTTER_CHANNEL: 'stable'
+  FRB_VERSION: 'v1.82.3'
   GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
 jobs:
@@ -37,7 +40,8 @@ jobs:
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          override: true
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -97,7 +101,8 @@ jobs:
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: stable
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          override: true
 
       - id: check_asset
         name: Check asset
@@ -111,7 +116,7 @@ jobs:
         with:
           repository: 'fzyzcjy/flutter_rust_bridge'
           path: 'flutter_rust_bridge'
-          ref: 'v1.82.3'
+          ref: ${{ env.FRB_VERSION }}
 
       - name: Install flutter_rust_bridge
         if: steps.check_asset.outputs.skip_build != 'true'
@@ -131,8 +136,8 @@ jobs:
         if: steps.check_asset.outputs.skip_build != 'true'
         uses: subosito/flutter-action@v2.3.0
         with:
-          channel: ${{ env.flutter_channel }}
-          flutter-version: ${{ env.flutter_version }}
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: Setup ffigen
         if: steps.check_asset.outputs.skip_build != 'true'
@@ -175,9 +180,9 @@ jobs:
         with:
           packages: |
             platform-tools
-            platforms;android-32
-            build-tools;30.0.2
-            ndk;25.2.9519653
+            platforms;android-33
+            build-tools;33.0.0
+            ndk;${{ env.NDK_VERSION }}
 
       - name: Set-Version (All)
         if: steps.check_asset.outputs.skip_build != 'true'
