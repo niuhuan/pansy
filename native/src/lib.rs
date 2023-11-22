@@ -1,22 +1,19 @@
-use std::io;
+use crate::entities::{init_databases, property};
+use crate::local::join_paths;
+use once_cell::sync::OnceCell;
+use std::ops::Deref;
 use std::path::Path;
 use std::sync::Mutex;
 use tokio::time::Duration;
-use crate::local::join_paths;
-use once_cell::sync::OnceCell;
-use crate::entities::{init_databases, property};
 
 mod api;
 mod bridge_generated;
-
 mod entities;
 mod local;
-
 mod download;
 
 static ROOT: OnceCell<String> = OnceCell::new();
 static NETWORK_IMAGE_DIR: OnceCell<String> = OnceCell::new();
-static DOWNLOADS_DIR: OnceCell<String> = OnceCell::new();
 
 lazy_static::lazy_static! {
     static ref INIT_ED: Mutex<bool> = Mutex::new(false);
@@ -24,6 +21,7 @@ lazy_static::lazy_static! {
         .enable_all()
         .thread_keep_alive(Duration::new(60, 0))
         .max_blocking_threads(30).build().unwrap();
+    static ref DOWNLOADS_DIR: tokio::sync::Mutex<String> = tokio::sync::Mutex::new("".to_owned());
 }
 
 pub(crate) fn init_root(path: &str, downloads_to: &str) {
@@ -37,32 +35,53 @@ pub(crate) fn init_root(path: &str, downloads_to: &str) {
     NETWORK_IMAGE_DIR
         .set(join_paths(vec![path, "network_image"]))
         .unwrap();
-    DOWNLOADS_DIR.set(downloads_to.to_owned()).unwrap();
+    RUNTIME.block_on(async {
+        let mut dd_lock = DOWNLOADS_DIR.lock().await;
+        *dd_lock = downloads_to.to_owned();
+        drop(dd_lock);
+    });
     create_dir_if_not_exists(ROOT.get().unwrap()).unwrap();
     create_dir_if_not_exists(NETWORK_IMAGE_DIR.get().unwrap()).unwrap();
     RUNTIME.block_on(init_databases());
     RUNTIME.block_on(async {
-        let downloads_to = property::load_property("downloads_to".to_owned()).await.unwrap();
+        let downloads_to = property::load_property("downloads_to".to_owned())
+            .await
+            .unwrap();
         if !downloads_to.is_empty() {
-            let _ = DOWNLOADS_DIR.set(downloads_to.clone());
+            let mut dd_lock = DOWNLOADS_DIR.lock().await;
+            *dd_lock = downloads_to.to_owned();
+            drop(dd_lock);
         }
     });
-    let _ = create_dir_if_not_exists(DOWNLOADS_DIR.get().unwrap());
+    RUNTIME.block_on(async {
+        let dd_lock = DOWNLOADS_DIR.lock().await;
+        let _ = create_dir_if_not_exists(dd_lock.deref());
+    });
     let _ = RUNTIME.spawn(download::download_demon());
 }
 
 pub async fn set_downloads_to(new_downloads_to: String) -> anyhow::Result<()> {
     create_dir_if_not_exists(&new_downloads_to)?;
-    let _ = DOWNLOADS_DIR.set(new_downloads_to.clone());
-    property::save_property("downloads_to".to_owned(), new_downloads_to).await.unwrap();
+    let mut dd_lock = DOWNLOADS_DIR.lock().await;
+    *dd_lock = new_downloads_to.to_owned();
+    drop(dd_lock);
+    property::save_property("downloads_to".to_owned(), new_downloads_to)
+        .await
+        .unwrap();
     Ok(())
 }
 
-fn create_dir_if_not_exists(path: &String) -> io::Result<()> {
+async fn recreate_downloads_to() -> anyhow::Result<()> {
+    let dd_lock = DOWNLOADS_DIR.lock().await;
+    create_dir_if_not_exists(dd_lock.deref())?;
+    Ok(())
+}
+
+fn create_dir_if_not_exists(path: &String) -> std::io::Result<()> {
     if !Path::new(path).exists() {
         return std::fs::create_dir_all(path);
     }
-    return Ok(());
+    Ok(())
 }
 
 pub(crate) fn get_root() -> &'static String {

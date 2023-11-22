@@ -111,7 +111,7 @@ jobs:
         with:
           repository: 'fzyzcjy/flutter_rust_bridge'
           path: 'flutter_rust_bridge'
-          ref: 'v1.54.0'
+          ref: 'v1.82.3'
 
       - name: Install flutter_rust_bridge
         if: steps.check_asset.outputs.skip_build != 'true'
@@ -219,13 +219,7 @@ jobs:
           cd pansy
           flutter pub get
           echo > native/src/bridge_generated.rs
-          flutter_rust_bridge_codegen \
-            --rust-input native/src/api.rs \
-            --dart-output lib/bridge_generated.dart \
-            --c-output ios/Runner/bridge_generated.h \
-            --rust-crate-dir native \
-            --llvm-path $LLVM_HOME \
-            --class-name Native
+          flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart
           cd native
           cargo ndk -o ../android/app/src/main/jniLibs -t arm64-v8a build --release
           cd ..

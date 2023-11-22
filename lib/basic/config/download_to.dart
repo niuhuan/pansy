@@ -10,13 +10,14 @@ import '../platform.dart';
 
 Future<bool> checkDownloadsTo(BuildContext context) async {
   if (Platform.isAndroid) {
-    if (Platform.isAndroid) {
-      late bool g;
-      if (androidVersion < 30) {
-        g = await Permission.storage.request().isGranted;
-      } else {
-        g = await Permission.manageExternalStorage.request().isGranted;
-      }
+    if (androidVersion < 30) {
+      defaultToast(
+        context,
+        AppLocalizations.of(context)!.androidApi29AndLowerNotSupport,
+      );
+      return false;
+    } else {
+      var g = await Permission.manageExternalStorage.request().isGranted;
       if (!g) {
         defaultToast(
           context,
@@ -25,25 +26,16 @@ Future<bool> checkDownloadsTo(BuildContext context) async {
         return false;
       }
     }
-    var downloadsTo = await api.loadProperty(k: "downloads_to");
-    if (downloadsTo.isEmpty) {
-      String? newDownloadsTo = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: AppLocalizations.of(context)!.selectDownloadsTo,
-      );
-      if (newDownloadsTo != null) {
-        try {
-          await api.setDownloadsTo(newDownloadsTo: newDownloadsTo);
-        } catch (e, s) {
-          defaultToast(
-            context,
-            AppLocalizations.of(context)!.setDownloadsToFailed + '\n$e',
-          );
-          return false;
-        }
-      } else {
+    var recreateDownloadsTo =
+        await api.loadProperty(k: "recreate_downloads_to");
+    if (recreateDownloadsTo.isEmpty) {
+      try {
+        await api.recreateDownloadsTo();
+        await api.saveProperty(k: "recreate_downloads_to", v: "1");
+      } catch (e, s) {
         defaultToast(
           context,
-          AppLocalizations.of(context)!.mustChooseDownloadsTo,
+          AppLocalizations.of(context)!.setDownloadsToFailed + '\n$e',
         );
         return false;
       }

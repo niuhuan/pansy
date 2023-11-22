@@ -74,6 +74,10 @@ pub fn init(root: String, downloads_to: String) -> Result<()> {
     Ok(())
 }
 
+pub fn recreate_downloads_to() -> Result<()> {
+    block_on(crate::recreate_downloads_to())
+}
+
 pub fn set_downloads_to(new_downloads_to: String) -> Result<()> {
     block_on(crate::set_downloads_to(new_downloads_to))
 }

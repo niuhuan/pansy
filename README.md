@@ -21,6 +21,26 @@ A beautiful illustration clients, support mac, windows, linux, ios, Android.
 ![](images/search.png)
 ![](images/search_screen.png)
 
+## Details
+
+### Supported Platforms
+
+|   Platform   | minimum version |
+|:------------:|:---------------:|
+|   Android    |   API 30 (10)   |
+|    Macos     |      10.15      |
+| iOS / iPadOS |       13        |
+|   Windows    |   10 (64bit)    |
+|    Linux     |     - 64bit     |
+
+### Download pictures location
+
+|   Platform   |          Location           |
+|:------------:|:---------------------------:|
+|   Android    | {USER_HOME}/Downloads/pansy/ |
+|   Desktop    | {USER_HOME}/Downloads/pansy/ |
+| iOS / iPadOS |   {PHONE}/pansy/downloads/   |
+
 ## Technical structure
 
 - [rust](https://github.com/rust-lang/rust)

@@ -1,1 +1,4 @@
-- Fix android 12 login
+v0.04
+
+- [x] ✨ download images to file
+- [x] 🐛 fix many login error

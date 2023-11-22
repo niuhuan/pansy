@@ -21,6 +21,26 @@ PANSY
 ![](images/search.png)
 ![](images/search_screen.png)
 
+## 详情
+
+### 支持的平台
+
+|   平台   | 最小版本 |
+|:------------:|:---------------:|
+|   Android    |   API 30 (10)   |
+|    Macos     |      10.15      |
+| iOS / iPadOS |       13        |
+|   Windows    |   10 (64bit)    |
+|    Linux     |     - 64bit     |
+
+### 图片下载路径
+
+|   平台   |          路径           |
+|:------------:|:---------------------------:|
+|   Android    | {USER_HOME}/Downloads/pansy/ |
+|   Desktop    | {USER_HOME}/Downloads/pansy/ |
+| iOS / iPadOS |   {PHONE}/pansy/downloads/   |
+
 ## 技术架构
 
 - [rust](https://github.com/rust-lang/rust)

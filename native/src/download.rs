@@ -32,7 +32,9 @@ async fn down(downloading: &download_image::Model) -> anyhow::Result<()> {
     let data = no_authed_client().await.load_image_data(downloading.original.clone()).await?;
     let f = image::guess_format(data.as_bytes())?;
     let path = format!("{}.{}", downloading.hash, f.extensions_str()[0]);
-    let local = join_paths(vec![DOWNLOADS_DIR.get().unwrap().as_str(), path.as_str()]);
+    let dd_lock = DOWNLOADS_DIR.lock().await;
+    let local = join_paths(vec![dd_lock.as_str(), path.as_str()]);
+    drop(dd_lock);
     tokio::fs::write(local, data).await?;
     Ok(())
 }
