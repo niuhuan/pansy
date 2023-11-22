@@ -54,11 +54,19 @@ pub(crate) async fn set_status_and_error_msg(hash: &str, status: i32, error_msg:
         .exec(DOWNLOADS_DB.get().unwrap().lock().await.deref()).await?)
 }
 
-// batch_save
 pub(crate) async fn batch_save(values: impl Iterator<Item=Model>) -> anyhow::Result<()> {
     let db = DOWNLOADS_DB.get().unwrap().lock().await;
     Entity::insert_many(values.map(|e| e.into_active_model()))
         .on_conflict(OnConflict::column(Column::Hash).do_nothing().to_owned())
+        .exec(db.deref()).await?;
+    Ok(())
+}
+
+pub(crate) async fn reset_failed_downloads() -> anyhow::Result<()> {
+    let db = DOWNLOADS_DB.get().unwrap().lock().await;
+    Entity::update_many()
+        .filter(Column::DownloadStatus.eq(2))
+        .col_expr(Column::DownloadStatus, Expr::value(0))
         .exec(db.deref()).await?;
     Ok(())
 }

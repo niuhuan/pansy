@@ -233,3 +233,7 @@ pub fn append_to_download(values: Vec<AppendToDownload>) -> Result<()> {
     block_on(download::append_to_download(values))
 }
 
+pub fn reset_failed_downloads() -> Result<()> {
+    block_on(download::reset_failed_downloads())
+}
+

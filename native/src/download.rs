@@ -57,3 +57,7 @@ pub async fn append_to_download(values: Vec<AppendToDownload>) -> anyhow::Result
     Ok(())
 }
 
+pub(crate) async fn reset_failed_downloads() -> anyhow::Result<()> {
+    download_image::reset_failed_downloads().await
+}
+
