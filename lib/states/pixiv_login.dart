@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/cross.dart';
@@ -7,7 +6,6 @@ import 'package:pansy/screens/login_screen.dart';
 import 'package:pansy/screens/pc_login_screen.dart';
 import 'dart:async';
 import 'package:uni_links/uni_links.dart';
-
 import '../ffi.dart';
 
 bool pixivLogin = false;
@@ -35,7 +33,9 @@ Future<void> pixivLoginAction(BuildContext context) async {
               .push(MaterialPageRoute(builder: (BuildContext context) {
             return LoginScreen(verify: verifyUrl!.verify, code: link1);
           }));
-          api.loginByCode(query: LoginByCodeQuery(code: link1, verify: verifyUrl!.verify));
+          api.loginByCode(
+              query:
+                  UiLoginByCodeQuery(code: link1, verify: verifyUrl!.verify));
         }
       }
     }, onError: (err) {

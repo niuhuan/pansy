@@ -1,9 +1,10 @@
 use std::time;
 use image::EncodableLayout;
-use crate::api::{AppendToDownload, Downloading};
+
 use crate::DOWNLOADS_DIR;
 use crate::entities::download_image;
-use crate::local::{join_paths, no_authed_client};
+use crate::local::join_paths;
+use crate::udto::*;
 
 pub(crate) async fn download_demon() {
     loop {
@@ -29,7 +30,7 @@ async fn down_post(downloading: download_image::Model) {
 }
 
 async fn down(downloading: &download_image::Model) -> anyhow::Result<()> {
-    let data = no_authed_client().await.load_image_data(downloading.original.clone()).await?;
+    let data = crate::local::client(0).await?.load_image_data(downloading.original.clone()).await?;
     let f = image::guess_format(data.as_bytes())?;
     let path = format!("{}.{}", downloading.hash, f.extensions_str()[0]);
     let dd_lock = DOWNLOADS_DIR.lock().await;
@@ -39,7 +40,7 @@ async fn down(downloading: &download_image::Model) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub async fn append_to_download(values: Vec<AppendToDownload>) -> anyhow::Result<()> {
+pub async fn append_to_download(values: Vec<UiAppendToDownload>) -> anyhow::Result<()> {
     download_image::batch_save(
         values.into_iter().map(|e| download_image::Model {
             hash: hex::encode(md5::compute(e.original.as_bytes()).0),
@@ -63,8 +64,8 @@ pub(crate) async fn reset_failed_downloads() -> anyhow::Result<()> {
     download_image::reset_failed_downloads().await
 }
 
-pub(crate) async fn downloading_list() -> anyhow::Result<Vec<Downloading>> {
-    Ok(download_image::all().await?.into_iter().map(|e| Downloading {
+pub(crate) async fn downloading_list() -> anyhow::Result<Vec<UiDownloading>> {
+    Ok(download_image::all().await?.into_iter().map(|e| UiDownloading {
         hash: e.hash,
         illust_id: e.illust_id,
         illust_title: e.illust_title,

@@ -12,7 +12,7 @@ class DownloadsScreen extends StatefulWidget {
 }
 
 class _DownloadsScreenState extends State<DownloadsScreen> {
-  List<Downloading> _list = [];
+  List<UiDownloading> _list = [];
 
   Future _fetch() async {
     _list = await api.downloadingList();
@@ -57,9 +57,9 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     return items;
   }
 
-  Widget _buildItem(Downloading item) {
+  Widget _buildItem(UiDownloading item) {
     return Container(
-      padding: EdgeInsets.all(5),
+      padding: const EdgeInsets.all(5),
       child: Row(children: [
         PixivImage(
           item.squareMedium,

@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
-
-import '../../types.dart';
+import '../../bridge_generated.dart';
 import '../illust_info_screen.dart';
 import 'image_size_abel.dart';
 import 'pixiv_image.dart';

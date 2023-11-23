@@ -11,6 +11,8 @@ mod bridge_generated;
 mod entities;
 mod local;
 mod download;
+mod udto;
+mod pixirust;
 
 static ROOT: OnceCell<String> = OnceCell::new();
 static NETWORK_IMAGE_DIR: OnceCell<String> = OnceCell::new();

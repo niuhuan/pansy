@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _init() async {
     await api.loginByCode(
-        query: LoginByCodeQuery(code: widget.code, verify: widget.verify));
+        query: UiLoginByCodeQuery(code: widget.code, verify: widget.verify));
     setPixivLogin(true);
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const AppScreen()),

@@ -7,7 +7,6 @@ import 'package:pansy/basic/cross.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pansy/ffi.dart';
 import '../basic/config/download_to.dart';
-import '../types.dart';
 import 'components/empty_app_bar.dart';
 import 'components/pixiv_image.dart';
 import 'components/shadow_icon_button.dart';
@@ -35,13 +34,13 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
         children: [
           LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
-              List<MetaImageUrls> metas = [];
+              List<MetaPageImageUrls> metas = [];
               if (widget.illust.metaPages.isNotEmpty) {
                 // 多张图片
                 metas.addAll(widget.illust.metaPages.map((e) => e.imageUrls));
               } else {
                 // 单张图片
-                metas.add(MetaImageUrls(
+                metas.add(MetaPageImageUrls(
                     squareMedium: widget.illust.imageUrls.squareMedium,
                     medium: widget.illust.imageUrls.medium,
                     large: widget.illust.imageUrls.large,
@@ -136,8 +135,7 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(widget.illust.title),
-                Text(formatDate(
-                    widget.illust.createDate, [yyyy, "-", mm, "-", dd])),
+                Text(widget.illust.createDate),
               ],
             ),
           ),
@@ -203,14 +201,14 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
           if (!await checkDownloadsTo(context)) {
             return;
           }
-          List<AppendToDownload> metas = [];
+          List<UiAppendToDownload> metas = [];
           if (widget.illust.metaPages.isNotEmpty) {
             // 多张图片
             var i = 0;
-            metas.addAll(widget.illust.metaPages.map((e) => AppendToDownload(
+            metas.addAll(widget.illust.metaPages.map((e) => UiAppendToDownload(
                   illustId: widget.illust.id,
                   illustTitle: widget.illust.title,
-                  illustType: widget.illust.type,
+                  illustType: widget.illust.illustType,
                   imageIdx: i++,
                   squareMedium: e.imageUrls.squareMedium,
                   medium: e.imageUrls.medium,
@@ -219,10 +217,10 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
                 )));
           } else {
             // 单张图片
-            metas.add(AppendToDownload(
+            metas.add(UiAppendToDownload(
               illustId: widget.illust.id,
               illustTitle: widget.illust.title,
-              illustType: widget.illust.type,
+              illustType: widget.illust.illustType,
               imageIdx: 0,
               squareMedium: widget.illust.imageUrls.squareMedium,
               medium: widget.illust.imageUrls.medium,

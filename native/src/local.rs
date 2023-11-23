@@ -2,15 +2,16 @@ use crate::entities::property::{
     load_bool_property, load_i64_property, load_property, save_bool_property, save_i64_property,
     save_property,
 };
-use anyhow::Result;
-use pixirust::{Client, Token};
+use crate::pixirust::client::Client;
+use crate::pixirust::entities::Token;
+use anyhow::{Result, Ok};
 use serde_derive::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tokio::sync::{Mutex, MutexGuard};
-use tokio::sync::{RwLock, RwLockReadGuard};
+use tokio::sync::RwLock;
 
 #[allow(dead_code)]
 pub(crate) fn join_paths<P: AsRef<Path>>(paths: Vec<P>) -> String {
@@ -62,15 +63,34 @@ pub(crate) async fn hash_lock(url: &String) -> MutexGuard<'static, ()> {
     HASH_LOCK[(s.finish() % 16) as usize].lock().await
 }
 
-pub(crate) async fn no_authed_client() -> RwLockReadGuard<'static, Client> {
-    CLIENT.read().await
+/// 
+/// param: auth_level:
+///   -1: no auth
+///    0: no auth or auth fail is ok
+///    1: ok at no auth, but error at auth fail
+///    2: must authed success
+pub(crate) async fn client(auth_level: i32) -> Result<tokio::sync::RwLockReadGuard<'static, Client>> {
+    if -1 == auth_level {
+        return Ok(CLIENT.read().await);
+    }
+    let period = TOKEN.lock().await;
+    if period.created_time == 0 {
+        if auth_level == 2 {
+            return Err(anyhow::Error::msg("no authed"));
+        }
+    }
+    match reload_auth(period).await {
+        Err(err) => {
+            if auth_level >= 1 {
+                return Err(err);
+            }
+        }
+        _ => {}
+    }
+    Ok(CLIENT.read().await)
 }
 
-pub(crate) async fn authed_client() -> Result<RwLockReadGuard<'static, Client>> {
-    let mut period = TOKEN.lock().await;
-    if period.created_time == 0 {
-        return Err(anyhow::Error::msg("no authed"));
-    }
+async fn reload_auth(mut period: tokio::sync::MutexGuard<'_, TokenPeriod>) -> Result<()> {
     let now = chrono::Local::now().timestamp_millis();
     let mut check_lock = CLIENT.write().await;
     if period.token.expires_in + period.created_time < now {
@@ -83,7 +103,7 @@ pub(crate) async fn authed_client() -> Result<RwLockReadGuard<'static, Client>> 
         (*check_lock).access_token = period.token.access_token.clone();
     }
     drop(check_lock);
-    Ok(CLIENT.read().await)
+    Ok(())
 }
 
 async fn write_token(token: &Token, time: &i64) {

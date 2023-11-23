@@ -1,11 +1,14 @@
 use crate::entities::{network_image, property};
 use crate::local::{
-    authed_client, get_in_china_, hash_lock, join_paths, load_in_china, load_token,
-    no_authed_client, set_in_china_, set_token,
+    client, get_in_china_, hash_lock, join_paths, load_in_china, load_token, set_in_china_,
+    set_token,
 };
+use crate::pixirust::client::IllustTrendingTags;
+use crate::pixirust::entities::IllustResponse;
+use crate::pixirust::entities::LoginUrl;
+use crate::udto::*;
 use crate::{download, get_network_image_dir};
-use anyhow::{Context, Result};
-use serde_derive::*;
+use anyhow::{Context, Ok, Result};
 use std::future::Future;
 use std::path::Path;
 
@@ -82,33 +85,11 @@ pub fn set_downloads_to(new_downloads_to: String) -> Result<()> {
 }
 
 pub fn save_property(k: String, v: String) -> Result<()> {
-    block_on(async move {
-        Ok(property::save_property(k, v).await?)
-    })
+    block_on(async move { Ok(property::save_property(k, v).await?) })
 }
 
 pub fn load_property(k: String) -> Result<String> {
-    block_on(async move {
-        Ok(property::load_property(k).await?)
-    })
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct LoginByCodeQuery {
-    pub code: String,
-    pub verify: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct IllustSearchQuery {
-    pub mode: String,
-    pub word: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct IllustRankQuery {
-    pub mode: String,
-    pub date: String,
+    block_on(async move { Ok(property::load_property(k).await?) })
 }
 
 fn block_on<T>(f: impl Future<Output = T>) -> T {
@@ -152,15 +133,9 @@ pub fn pre_login() -> Result<bool> {
     block_on(async { load_token().await })
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct LoginUrl {
-    pub verify: String,
-    pub url: String,
-}
-
 pub fn create_login_url() -> LoginUrl {
     block_on(async {
-        let raw = no_authed_client().await.create_login_url();
+        let raw = crate::local::client(-1).await.unwrap().create_login_url();
         LoginUrl {
             verify: raw.verify,
             url: raw.url,
@@ -168,10 +143,11 @@ pub fn create_login_url() -> LoginUrl {
     })
 }
 
-pub fn login_by_code(query: LoginByCodeQuery) -> Result<bool> {
+pub fn login_by_code(query: UiLoginByCodeQuery) -> Result<bool> {
     block_on(async {
-        let token = no_authed_client()
+        let token = client(-1)
             .await
+            .unwrap()
             .load_token_by_code(query.code, query.verify)
             .await?;
         set_token(token, chrono::Local::now().timestamp_millis()).await;
@@ -179,32 +155,56 @@ pub fn login_by_code(query: LoginByCodeQuery) -> Result<bool> {
     })
 }
 
+pub fn create_register_url() -> Result<LoginUrl> {
+    block_on(async { Ok(crate::local::client(1).await?.create_register_url()) })
+}
+
 pub fn request_url(params: String) -> Result<String> {
-    block_on(async { authed_client().await?.get_from_pixiv_raw(params).await })
+    block_on(async { client(2).await?.get_from_pixiv_raw(params).await })
+}
+
+pub fn illust_from_url(url: String) -> Result<IllustResponse> {
+    block_on(async {
+        let illust = client(2).await?.illust_from_url(url).await?;
+        Ok(illust.into())
+    })
 }
 
 pub fn illust_recommended_first_url() -> Result<String> {
-    block_on(async { Ok(no_authed_client().await.illust_recommended_first_url()) })
+    block_on(async {
+        Ok(crate::local::client(1)
+            .await?
+            .illust_recommended_first_url())
+    })
 }
 
-pub fn illust_search_first_url(query: IllustSearchQuery) -> Result<String> {
+pub fn illust_search_first_url(query: UiIllustSearchQuery) -> Result<String> {
     block_on(async {
-        Ok(no_authed_client()
-            .await
+        Ok(client(-1)
+            .await?
             .illust_search_first_url(query.word, query.mode))
     })
 }
 
-pub fn illust_rank_first_url(query: IllustRankQuery) -> Result<String> {
+pub fn illust_rank_first_url(query: UiIllustRankQuery) -> Result<String> {
     block_on(async {
-        Ok(no_authed_client()
-            .await
+        Ok(client(-1)
+            .await?
             .illust_rank_first_url(query.mode, query.date))
     })
 }
 
+pub fn illust_trending_tags() -> Result<IllustTrendingTags> {
+    block_on(async { crate::local::client(1).await?.illust_trending_tags().await })
+}
+
 pub fn illust_trending_tags_url() -> String {
-    block_on(async { no_authed_client().await.illust_trending_tags_url() })
+    block_on(async {
+        crate::local::client(-1)
+            .await
+            .unwrap()
+            .illust_trending_tags_url()
+    })
 }
 
 /// 下载pixiv的图片
@@ -225,7 +225,7 @@ pub fn load_pixiv_image(url: String) -> Result<String> {
                     hex::encode(md5::compute(url.clone()).to_vec()),
                     &now,
                 );
-                let client = no_authed_client().await;
+                let client = crate::local::client(1).await?;
                 let data: bytes::Bytes = client.load_image_data(url.clone()).await?;
                 drop(client);
                 let local = join_paths(vec![get_network_image_dir().as_str(), &path]);
@@ -238,18 +238,7 @@ pub fn load_pixiv_image(url: String) -> Result<String> {
     })
 }
 
-pub struct AppendToDownload {
-    pub illust_id: i64,
-    pub illust_title: String,
-    pub illust_type: String,
-    pub image_idx: i64,
-    pub square_medium: String,
-    pub medium: String,
-    pub large: String,
-    pub original: String,
-}
-
-pub fn append_to_download(values: Vec<AppendToDownload>) -> Result<()> {
+pub fn append_to_download(values: Vec<UiAppendToDownload>) -> Result<()> {
     block_on(download::append_to_download(values))
 }
 
@@ -257,20 +246,6 @@ pub fn reset_failed_downloads() -> Result<()> {
     block_on(download::reset_failed_downloads())
 }
 
-pub struct Downloading {
-    pub hash: String,
-    pub illust_id: i64,
-    pub illust_title: String,
-    pub illust_type: String,
-    pub image_idx: i64,
-    pub square_medium: String,
-    pub medium: String,
-    pub large: String,
-    pub original: String,
-    pub download_status: i32,
-    pub error_msg: String,
-}
-
-pub fn downloading_list() -> Result<Vec<Downloading>> {
+pub fn downloading_list() -> Result<Vec<UiDownloading>> {
     block_on(download::downloading_list())
 }

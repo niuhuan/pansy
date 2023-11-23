@@ -1,8 +1,6 @@
 
 import 'package:flutter/material.dart';
-
 import '../../ffi.dart';
-import '../../types.dart';
 import 'illust_flow.dart';
 
 class FirstUrlIllustFlow extends StatefulWidget {
@@ -23,7 +21,7 @@ class _FirstUrlIllustFlowState extends State<FirstUrlIllustFlow> {
     if (_nextUrl == "") {
       _nextUrl = widget.firstUrl;
     }
-    var response = await illustPageByUrl(_nextUrl);
+    var response = await api.illustFromUrl(url: _nextUrl);
     _nextUrl = response.nextUrl;
     return response.illusts;
   }
