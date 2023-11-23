@@ -27,5 +27,7 @@
   "selectDownloadsTo": "Select downloads to",
   "mustChooseDownloadsTo": "Must choose downloads to",
   "setDownloadsToFailed": "Set downloads to failed",
-  "androidApi29AndLowerNotSupport": "Android api 29 and lower not support"
+  "androidApi29AndLowerNotSupport": "Android api 29 and lower not support",
+  "totalViews": "views",
+  "totalBookmarks": "bookmarks"
 }

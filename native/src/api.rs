@@ -225,7 +225,7 @@ pub fn load_pixiv_image(url: String) -> Result<String> {
                     hex::encode(md5::compute(url.clone()).to_vec()),
                     &now,
                 );
-                let client = crate::local::client(1).await?;
+                let client = crate::local::client(0).await?;
                 let data: bytes::Bytes = client.load_image_data(url.clone()).await?;
                 drop(client);
                 let local = join_paths(vec![get_network_image_dir().as_str(), &path]);
