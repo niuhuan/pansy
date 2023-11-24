@@ -166,6 +166,7 @@ class _AppScreenState extends State<AppScreen>
     }
     return Scaffold(
       appBar: AppBar(
+        elevation: 1,
         title: _leading(),
         actions: _screens.map(_actionButton).toList(),
       ),

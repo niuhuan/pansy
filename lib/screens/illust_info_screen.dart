@@ -9,7 +9,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pansy/ffi.dart';
 import '../basic/config/download_to.dart';
 import 'components/pixiv_image.dart';
-import 'components/shadow_icon_button.dart';
 import 'search_screen.dart';
 
 class IllustInfoScreen extends StatefulWidget {
@@ -35,15 +34,19 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
         children: [
           ..._buildPictures(),
           _buildInfos(),
+          _buildTitle(),
           _buildTags(),
-          _buildAuthor(),
+          SafeArea(top: false, child: Container()),
         ],
       ),
     );
   }
 
   AppBar _buildAuthorAppBar() {
+    final theme = Theme.of(context);
     return AppBar(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      foregroundColor: theme.textTheme.bodyLarge?.color ?? Colors.black,
       centerTitle: false,
       elevation: 0.1,
       title: Text.rich(
@@ -188,11 +191,18 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
     );
   }
 
+  Widget _buildTitle() {
+    return Container(
+      margin: const EdgeInsets.all(10),
+      child: Text(widget.illust.title),
+    );
+  }
+
   Widget _buildTags() {
     final theme = Theme.of(context);
     final textColor =
         (theme.textTheme.bodyMedium?.color ?? Colors.black).withOpacity(.85);
-    final textColorTitle = (theme.textTheme.titleMedium?.color ?? Colors.black);
+    final textColorTitle = (theme.colorScheme.primary ?? Colors.black);
     return Card(
       elevation: 0,
       margin: const EdgeInsets.only(top: .5, bottom: .5),
@@ -254,56 +264,6 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
     );
   }
 
-  Widget _buildAuthor() {
-    return Container(
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          Container(
-            margin: EdgeInsets.only(left: 10, right: 10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.illust.title),
-                Text(widget.illust.createDate),
-              ],
-            ),
-          ),
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(text: widget.illust.user.name),
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.middle,
-                  child: Container(
-                    margin: EdgeInsets.all(10),
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 3,
-                          style: BorderStyle.solid,
-                        )),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                      child: ScalePixivImage(
-                        url: widget.illust.user.profileImageUrls.medium,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _moreButton() {
     return PopupMenuButton<int>(
       icon: const DecoratedIcon(
@@ -321,9 +281,21 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
       itemBuilder: (BuildContext context) {
         return [
           PopupMenuItem(
-            child: Text(
-              AppLocalizations.of(context)!.downloadAllOriginalImagesToFiles,
-            ),
+            child: Text.rich(TextSpan(children: [
+              const WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                baseline: TextBaseline.alphabetic,
+                child: Opacity(
+                  opacity: .8,
+                  child: Icon(Icons.download),
+                ),
+              ),
+              const TextSpan(text: "  "),
+              TextSpan(
+                text: AppLocalizations.of(context)!
+                    .downloadAllOriginalImagesToFiles,
+              )
+            ])),
             value: 1,
           ),
         ];

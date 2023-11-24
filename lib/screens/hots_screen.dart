@@ -17,7 +17,6 @@ class _HotsScreenState extends State<HotsScreen>
   @override
   bool get wantKeepAlive => true;
 
-  var _selectedIndex = 0;
   late final _tabController = TabController(
     initialIndex: 0,
     vsync: this,
@@ -66,7 +65,8 @@ class _RankTabState extends State<_RankTab> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
-  late Future<String> _future = api.illustRankFirstUrl(query:UiIllustRankQuery(mode: widget.mode, date: ""));
+  late Future<String> _future = api.illustRankFirstUrl(
+      query: UiIllustRankQuery(mode: widget.mode, date: ""));
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +75,8 @@ class _RankTabState extends State<_RankTab> with AutomaticKeepAliveClientMixin {
       future: _future,
       onRefresh: () async {
         setState(() {
-          _future = api.illustRankFirstUrl(query:UiIllustRankQuery(mode: widget.mode, date: ""));
+          _future = api.illustRankFirstUrl(
+              query: UiIllustRankQuery(mode: widget.mode, date: ""));
         });
       },
       successBuilder: (BuildContext context, AsyncSnapshot<String> snapshot) {
