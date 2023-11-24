@@ -53,8 +53,9 @@ class PixivImage extends StatelessWidget {
   final String url;
   final double? width;
   final double? height;
+  final BoxFit? fit;
 
-  const PixivImage(this.url, {Key? key, this.width, this.height})
+  const PixivImage(this.url, {Key? key, this.width, this.height, this.fit})
       : super(key: key);
 
   @override
@@ -66,7 +67,7 @@ class PixivImage extends StatelessWidget {
         image: PixivUrlImageProvider(url),
         width: width,
         height: height,
-        fit: BoxFit.contain,
+        fit: fit ?? BoxFit.contain,
       ),
     );
   }

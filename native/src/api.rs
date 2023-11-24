@@ -3,7 +3,7 @@ use crate::local::{
     client, get_in_china_, hash_lock, join_paths, load_in_china, load_token, set_in_china_,
     set_token,
 };
-use crate::pixirust::client::IllustTrendingTags;
+use crate::pixirust::client::{IllustTrendingTags, UserDetail};
 use crate::pixirust::entities::IllustResponse;
 use crate::pixirust::entities::LoginUrl;
 use crate::udto::*;
@@ -236,6 +236,10 @@ pub fn load_pixiv_image(url: String) -> Result<String> {
         };
         Ok(join_paths(vec![get_network_image_dir().as_str(), &path]))
     })
+}
+
+pub fn user_detail(user_id: i64) -> Result<UserDetail> {
+    block_on(async { crate::local::client(2).await?.user_detail(user_id).await })
 }
 
 pub fn append_to_download(values: Vec<UiAppendToDownload>) -> Result<()> {

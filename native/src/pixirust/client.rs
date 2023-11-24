@@ -252,6 +252,14 @@ impl Client {
         )
     }
 
+    pub async fn user_detail(&self, user_id: i64) -> Result<UserDetail> {
+        self.get_from_pixiv(format!(
+            "https://{}/v1/user/detail?filter=for_android&user_id={}",
+            APP.server, user_id,
+        ))
+        .await
+    }
+
     pub async fn load_image_data(&self, url: String) -> Result<bytes::Bytes> {
         let req = match self.agent_free {
             true => {

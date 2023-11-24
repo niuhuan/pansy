@@ -7,6 +7,7 @@ import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pansy/ffi.dart';
+import 'package:pansy/screens/user_info_screen.dart';
 import '../basic/config/download_to.dart';
 import 'components/pixiv_image.dart';
 import 'search_screen.dart';
@@ -74,7 +75,16 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
               ),
             ),
             WidgetSpan(child: Container(width: 10)),
-            TextSpan(text: widget.illust.user.name),
+            TextSpan(
+              recognizer: TapGestureRecognizer()
+                ..onTap = () async {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (BuildContext context) {
+                    return UserInfoScreen(widget.illust.user);
+                  }));
+                },
+              text: widget.illust.user.name,
+            ),
           ],
         ),
       ),
@@ -202,7 +212,7 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
     final theme = Theme.of(context);
     final textColor =
         (theme.textTheme.bodyMedium?.color ?? Colors.black).withOpacity(.85);
-    final textColorTitle = (theme.colorScheme.primary ?? Colors.black);
+    final textColorTitle = theme.colorScheme.primary;
     return Card(
       elevation: 0,
       margin: const EdgeInsets.only(top: .5, bottom: .5),

@@ -65,7 +65,7 @@ pub struct Illust {
     pub image_urls: MainImageUrls,
     pub caption: String,
     pub restrict: i64,
-    pub user: User,
+    pub user: UserSample,
     pub tags: Vec<Tag>,
     pub tools: Vec<String>,
     pub create_date: String,
@@ -98,7 +98,7 @@ pub struct MainImageUrls {
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct User {
+pub struct UserSample {
     pub id: i64,
     pub name: String,
     pub account: String,
@@ -153,3 +153,77 @@ pub const ILLUST_SEARCH_MODE_PARTIAL_MATCH_FOR_TAGS: &'static str = "partial_mat
 pub const ILLUST_SEARCH_MODE_EXACT_MATCH_FOR_TAGS: &'static str = "exact_match_for_tags";
 #[allow(dead_code)]
 pub const ILLUST_SEARCH_MODE_TITLE_AND_CAPTION: &'static str = "title_and_caption";
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct UserDetail {
+    pub profile: Profile,
+    pub profile_publicity: ProfilePublicity,
+    pub user: User,
+    pub workspace: Workspace,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Profile {
+    pub address_id: i64,
+    pub background_image_url: Option<String>,
+    pub birth: String,
+    pub birth_day: String,
+    pub birth_year: i64,
+    pub country_code: String,
+    pub gender: String,
+    pub is_premium: bool,
+    pub is_using_custom_profile_image: bool,
+    pub job: String,
+    pub job_id: i64,
+    pub pawoo_url: Option<String>,
+    pub region: String,
+    pub total_follow_users: i64,
+    pub total_illust_bookmarks_public: i64,
+    pub total_illust_series: i64,
+    pub total_illusts: i64,
+    pub total_manga: i64,
+    pub total_mypixiv_users: i64,
+    pub total_novel_series: i64,
+    pub total_novels: i64,
+    pub twitter_account: String,
+    pub twitter_url: Option<String>,
+    pub webpage: Option<String>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ProfilePublicity {
+    pub birth_day: String,
+    pub birth_year: String,
+    pub gender: String,
+    pub job: String,
+    pub pawoo: bool,
+    pub region: String,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct User {
+    pub account: String,
+    pub comment: String,
+    pub id: i64,
+    pub is_access_blocking_user: bool,
+    pub is_followed: bool,
+    pub name: String,
+    pub profile_image_urls: ProfileImageUrls,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Workspace {
+    pub chair: String,
+    pub comment: String,
+    pub desk: String,
+    pub desktop: String,
+    pub monitor: String,
+    pub mouse: String,
+    pub music: String,
+    pub pc: String,
+    pub printer: String,
+    pub scanner: String,
+    pub tablet: String,
+    pub tool: String,
+    pub workspace_image_url: Option<String>,
+}

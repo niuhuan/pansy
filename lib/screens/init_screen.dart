@@ -1,12 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/config/in_china.dart';
 import 'package:pansy/ffi.dart';
 import 'package:pansy/screens/app_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../basic/commons.dart';
 import '../basic/platform.dart';
 import '../cross.dart';
 
