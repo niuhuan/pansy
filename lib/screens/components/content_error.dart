@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 
 import 'package:pansy/basic/error_types.dart';
-
 
 class ContentError extends StatelessWidget {
   final Object? error;

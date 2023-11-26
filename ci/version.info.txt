@@ -1,4 +1,4 @@
-v0.04
+v0.0.5
 
-- [x] ✨ download images to file
-- [x] 🐛 fix many login error
+- [x] ✨ view user info
+- [x] ✨ list user's all illusts
