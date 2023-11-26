@@ -7,8 +7,8 @@ import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pansy/ffi.dart';
-import 'package:pansy/screens/user_info_screen.dart';
 import '../basic/config/download_to.dart';
+import 'components/appbar.dart';
 import 'components/pixiv_image.dart';
 import 'search_screen.dart';
 
@@ -30,7 +30,13 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAuthorAppBar(),
+      appBar: buildUserSampleAppBar(
+        context,
+        widget.illust.user,
+        [
+          _moreButton(),
+        ],
+      ),
       body: ListView(
         children: [
           ..._buildPictures(),
@@ -40,57 +46,6 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
           SafeArea(top: false, child: Container()),
         ],
       ),
-    );
-  }
-
-  AppBar _buildAuthorAppBar() {
-    final theme = Theme.of(context);
-    return AppBar(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      foregroundColor: theme.textTheme.bodyLarge?.color ?? Colors.black,
-      centerTitle: false,
-      elevation: 0.1,
-      title: Text.rich(
-        TextSpan(
-          children: [
-            WidgetSpan(
-              alignment: PlaceholderAlignment.middle,
-              child: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 3,
-                    style: BorderStyle.solid,
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(50)),
-                  child: ScalePixivImage(
-                    url: widget.illust.user.profileImageUrls.medium,
-                  ),
-                ),
-              ),
-            ),
-            WidgetSpan(child: Container(width: 10)),
-            TextSpan(
-              recognizer: TapGestureRecognizer()
-                ..onTap = () async {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (BuildContext context) {
-                    return UserInfoScreen(widget.illust.user);
-                  }));
-                },
-              text: widget.illust.user.name,
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        _moreButton(),
-      ],
     );
   }
 

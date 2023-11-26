@@ -29,5 +29,9 @@
   "setDownloadsToFailed": "下载位置无法使用",
   "androidApi29AndLowerNotSupport": "安卓29及以下版本不支持",
   "totalViews": "总浏览量",
-  "totalBookmarks": "总收藏量"
+  "totalBookmarks": "总收藏量",
+  "illusts": "插画作品",
+  "viewMore": "查看更多",
+  "followers": "关注",
+  "pFriends": "P友"
 }

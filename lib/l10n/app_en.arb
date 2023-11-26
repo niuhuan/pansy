@@ -29,5 +29,9 @@
   "setDownloadsToFailed": "Set downloads to failed",
   "androidApi29AndLowerNotSupport": "Android api 29 and lower not support",
   "totalViews": "views",
-  "totalBookmarks": "bookmarks"
+  "totalBookmarks": "bookmarks",
+  "illusts": "illusts",
+  "viewMore": "Show more",
+  "followers": "followers",
+  "pFriends": "P friends"
 }

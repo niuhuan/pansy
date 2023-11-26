@@ -1,10 +1,13 @@
 import 'dart:ui';
 import 'dart:math';
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pansy/ffi.dart';
 import 'package:pansy/screens/components/pixiv_image.dart';
+import 'package:pansy/screens/components/shadow_icon_button.dart';
+import 'package:pansy/screens/illust_info_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'user_illusts_screen.dart';
 
 class UserInfoScreen extends StatefulWidget {
   final UserSample userSample;
@@ -68,11 +71,13 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         ? .0
         : max(-_scrollController.offset,
             maxPosition); // 是个负数，所以max得到是绝对值较小那个数的相反数
+    var start = 50.0;
     var end = 0 - maxPosition; // 0 到 maxPosition之间的距离便是总长度, 得到一个正数
-    var current = 0 - currentPosition; // 0 到 currentPosition之间的距离便是当前长度, 得到一个正数
-    double percent = max(0, current / end); // 当前长度占总长度的百分比
+    var current =
+        0 - currentPosition - start; // 0 到 currentPosition之间的距离便是当前长度, 得到一个正数
+    var maxValue = end - start; // 总长度
+    double percent = max(0, current / maxValue); // 当前长度占总长度的百分比
     // 滑动距离越长颜色越深，越模糊
-    double appBarOpacity = 0.2 * percent;
     double appBarBlur = 10 * percent;
 
     return Scaffold(
@@ -107,6 +112,10 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
       foregroundColor: Colors.white,
       centerTitle: false,
       elevation: 0,
+      leading: ShadowIconButton(
+        icon: Icons.arrow_back,
+        onPressed: () => Navigator.of(context).pop(),
+      ),
       title: Transform.translate(
         offset: Offset(
             0,
@@ -166,13 +175,28 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         Column(
           children: [
             Container(
+              padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white,
-                    style: BorderStyle.solid,
-                    width: 3,
-                  )),
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [.0, .45, .55, 1],
+                  colors: [
+                    Theme.of(context).scaffoldBackgroundColor,
+                    Theme.of(context).scaffoldBackgroundColor,
+                    Theme.of(context).textTheme.bodyMedium?.color ??
+                        Colors.black,
+                    Theme.of(context).textTheme.bodyMedium?.color ??
+                        Colors.black,
+                  ],
+                ),
+                // border: Border.all(
+                //   color: Colors.white,
+                //   style: BorderStyle.solid,
+                //   width: 3,
+                // ),
+              ),
               child: SizedBox(
                 width: _avatarSize,
                 height: _avatarSize,
@@ -201,12 +225,22 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             child: Container(),
           ),
           Text(
-            "${userDetail.profile.totalFollowUsers} 关注",
+            "${userDetail.profile.totalFollowUsers}",
+            style: Theme.of(context).textTheme.subtitle1,
+          ),
+          const Text(" "),
+          Text(
+            AppLocalizations.of(context)!.followers,
             style: Theme.of(context).textTheme.subtitle1,
           ),
           Container(width: 5),
           Text(
-            "${userDetail.profile.totalMypixivUsers} P友",
+            "${userDetail.profile.totalMypixivUsers}",
+            style: Theme.of(context).textTheme.subtitle1,
+          ),
+          Text(" "),
+          Text(
+            AppLocalizations.of(context)!.pFriends,
             style: Theme.of(context).textTheme.subtitle1,
           ),
           Expanded(
@@ -215,8 +249,9 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         ]),
         Container(height: 10),
         _buildIllusts(userDetail),
-        Container(
-          height: 3000,
+        SafeArea(
+          top: false,
+          child: Container(),
         ),
       ],
     );
@@ -280,6 +315,130 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   }
 
   Widget _buildIllusts(UserDetail userDetail) {
-    return Column();
+    return UserIllusts(userDetail,
+        key: Key("USER_INFO_SCREEN::" + userDetail.user.id.toString()));
+  }
+}
+
+class UserIllusts extends StatefulWidget {
+  final UserDetail userDetail;
+  const UserIllusts(this.userDetail, {Key? key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _UserIllustsState();
+}
+
+class _UserIllustsState extends State<UserIllusts> {
+  late Future<List<Illust>> _future;
+
+  Future<List<Illust>> _fetchIllusts() {
+    return api
+        .userIllustsFirstUrl(userId: widget.userDetail.user.id)
+        .then((value) => api.illustFromUrl(url: value))
+        .then((value) => value.illusts);
+  }
+
+  @override
+  void initState() {
+    _future = _fetchIllusts();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<Illust>>(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return _buildIllusts(snapshot.data!);
+        } else if (snapshot.hasError) {
+          return Text("${widget.userDetail.user.id} : ${snapshot.error}");
+        }
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
+  }
+
+  Widget _buildIllusts(List<Illust> illusts) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => UserIllustsScreen(UserSample(
+                      id: widget.userDetail.user.id,
+                      name: widget.userDetail.user.name,
+                      profileImageUrls: widget.userDetail.user.profileImageUrls,
+                      account: widget.userDetail.user.account,
+                      isFollowed: widget.userDetail.user.isFollowed,
+                    )))),
+            child: Row(
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.illusts,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Container(width: 5),
+                const Text("("),
+                Text(
+                  "${widget.userDetail.profile.totalIllusts}",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                ),
+                const Text(")"),
+                Expanded(
+                  child: Container(),
+                ),
+                Text(
+                  AppLocalizations.of(context)!.viewMore,
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ],
+            ),
+          ),
+          Container(height: 10),
+          LayoutBuilder(builder: (context, constraints) {
+            const scpace = 15;
+            var maxWidth = constraints.maxWidth - scpace;
+            var height = maxWidth / 3;
+            return Wrap(
+              spacing: scpace / 2,
+              runSpacing: scpace / 2,
+              children: [
+                for (var illust in illusts.take(15))
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => IllustInfoScreen(illust))),
+                    child: SizedBox(
+                      width: height,
+                      height: height,
+                      child: SizedBox(
+                        width: height,
+                        height: height,
+                        child: PixivImage(
+                          illust.imageUrls.squareMedium,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
   }
 }

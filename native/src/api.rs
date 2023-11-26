@@ -194,6 +194,12 @@ pub fn illust_rank_first_url(query: UiIllustRankQuery) -> Result<String> {
     })
 }
 
+pub fn user_illusts_first_url(user_id: i64) -> Result<String> {
+    block_on(async {
+        Ok(client(-1).await?.user_illusts_first_url(user_id))
+    })
+}
+
 pub fn illust_trending_tags() -> Result<IllustTrendingTags> {
     block_on(async { crate::local::client(1).await?.illust_trending_tags().await })
 }

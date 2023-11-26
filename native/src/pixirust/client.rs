@@ -1,9 +1,9 @@
+pub use super::entities::*;
+use super::utils::*;
 pub use anyhow::Error;
 pub use anyhow::Result;
 use base64::Engine;
 use serde_json::json;
-use super::utils::*;
-pub use super::entities::*;
 
 const APP_SERVER: &'static str = "app-api.pixiv.net";
 const APP_SERVER_IP: &'static str = "210.140.131.199";
@@ -217,6 +217,13 @@ impl Client {
         format!(
             "https://{}/v1/illust/ranking?filter=for_android&mode={}&date={}",
             APP.server, mode, date,
+        )
+    }
+
+    pub fn user_illusts_first_url(&self, user_id: i64) -> String {
+        format!(
+            "https://{}/v1/user/illusts?filter=for_android&user_id={}&type=illust",
+            APP.server, user_id,
         )
     }
 
