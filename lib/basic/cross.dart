@@ -5,9 +5,9 @@ import 'package:clipboard/clipboard.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pansy/ffi.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../src/rust/api/api.dart';
 import 'commons.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -40,7 +40,7 @@ Future<dynamic> openUrl(String url) async {
 }
 
 Future<dynamic> savePixivImage(String url, BuildContext context) async {
-  var path = await api.loadPixivImage(url: url);
+  var path = await loadPixivImage(url: url);
   await saveImageFileToGallery(path, context);
 }
 
@@ -67,7 +67,7 @@ Future saveImageFileToGallery(String path, BuildContext context) async {
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
     if (selectedDirectory != null) {
       try {
-        await api.copyImageTo(srcPath: path, toDir: selectedDirectory);
+        await copyImageTo(srcPath: path, toDir: selectedDirectory);
         defaultToast(
           context,
           AppLocalizations.of(context)!.success,

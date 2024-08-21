@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_search_bar/flutter_search_bar.dart' as sb;
+import './components/flutter_search_bar.dart' as sb;
 import 'package:pansy/basic/commons.dart';
 
-import '../ffi.dart';
+import '../src/rust/api/api.dart';
+import '../src/rust/udto.dart';
 import 'components/content_builder.dart';
 import 'components/first_url_illust_flow.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -52,7 +53,7 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  late Future<String> _future = api.illustSearchFirstUrl(
+  late Future<String> _future = illustSearchFirstUrl(
       query: UiIllustSearchQuery(mode: widget.mode, word: widget.word));
 
   late final TextEditingController _textEditController =
@@ -84,7 +85,6 @@ class _SearchScreenState extends State<SearchScreen> {
             Expanded(child: Container()),
             MaterialButton(
               minWidth: 50,
-              textColor: Colors.white,
               onPressed: () async {
                 String? mode = await chooseMode(context);
                 if (mode != null && mode != widget.mode) {
@@ -124,7 +124,7 @@ class _SearchScreenState extends State<SearchScreen> {
         future: _future,
         onRefresh: () async {
           setState(() {
-            _future = api.illustSearchFirstUrl(
+            _future = illustSearchFirstUrl(
                 query: UiIllustSearchQuery(mode: widget.mode, word: widget.word));
           });
         },

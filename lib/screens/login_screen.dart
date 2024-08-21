@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:pansy/ffi.dart';
+import 'package:pansy/src/rust/api/api.dart';
+import 'package:pansy/src/rust/frb_generated.dart';
 import 'package:pansy/screens/app_screen.dart';
 import 'package:pansy/screens/components/content_builder.dart';
 import 'package:pansy/states/pixiv_login.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../src/rust/udto.dart';
 
 class LoginScreen extends StatefulWidget {
   final String verify;
@@ -20,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late Future<void> _future = _init();
 
   Future<void> _init() async {
-    await api.loginByCode(
+    await loginByCode(
         query: UiLoginByCodeQuery(code: widget.code, verify: widget.verify));
     setPixivLogin(true);
     Navigator.of(context).pushAndRemoveUntil(

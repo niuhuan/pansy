@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/config/in_china.dart';
-import 'package:pansy/ffi.dart';
 import 'package:pansy/screens/app_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
 import '../basic/platform.dart';
 import '../cross.dart';
+import '../src/rust/api/api.dart';
 
 class InitScreen extends StatefulWidget {
   const InitScreen({Key? key}) : super(key: key);
@@ -22,12 +22,12 @@ class _InitScreenState extends State<InitScreen> {
 
   Future<void> _init() async {
     await initPlatform();
-    await api.init(
+    await init(
       root: await cross.root(),
       downloadsTo: await cross.downloads(),
     );
     await initInChina();
-    setPixivLogin(await api.preLogin());
+    setPixivLogin(await preLogin());
     Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (BuildContext context) => const AppScreen(),
     ));

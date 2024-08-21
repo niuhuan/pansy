@@ -77,7 +77,7 @@ class _PixivAccountCardState extends State<PixivAccountCard> {
                             style: TextStyle(
                               color: Theme.of(context)
                                   .textTheme
-                                  .bodyText1
+                                  .bodyMedium
                                   ?.color
                                   ?.withAlpha(100),
                               fontSize: 10,
@@ -106,7 +106,7 @@ class _PixivAccountCardState extends State<PixivAccountCard> {
                 size: 20,
                 color: Theme.of(context)
                     .textTheme
-                    .bodyText1
+                    .bodyMedium
                     ?.color
                     ?.withAlpha(150),
               ),

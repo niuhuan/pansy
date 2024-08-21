@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/cross.dart';
-import 'package:pansy/bridge_generated.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../src/rust/pixirust/entities.dart';
 import 'login_screen.dart';
 
 class PcLoginScreen extends StatefulWidget {

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pansy/ffi.dart';
+import 'package:pansy/src/rust/api/api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../src/rust/udto.dart';
 import 'components/pixiv_image.dart';
 
 class DownloadsScreen extends StatefulWidget {
@@ -15,7 +16,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   List<UiDownloading> _list = [];
 
   Future _fetch() async {
-    _list = await api.downloadingList();
+    _list = await downloadingList();
     setState(() {});
   }
 
@@ -37,7 +38,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () async {
-              await api.resetFailedDownloads();
+              await resetFailedDownloads();
               _fetch();
             },
           ),

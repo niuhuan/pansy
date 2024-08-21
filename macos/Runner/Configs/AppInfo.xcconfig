@@ -8,7 +8,7 @@
 PRODUCT_NAME = pansy
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = niuhuan.pansy
+PRODUCT_BUNDLE_IDENTIFIER = opensource.pansy
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2022 niuhuan. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2024 opensource. All rights reserved.

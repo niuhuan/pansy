@@ -44,7 +44,7 @@ Widget accountCard(
                           style: TextStyle(
                             color: Theme.of(context)
                                 .textTheme
-                                .bodyText1
+                                .bodyMedium
                                 ?.color
                                 ?.withAlpha(100),
                             fontSize: 10,

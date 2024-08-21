@@ -9,6 +9,7 @@ import 'package:pansy/screens/hots_screen.dart';
 import 'package:pansy/screens/settings_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../basic/config/in_china.dart' as c;
 
 class AppScreen extends StatefulWidget {
   const AppScreen({Key? key}) : super(key: key);
@@ -86,7 +87,7 @@ class _AppScreenState extends State<AppScreen>
   Widget _actionButton(AppScreenData data) {
     var active = _screens[_selectedIndex] == data;
     var icon = active ? data.activeIcon : data.icon;
-    Color color = Colors.white.withAlpha(active ? 240 : 180);
+    Color color = Colors.black.withAlpha(active ? 255 : 180);
     return Column(
       children: [
         Expanded(child: Container()),
@@ -149,7 +150,7 @@ class _AppScreenState extends State<AppScreen>
                     Switch(
                       value: inChina,
                       onChanged: (value) async {
-                        await setInChina(value);
+                        await c.setInChina(value);
                         setState(() {});
                       },
                     ),

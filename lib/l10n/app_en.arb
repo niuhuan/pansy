@@ -32,6 +32,10 @@
   "totalBookmarks": "bookmarks",
   "illusts": "illusts",
   "viewMore": "Show more",
-  "followers": "followers",
-  "pFriends": "P friends"
+  "followers": "Followers",
+  "pFriends": "P friends",
+  "webpage": "Webpage",
+  "gender": "Gender",
+  "job": "Job",
+  "region": "Region"
 }

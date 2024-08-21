@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:pansy/bridge_generated.dart';
 
+import '../../src/rust/pixirust/entities.dart';
 import '../user_info_screen.dart';
 import 'pixiv_image.dart';
 

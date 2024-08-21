@@ -6,7 +6,10 @@ import 'package:pansy/screens/login_screen.dart';
 import 'package:pansy/screens/pc_login_screen.dart';
 import 'dart:async';
 import 'package:uni_links/uni_links.dart';
-import '../ffi.dart';
+
+import '../src/rust/api/api.dart';
+import '../src/rust/pixirust/entities.dart';
+import '../src/rust/udto.dart';
 
 bool pixivLogin = false;
 Event pixivLoginEvent = Event();
@@ -21,7 +24,7 @@ LoginUrl? verifyUrl;
 StreamSubscription? _sub;
 
 Future<void> pixivLoginAction(BuildContext context) async {
-  verifyUrl = await api.createLoginUrl();
+  verifyUrl = await createLoginUrl();
   if (Platform.isAndroid || Platform.isIOS) {
     _sub?.cancel();
     _sub = linkStream.listen((String? link) {
@@ -33,7 +36,7 @@ Future<void> pixivLoginAction(BuildContext context) async {
               .push(MaterialPageRoute(builder: (BuildContext context) {
             return LoginScreen(verify: verifyUrl!.verify, code: link1);
           }));
-          api.loginByCode(
+          loginByCode(
               query:
                   UiLoginByCodeQuery(code: link1, verify: verifyUrl!.verify));
         }

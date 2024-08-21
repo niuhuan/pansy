@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'dart:ui' as ui show Codec;
+import 'dart:ui' as ui;
 
-import 'package:pansy/ffi.dart';
+import 'package:pansy/src/rust/api/api.dart';
+import 'package:pansy/src/rust/frb_generated.dart';
 
 class PixivUrlImageProvider extends ImageProvider<PixivUrlImageProvider> {
   final String url;
@@ -14,7 +15,7 @@ class PixivUrlImageProvider extends ImageProvider<PixivUrlImageProvider> {
   PixivUrlImageProvider(this.url, {this.scale = 1.0});
 
   @override
-  ImageStreamCompleter load(PixivUrlImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(PixivUrlImageProvider key, ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
       scale: key.scale,
@@ -28,8 +29,8 @@ class PixivUrlImageProvider extends ImageProvider<PixivUrlImageProvider> {
 
   Future<ui.Codec> _loadAsync(PixivUrlImageProvider key) async {
     assert(key == this);
-    return PaintingBinding.instance!.instantiateImageCodec(
-        await File(await api.loadPixivImage(url: url)).readAsBytes());
+    return ui.instantiateImageCodec(
+        await File(await loadPixivImage(url: url)).readAsBytes());
   }
 
   @override

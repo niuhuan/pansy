@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:pansy/ffi.dart';
+import 'package:pansy/src/rust/api/api.dart';
+import 'package:pansy/src/rust/frb_generated.dart';
 import 'package:pansy/screens/components/appbar.dart';
 import 'package:pansy/screens/components/first_url_illust_flow.dart';
+
+import '../src/rust/pixirust/entities.dart';
 
 class UserIllustsScreen extends StatefulWidget {
   final UserSample user;
@@ -13,7 +16,7 @@ class UserIllustsScreen extends StatefulWidget {
 
 class _UserIllustsScreenState extends State<UserIllustsScreen> {
   late final Future<String> _firstUrlFuture =
-      api.userIllustsFirstUrl(userId: widget.user.id);
+       userIllustsFirstUrl(userId: widget.user.id);
 
   @override
   Widget build(BuildContext context) {

@@ -1,12 +1,14 @@
 import 'dart:ui';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:pansy/ffi.dart';
+import 'package:pansy/src/rust/api/api.dart';
+import 'package:pansy/src/rust/frb_generated.dart';
 import 'package:pansy/screens/components/pixiv_image.dart';
 import 'package:pansy/screens/components/shadow_icon_button.dart';
 import 'package:pansy/screens/illust_info_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../src/rust/pixirust/entities.dart';
 import 'user_illusts_screen.dart';
 
 class UserInfoScreen extends StatefulWidget {
@@ -26,7 +28,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
 
   @override
   void initState() {
-    _future = api.userDetail(userId: widget.userSample.id);
+    _future = userDetail(userId: widget.userSample.id);
     _scrollController = ScrollController();
     _scrollController.addListener(_setState);
     super.initState();
@@ -53,7 +55,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         } else if (snapshot.hasError) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text("用户信息"),
+              title: const Text(""),
             ),
             body: Text("${widget.userSample.id} : ${snapshot.error}"),
           );
@@ -216,7 +218,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         Center(
           child: Text(
             userDetail.user.name,
-            style: Theme.of(context).textTheme.headline6,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
         Container(height: 10),
@@ -226,28 +228,34 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           ),
           Text(
             "${userDetail.profile.totalFollowUsers}",
-            style: Theme.of(context).textTheme.subtitle1,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
           ),
           const Text(" "),
           Text(
             AppLocalizations.of(context)!.followers,
-            style: Theme.of(context).textTheme.subtitle1,
+            style: const TextStyle(),
           ),
-          Container(width: 5),
+          Container(width: 25),
           Text(
             "${userDetail.profile.totalMypixivUsers}",
-            style: Theme.of(context).textTheme.subtitle1,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
           ),
-          Text(" "),
+          const Text(" "),
           Text(
             AppLocalizations.of(context)!.pFriends,
-            style: Theme.of(context).textTheme.subtitle1,
+            style: const TextStyle(),
           ),
           Expanded(
             child: Container(),
           ),
         ]),
-        Container(height: 10),
+        Container(height: 20),
+        _buildInfos(userDetail),
+        Container(height: 20),
         _buildIllusts(userDetail),
         SafeArea(
           top: false,
@@ -314,6 +322,164 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     });
   }
 
+  Widget _buildInfos(UserDetail userDetail) {
+    List<Widget> infos = [];
+    if (userDetail.user.comment.isNotEmpty) {
+      infos.add(Text(
+        userDetail.user.comment,
+        style: const TextStyle(
+          height: 1.2,
+        ),
+      ));
+      infos.add(Container(height: 10));
+    }
+    if (userDetail.profile.webpage?.isNotEmpty ?? false) {
+      infos.add(_buildUserProperty(
+        AppLocalizations.of(context)!.webpage,
+        userDetail.profile.webpage!,
+      ));
+    }
+    if (userDetail.profile.gender.isNotEmpty) {
+      infos.add(_buildUserProperty(
+        AppLocalizations.of(context)!.gender,
+        userDetail.profile.gender,
+      ));
+    }
+    if (userDetail.profile.job.isNotEmpty) {
+      infos.add(_buildUserProperty(
+        AppLocalizations.of(context)!.job,
+        userDetail.profile.job,
+      ));
+    }
+    if (userDetail.profile.region.isNotEmpty) {
+      infos.add(_buildUserProperty(
+        AppLocalizations.of(context)!.region,
+        userDetail.profile.region,
+      ));
+    }
+
+    return LayoutBuilder(builder: (context, constraints) {
+      var expandable = infos.length > 3 ||
+          _textPainter(userDetail.user.comment, constraints) > 45;
+
+      if (expandable) {
+        if (_infoExpand) {
+          return Column(
+            children: [
+              ...infos,
+              IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _infoExpand = false;
+                    });
+                  },
+                  icon: Icon(
+                    Icons.arrow_upward,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ))
+            ],
+          );
+        } else {
+          return SizedBox(
+            height: 14 * 5,
+            child: ClipRect(
+              child: Stack(
+                children: [
+                  ShaderMask(
+                    shaderCallback: (rect) {
+                      return const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [.0, .45, 1],
+                        colors: [
+                          Colors.white,
+                          Colors.white,
+                          Colors.transparent,
+                        ],
+                      ).createShader(rect);
+                    },
+                    child: Column(
+                      children: infos,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Row(
+                      children: [
+                        Expanded(child: Container()),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _infoExpand = true;
+                            });
+                          },
+                          icon: Icon(
+                            Icons.arrow_downward,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                        ),
+                        Expanded(child: Container()),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+      }
+
+      return Container(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            ...infos,
+          ],
+        ),
+      );
+    });
+  }
+
+  bool _infoExpand = false;
+
+  double _textPainter(String text, BoxConstraints constraints) {
+    final span = TextSpan(
+      text: text,
+      style: const TextStyle(
+        height: 1.2,
+      ),
+    );
+    final max = TextPainter(
+      text: span,
+      textDirection: TextDirection.ltr,
+    );
+    max.layout(maxWidth: constraints.maxWidth);
+    return max.height;
+  }
+
+  Widget _buildUserProperty(String title, String value) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            textAlign: TextAlign.end,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Container(width: 5),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.start,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildIllusts(UserDetail userDetail) {
     return UserIllusts(userDetail,
         key: Key("USER_INFO_SCREEN::" + userDetail.user.id.toString()));
@@ -332,9 +498,8 @@ class _UserIllustsState extends State<UserIllusts> {
   late Future<List<Illust>> _future;
 
   Future<List<Illust>> _fetchIllusts() {
-    return api
-        .userIllustsFirstUrl(userId: widget.userDetail.user.id)
-        .then((value) => api.illustFromUrl(url: value))
+    return userIllustsFirstUrl(userId: widget.userDetail.user.id)
+        .then((value) => illustFromUrl(url: value))
         .then((value) => value.illusts);
   }
 

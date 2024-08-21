@@ -33,5 +33,9 @@
   "illusts": "插画作品",
   "viewMore": "查看更多",
   "followers": "关注",
-  "pFriends": "P友"
+  "pFriends": "P友",
+  "webpage": "网页",
+  "gender": "性别",
+  "job": "职业",
+  "region": "地区"
 }

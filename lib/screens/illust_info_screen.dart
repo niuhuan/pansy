@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:pansy/ffi.dart';
+import 'package:pansy/src/rust/api/api.dart';
 import '../basic/config/download_to.dart';
+import '../src/rust/pixirust/entities.dart';
+import '../src/rust/udto.dart';
 import 'components/appbar.dart';
 import 'components/pixiv_image.dart';
 import 'search_screen.dart';
@@ -231,21 +233,14 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
 
   Widget _moreButton() {
     return PopupMenuButton<int>(
-      icon: const DecoratedIcon(
+      icon: const Icon(
         Icons.more_vert,
         size: 24,
-        shadows: [
-          BoxShadow(
-            color: Colors.black,
-            offset: Offset(1.0, 1.0),
-            blurRadius: 5.0,
-          ),
-        ],
-        color: Colors.white,
       ),
       itemBuilder: (BuildContext context) {
         return [
           PopupMenuItem(
+            value: 1,
             child: Text.rich(TextSpan(children: [
               const WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
@@ -261,7 +256,6 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
                     .downloadAllOriginalImagesToFiles,
               )
             ])),
-            value: 1,
           ),
         ];
       },
@@ -298,7 +292,7 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
             ));
           }
           try {
-            await api.appendToDownload(values: metas);
+            await appendToDownload(values: metas);
             defaultToast(context, AppLocalizations.of(context)!.success);
           } catch (e, s) {
             log("$e\n$s");

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/ranks.dart';
-
-import '../ffi.dart';
+import '../src/rust/api/api.dart';
+import '../src/rust/udto.dart';
 import 'components/content_builder.dart';
 import 'components/first_url_illust_flow.dart';
 
@@ -65,7 +65,7 @@ class _RankTabState extends State<_RankTab> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
-  late Future<String> _future = api.illustRankFirstUrl(
+  late Future<String> _future = illustRankFirstUrl(
       query: UiIllustRankQuery(mode: widget.mode, date: ""));
 
   @override
@@ -75,7 +75,7 @@ class _RankTabState extends State<_RankTab> with AutomaticKeepAliveClientMixin {
       future: _future,
       onRefresh: () async {
         setState(() {
-          _future = api.illustRankFirstUrl(
+          _future = illustRankFirstUrl(
               query: UiIllustRankQuery(mode: widget.mode, date: ""));
         });
       },

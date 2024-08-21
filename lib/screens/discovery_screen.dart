@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pansy/screens/components/content_builder.dart';
 import 'package:pansy/screens/components/first_url_illust_flow.dart';
 
-import '../ffi.dart';
+import '../src/rust/api/api.dart';
 
 class DiscoveryScreen extends StatefulWidget {
   const DiscoveryScreen({Key? key}) : super(key: key);
@@ -17,7 +17,7 @@ class _DiscoveryScreenState extends State<DiscoveryScreen>
   @override
   bool get wantKeepAlive => true;
 
-  Future<String> _future = api.illustRecommendedFirstUrl();
+  Future<String> _future = illustRecommendedFirstUrl();
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class _DiscoveryScreenState extends State<DiscoveryScreen>
       future: _future,
       onRefresh: () async {
         setState(() {
-          _future = api.illustRecommendedFirstUrl();
+          _future = illustRecommendedFirstUrl();
         });
       },
       successBuilder: (BuildContext context, AsyncSnapshot<String> snapshot) {

@@ -1,11 +1,9 @@
 import 'dart:convert';
 
-import 'package:pansy/ffi.dart';
-
-
+import 'package:pansy/src/rust/api/api.dart';
 
 Future<IllustRecommendedResponse> illustPageByUrl(String url) async {
-  var j = await api.requestUrl(params: url);
+  var j = await requestUrl(params: url);
   print(j);
   return IllustRecommendedResponse.fromJson(
     jsonDecode(j),
@@ -14,7 +12,7 @@ Future<IllustRecommendedResponse> illustPageByUrl(String url) async {
 
 Future<IllustTrendingTags> illustTrendingTags() async {
   return IllustTrendingTags.fromJson(jsonDecode(
-    await api.requestUrl(params: await api.illustTrendingTagsUrl()),
+    await requestUrl(params: await illustTrendingTagsUrl()),
   ));
 }
 
@@ -29,13 +27,13 @@ class VerifyUrl {
 }
 
 class IllustRecommendedResponse {
-  late List<Illust> illusts;
+  late List<IllustDart> illusts;
   late String nextUrl;
 
   IllustRecommendedResponse.fromJson(Map<String, dynamic> json) {
     this.illusts = List.of(json["illusts"])
         .map((e) => Map<String, dynamic>.of(e))
-        .map((e) => Illust.fromJson(e))
+        .map((e) => IllustDart.fromJson(e))
         .toList();
     this.nextUrl = json["next_url"];
   }
@@ -66,7 +64,7 @@ class UserAuthorProfileImageUrls {
   }
 }
 
-class Illust {
+class IllustDart {
   late int id;
   late String title;
   late String type;
@@ -78,7 +76,7 @@ class Illust {
   late UserPreview user;
   late DateTime createDate;
 
-  Illust.fromJson(Map<String, dynamic> json) {
+  IllustDart.fromJson(Map<String, dynamic> json) {
     this.id = json["id"];
     this.title = json["title"];
     this.type = json["type"];
@@ -165,11 +163,11 @@ class IllustTrendingTags {
 class TrendTag {
   late String tag;
   late String? translatedName;
-  late Illust illust;
+  late IllustDart illust;
 
   TrendTag.fromJson(json) {
     tag = json["tag"];
     translatedName = json["translated_name"];
-    illust = Illust.fromJson(json["illust"]);
+    illust = IllustDart.fromJson(json["illust"]);
   }
 }
