@@ -5,11 +5,10 @@ on:
 
 env:
   LLVM_VERSION: '10.0'
-  RUST_TOOLCHAIN: nightly-2023-10-31
+  RUST_TOOLCHAIN: nightly-3.22.3
   NDK_VERSION: 25.2.9519653
-  FLUTTER_VERSION: '3.13.9'
+  FLUTTER_VERSION: '3.22.3'
   FLUTTER_CHANNEL: 'stable'
-  FRB_VERSION: 'v1.82.3'
 
 jobs:
 
@@ -127,26 +126,6 @@ jobs:
           cd pansy/ci
           cargo run --release --bin check-asset
 
-      - name: Check bridge
-        if: steps.check_asset.outputs.skip_build != 'true'
-        uses: actions/checkout@v3
-        with:
-          repository: 'fzyzcjy/flutter_rust_bridge'
-          path: 'flutter_rust_bridge'
-          ref: ${{ env.FRB_VERSION }}
-
-      - name: Install flutter_rust_bridge
-        if: steps.check_asset.outputs.skip_build != 'true'
-        run: |
-          cd flutter_rust_bridge/frb_codegen
-          cargo install --path . --force
-          cd ../..
-
-      - name: Install cargo-expand
-        if: steps.check_asset.outputs.skip_build != 'true'
-        run: |
-          cargo install cargo-expand --force
-
       - name: Cache Flutter dependencies (Linux/Android)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' || matrix.config.target == 'linux' )
         uses: actions/cache@v3
@@ -221,14 +200,6 @@ jobs:
           rustup target install aarch64-apple-ios
           cd pansy
           flutter pub get
-          flutter_rust_bridge_codegen \
-            --rust-input native/src/api.rs \
-            --dart-output lib/bridge_generated.dart \
-            --c-output ios/Runner/bridge_generated.h \
-            --rust-crate-dir native \
-            --class-name Native
-          cargo build --manifest-path native/Cargo.toml --features= --lib --release --target=aarch64-apple-ios
-          cp native/target/aarch64-apple-ios/release/libnative.a ios/Runner/
           /usr/libexec/PlistBuddy -c 'Add :application-identifier string opensource.pansy' ios/Runner/Info.plist
           flutter build ios --no-simulator --no-codesign --release
           cd build
@@ -239,26 +210,12 @@ jobs:
           zip -r -9 nosign.ipa Payload
           cd ..
 
-      - name: Gen bridge (Android)
-        if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32' || matrix.config.target == 'android-arm64' || matrix.config.target == 'android-x86_64' )
-        run: |
-          cd pansy
-          flutter pub get
-          flutter_rust_bridge_codegen \
-            --rust-input native/src/api.rs \
-            --dart-output lib/bridge_generated.dart \
-            --rust-crate-dir native \
-            --class-name Native
-
       - name: Install rust target and build (Android-arm64)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm64')
         run: |
           export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
           rustup target install aarch64-linux-android
           cd pansy
-          cd native
-          cargo ndk -o ../android/app/src/main/jniLibs -t arm64-v8a build --release
-          cd ..
           flutter build apk --target-platform android-arm64
 
       - name: Install rust target and build (Android-arm32)
@@ -267,9 +224,6 @@ jobs:
           export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
           rustup target install armv7-linux-androideabi
           cd pansy
-          cd native
-          cargo ndk -o ../android/app/src/main/jniLibs -t armeabi-v7a build --release
-          cd ..
           flutter build apk --target-platform android-arm
 
       - name: Install rust target and build (Android-x86_64)
@@ -278,9 +232,6 @@ jobs:
           export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
           rustup target install x86_64-linux-android
           cd pansy
-          cd native
-          cargo ndk -o ../android/app/src/main/jniLibs -t x86_64 build --release
-          cd ..
           flutter build apk --target-platform android-x64
 
       - name: Install dependencies and build (Linux)
@@ -293,11 +244,6 @@ jobs:
           mv appimagetool-x86_64.AppImage appimagetool
           cd pansy
           flutter pub get
-          flutter_rust_bridge_codegen \
-            --rust-input native/src/api.rs \
-            --dart-output lib/bridge_generated.dart \
-            --rust-crate-dir native \
-            --class-name Native
           flutter config --enable-linux-desktop
           flutter build linux --release
           mv build/linux/x64/release/bundle/{pansy,AppRun}
@@ -310,7 +256,6 @@ jobs:
         run: |
           cd pansy
           flutter pub get
-          flutter_rust_bridge_codegen --rust-input native/src/api.rs --dart-output lib/bridge_generated.dart --c-output ios/Runner/bridge_generated.h --rust-crate-dir native  --class-name Native
           flutter config --enable-windows-desktop
           flutter build windows
           cd build/windows/runner/Release
@@ -325,12 +270,6 @@ jobs:
           flutter config --enable-macos-desktop
           cd pansy
           flutter pub get
-          flutter_rust_bridge_codegen \
-              --rust-input native/src/api.rs \
-              --dart-output lib/bridge_generated.dart \
-              --c-output macos/Runner/bridge_generated.h \
-              --rust-crate-dir native \
-              --class-name Native
           flutter build macos
           cd build
           mkdir appimage

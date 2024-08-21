@@ -41,18 +41,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-native/target
-jniLibs
-
-ios/Runner/sb..h
-ios/Runner/native.h
-macos/Runner/bridge_generated.h
-macos/Runner/native.h
-windows/Runner/native.h
-native/src/bridge_generated.rs
-lib/bridge_generated.dart
 
 ci/target/
-bridge_generated.*
 *.a
 

@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:pansy/screens/components/mouse_and_touch_scroll_behavior.dart';
 import 'package:pansy/screens/init_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:pansy/src/rust/api/api.dart';
 import 'package:pansy/src/rust/frb_generated.dart';
 
 void main() async {
