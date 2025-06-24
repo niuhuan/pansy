@@ -284,7 +284,7 @@ jobs:
           cd pansy
           echo $KEY_FILE_BASE64 > key.jks.base64
           base64 -d key.jks.base64 > key.jks
-          echo $KEY_PASSWORD | $ANDROID_HOME/build-tools/30.0.2/apksigner sign --ks key.jks build/app/outputs/flutter-apk/app-release.apk
+          echo $KEY_PASSWORD | $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks key.jks build/app/outputs/flutter-apk/app-release.apk
 
       - name: Cargo ci build cache
         if: steps.check_asset.outputs.skip_build != 'true'
