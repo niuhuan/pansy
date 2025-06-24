@@ -122,6 +122,8 @@ jobs:
 
       - id: check_asset
         name: Check asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd pansy/ci
           cargo run --release --bin check-asset

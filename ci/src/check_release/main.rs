@@ -30,7 +30,8 @@ async fn main() -> Result<()> {
     let client = reqwest::ClientBuilder::new().user_agent(UA).build()?;
 
     let release_url = format!("https://api.github.com/repos/{repo}/releases/tags/{code}");
-    let check_response = client.get(release_url).send().await?;
+    let check_response = client.get(release_url)
+        .header("Authorization", format!("token {}", gh_token)).send().await?;
 
     match check_response.status().as_u16() {
         200 => {
