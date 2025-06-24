@@ -38,9 +38,6 @@ Future<void> pixivLoginAction(BuildContext context) async {
               .push(MaterialPageRoute(builder: (BuildContext context) {
             return LoginScreen(verify: verifyUrl!.verify, code: link1);
           }));
-          loginByCode(
-              query:
-                  UiLoginByCodeQuery(code: link1, verify: verifyUrl!.verify));
         }
       }
     }, onError: (err) {
