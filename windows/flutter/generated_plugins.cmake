@@ -3,12 +3,13 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  app_links
   permission_handler_windows
   url_launcher_windows
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
-  pansy_native
+  rust_lib_pansy
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

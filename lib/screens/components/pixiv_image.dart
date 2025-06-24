@@ -41,7 +41,7 @@ class PixivUrlImageProvider extends ImageProvider<PixivUrlImageProvider> {
   }
 
   @override
-  int get hashCode => hashValues(url, scale);
+  int get hashCode => Object.hash(url, scale);
 
   @override
   String toString() => '$runtimeType('

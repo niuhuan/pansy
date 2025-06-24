@@ -5,7 +5,7 @@ import 'package:pansy/basic/cross.dart';
 import 'package:pansy/screens/login_screen.dart';
 import 'package:pansy/screens/pc_login_screen.dart';
 import 'dart:async';
-import 'package:uni_links/uni_links.dart';
+import 'package:app_links/app_links.dart';
 
 import '../src/rust/api/api.dart';
 import '../src/rust/pixirust/entities.dart';
@@ -21,14 +21,16 @@ void setPixivLogin(bool login) {
 
 LoginUrl? verifyUrl;
 
+final appLinks = AppLinks();
 StreamSubscription? _sub;
 
 Future<void> pixivLoginAction(BuildContext context) async {
   verifyUrl = await createLoginUrl();
   if (Platform.isAndroid || Platform.isIOS) {
     _sub?.cancel();
-    _sub = linkStream.listen((String? link) {
-      if (verifyUrl != null && link != null) {
+    _sub = appLinks.uriLinkStream.listen((uri) {
+      if (verifyUrl != null && uri != null) {
+        var link = uri.toString();
         String link1 = link.replaceAll("pixiv://account/login?code=", "");
         link1 = link1.replaceAll("&via=login", "");
         if (link1 != link) {

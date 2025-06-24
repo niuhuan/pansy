@@ -1,5 +1,5 @@
 [package]
-name = "pansy_native"
+name = "rust_lib_pansy"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,26 +7,29 @@ edition = "2021"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-flutter_rust_bridge = "=2.1.0"
-anyhow = "1.0.75"
-once_cell = "1.18.0"
-lazy_static = "1.4.0"
-libc = "0.2.150"
-serde = "1.0.193"
-serde_derive = "1.0.193"
-serde_json = "1.0.108"
-openssl = { version = "0.10.59", features = ["vendored"] }
-chrono = "0.4.31"
-sea-orm = { version = "0.12.6", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"], default-features = false }
-bytes = "1.5.0"
-md5 = "0.7.0"
-hex = "0.4.3"
-base64 = "0.21.5"
+anyhow = "1.0.98"
 async_once = "0.2.6"
-tokio = { version = "1.34.0", features = ["full"] }
-image = { version = "0.24.7", features = ["jpeg", "gif", "webp", "bmp", "png", "jpeg_rayon"] }
-directories = "5.0.1"
-reqwest = { version = "0.11.22", features = ["socks"] }
-sha2 = "0.10.8"
-uuid = { version = "1.6.1", features = ["v4"] }
+base64 = "0.22.1"
+bytes = "1.10.1"
+chrono = "0.4.41"
+directories = "6.0.0"
+flutter_rust_bridge = "=2.9.0"
+hex = "0.4.3"
+image = { version = "0.25.6", features = ["jpeg", "gif", "webp", "bmp", "png"] }
+lazy_static = "1.5.0"
+libc = "0.2.174"
+md5 = "0.7.0"
+once_cell = "1.21.3"
+openssl = { version = "0.10.73", features = ["vendored"] }
+reqwest = { version = "0.12.20", features = ["socks"] }
+sea-orm = { version = "1.1.12", default-features = false, features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"] }
+serde = "1.0.219"
+serde_derive = "1.0.219"
+serde_json = "1.0.140"
+sha2 = "0.10.9"
+tokio = { version = "1.45.1", features = ["full"] }
 urlencoding = "2.1.3"
+uuid = { version = "1.17.0", features = ["v4"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

@@ -5,9 +5,11 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -44,4 +46,5 @@ app.*.map.json
 
 ci/target/
 *.a
-
+.metadata
+.last_build_id
