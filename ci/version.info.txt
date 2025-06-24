@@ -1,4 +1,3 @@
-v0.0.5
+v0.0.7
 
-- [x] ✨ view user info
-- [x] ✨ list user's all illusts
+- [x] fix android login
