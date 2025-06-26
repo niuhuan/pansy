@@ -16,42 +16,43 @@ AppBar buildUserSampleAppBar(
     foregroundColor: theme.textTheme.bodyLarge?.color ?? Colors.black,
     centerTitle: false,
     elevation: 0.1,
-    title: Text.rich(
-      TextSpan(
-        children: [
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white,
-                  width: 3,
-                  style: BorderStyle.solid,
+    title: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () async {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return UserInfoScreen(user);
+            },
+          ),
+        );
+      },
+      child: Text.rich(
+        TextSpan(
+          children: [
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 3,
+                    style: BorderStyle.solid,
+                  ),
                 ),
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(50)),
-                child: ScalePixivImage(
-                  url: user.profileImageUrls.medium,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(50)),
+                  child: ScalePixivImage(url: user.profileImageUrls.medium),
                 ),
               ),
             ),
-          ),
-          WidgetSpan(child: Container(width: 10)),
-          TextSpan(
-            recognizer: TapGestureRecognizer()
-              ..onTap = () async {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (BuildContext context) {
-                  return UserInfoScreen(user);
-                }));
-              },
-            text: user.name,
-          ),
-        ],
+            WidgetSpan(child: Container(width: 10)),
+            TextSpan(text: user.name),
+          ],
+        ),
       ),
     ),
     actions: actions,
