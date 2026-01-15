@@ -10,6 +10,7 @@ import 'package:pansy/basic/config/download_save_target.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:pansy/basic/download/download_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pansy/src/rust/api/api.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../src/rust/pixirust/entities.dart';
@@ -94,8 +95,13 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
       pictures.add(
         GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onLongPress:
-              () => _downloadSingleImage(pageIndex: i, url: metas[i].original),
+          onLongPressStart: (details) {
+            _showPageActions(
+              pageIndex: i,
+              url: metas[i].original,
+              sharePositionOrigin: _rectFromGlobal(details.globalPosition),
+            );
+          },
           child: pic,
         ),
       );
@@ -390,28 +396,34 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
               ),
             ),
           ),
-          if (widget.illust.metaPages.length > 1)
-            PopupMenuItem(
-              value: 5,
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    const WidgetSpan(
-                      alignment: PlaceholderAlignment.middle,
-                      baseline: TextBaseline.alphabetic,
-                      child: Opacity(
-                        opacity: .8,
-                        child: Icon(Icons.collections_outlined),
+          PopupMenuItem(
+            value: 5,
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    baseline: TextBaseline.alphabetic,
+                    child: Opacity(
+                      opacity: .8,
+                      child: Icon(
+                        widget.illust.metaPages.length > 1
+                            ? Icons.collections_outlined
+                            : Icons.download_outlined,
                       ),
                     ),
-                    const TextSpan(text: "  "),
-                    TextSpan(
-                      text: AppLocalizations.of(context)!.downloadAllPages,
-                    ),
-                  ],
-                ),
+                  ),
+                  const TextSpan(text: "  "),
+                  TextSpan(
+                    text:
+                        widget.illust.metaPages.length > 1
+                            ? AppLocalizations.of(context)!.downloadAllPages
+                            : AppLocalizations.of(context)!.downloadImage,
+                  ),
+                ],
               ),
             ),
+          ),
         ];
       },
       onSelected: (value) async {
@@ -450,7 +462,7 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
 
             final result = await DownloadService.downloadIllust(
               widget.illust,
-              allPages: value == 5,
+              allPages: widget.illust.metaPages.length > 1,
               target: target,
             );
             if (!mounted) return;
@@ -527,6 +539,71 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
 
     final size = MediaQuery.of(context).size;
     return Rect.fromLTWH(size.width / 2, size.height / 2, 1, 1);
+  }
+
+  Rect _rectFromGlobal(Offset globalPosition) =>
+      Rect.fromCenter(center: globalPosition, width: 1, height: 1);
+
+  Future<void> _showPageActions({
+    required int pageIndex,
+    required String url,
+    required Rect sharePositionOrigin,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final action = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.download_outlined),
+                title: Text(l10n.downloadImage),
+                onTap: () => Navigator.of(context).pop(1),
+              ),
+              ListTile(
+                leading: const Icon(Icons.image_outlined),
+                title: Text(l10n.shareImage),
+                onTap: () => Navigator.of(context).pop(2),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (action == null) return;
+    if (action == 1) {
+      await _downloadSingleImage(pageIndex: pageIndex, url: url);
+      return;
+    }
+    if (action == 2) {
+      await _shareSingleImage(url: url, sharePositionOrigin: sharePositionOrigin);
+      return;
+    }
+  }
+
+  Future<void> _shareSingleImage({
+    required String url,
+    required Rect sharePositionOrigin,
+  }) async {
+    final link = "https://www.pixiv.net/artworks/${widget.illust.id}";
+    try {
+      final cached = await loadPixivImage(url: url);
+      await SharePlus.instance.share(
+        ShareParams(
+          text: link,
+          files: [XFile(cached)],
+          sharePositionOrigin: sharePositionOrigin,
+        ),
+      );
+    } catch (e, s) {
+      log("$e\n$s");
+      if (!mounted) return;
+      defaultToast(context, AppLocalizations.of(context)!.failed + "\n$e");
+    }
   }
 
   Future<DownloadSaveTarget?> _chooseSaveTarget() async {
