@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pansy/src/rust/api/api.dart';
-import 'package:pansy/src/rust/frb_generated.dart';
 import 'package:pansy/screens/app_screen.dart';
 import 'package:pansy/screens/components/content_builder.dart';
 import 'package:pansy/states/pixiv_login.dart';
@@ -25,7 +24,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _init() async {
     await loginByCode(
         query: UiLoginByCodeQuery(code: widget.code, verify: widget.verify));
+    await clearPendingPixivLogin();
     setPixivLogin(true);
+    if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const AppScreen()),
         (route) => false);

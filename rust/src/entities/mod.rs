@@ -1,18 +1,16 @@
 use crate::get_root;
 use crate::local::join_paths;
+use once_cell::sync::OnceCell;
 use sea_orm::prelude::DatabaseConnection;
 use sea_orm::{ConnectionTrait, EntityTrait, Schema, Statement};
 use std::time::Duration;
-use once_cell::sync::OnceCell;
 use tokio::sync::Mutex;
 
 pub(crate) mod network_image;
 pub(crate) mod property;
-pub(crate) mod download_image;
 
 static IMAGE_CACHE_DB: OnceCell<Mutex<DatabaseConnection>> = OnceCell::new();
 static PROPERTIES_DB: OnceCell<Mutex<DatabaseConnection>> = OnceCell::new();
-static DOWNLOADS_DB: OnceCell<Mutex<DatabaseConnection>> = OnceCell::new();
 
 pub(crate) async fn init_databases(){
     {
@@ -26,12 +24,6 @@ pub(crate) async fn init_databases(){
         let db = connect_db(&path).await;
         setup_properties_db(&db).await;
         PROPERTIES_DB.set(Mutex::new(db)).unwrap();
-    }
-    {
-        let path = join_paths(vec![get_root().as_str(),"downloads.db"]);
-        let db = connect_db(&path).await;
-        setup_downloads_db(&db).await;
-        DOWNLOADS_DB.set(Mutex::new(db)).unwrap();
     }
 }
 
@@ -137,8 +129,4 @@ async fn setup_image_cache_db(db: &DatabaseConnection) {
 
 async fn setup_properties_db(db: &DatabaseConnection) {
     property::init(db).await
-}
-
-async fn setup_downloads_db(db: &DatabaseConnection) {
-    download_image::init(db).await
 }

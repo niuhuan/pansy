@@ -1,6 +1,5 @@
 {
   "permissionDenied": "Permission denied",
-  "inChineseNetwork": "I am in chinese network",
   "login": "Login",
   "logging": "Logging",
   "openLoginUrl": "Open login URL",
@@ -12,21 +11,73 @@
   "exact_match_for_tags": "Exact match for tags",
   "title_and_caption": "Title and caption",
   "choose": "Choose",
-  "downloadAndSaveOrigin": "Download origin image and save to album",
+  "share": "Share",
+  "shareLink": "Share link",
+  "shareImage": "Share image",
+  "copyLink": "Copy link",
   "success": "Success",
   "failed": "Failed",
   "copy": "Copy",
   "copied": "Copied",
   "ok": "Ok",
+  "cancel": "Cancel",
   "copyLoginUrl": "Copy login url",
   "pcLoginNotice": "1. Open VPN or proxy, click \"Open login url\"\n2. Press f12 in browser, click network menu item\n3. find url pixiv:// after login \n4. copy code (code=*CODE*&via=login)",
-  "downloadAllOriginalImagesToFiles": "Download all original images to files",
   "settings": "Settings",
+  "network": "Network",
+  "download": "Download",
+  "downloadsFolder": "Downloads",
+  "downloadDir": "Download directory",
+  "downloadDirDefault": "Default: {path}",
+  "@downloadDirDefault": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadDirAndroidDesc": "{base}/{subDir}",
+  "@downloadDirAndroidDesc": {
+    "placeholders": {
+      "base": {
+        "type": "String"
+      },
+      "subDir": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSubDir": "Downloads subfolder",
+  "downloadSubDirHint": "e.g. Pansy",
+  "downloadDirNotSet": "Not set",
+  "downloadDirRequired": "Please set a download directory",
+  "chooseDownloadDir": "Choose download directory",
+  "reset": "Reset",
+  "downloadImage": "Download image",
+  "downloadAllPages": "Download all pages",
+  "saveTo": "Save to",
+  "saveToFile": "Files",
+  "saveToAlbum": "Album",
+  "saveToFileAndAlbum": "Files and album",
+  "defaultSaveTarget": "Default save target",
+  "downloadSavedTo": "Saved to: {path}",
+  "@downloadSavedTo": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadSavedToAlbum": "Saved to album",
+  "downloadSavedToFileAndAlbum": "Saved to: {path}\nAlso saved to album",
+  "@downloadSavedToFileAndAlbum": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "logout": "Logout",
-  "downloads": "Downloads",
-  "selectDownloadsTo": "Select downloads to",
-  "mustChooseDownloadsTo": "Must choose downloads to",
-  "setDownloadsToFailed": "Set downloads to failed",
   "androidApi29AndLowerNotSupport": "Android api 29 and lower not support",
   "totalViews": "views",
   "totalBookmarks": "bookmarks",
@@ -37,5 +88,24 @@
   "webpage": "Webpage",
   "gender": "Gender",
   "job": "Job",
-  "region": "Region"
+  "region": "Region",
+  "imageHost": "Image host",
+  "imageHostDesc": "Choose a host for loading images (default / proxy / custom).",
+  "imageHostDefault": "Default",
+  "imageHostProxy": "Proxy",
+  "customHost": "Custom host",
+  "customHostHint": "e.g. i.pixiv.re or https://i.pixiv.re",
+  "tags": "Tags",
+  "clear": "Clear",
+  "home": "Home",
+  "ranking": "Ranking",
+  "appName": "Pansy",
+  "loadFailed": "Load failed",
+  "retry": "Retry",
+  "selectDate": "Select date",
+  "searchHistory": "Search history",
+  "trendingTags": "Trending tags",
+  "latest": "Latest",
+  "popular": "Popular",
+  "noResults": "No results found"
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import './components/flutter_search_bar.dart' as sb;
 import 'package:pansy/basic/commons.dart';
+import 'package:pansy/basic/stores/tag_history_store.dart';
 
 import '../src/rust/api/api.dart';
 import '../src/rust/udto.dart';
@@ -53,6 +54,12 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  @override
+  void initState() {
+    recordTag(widget.word);
+    super.initState();
+  }
+
   late Future<String> _future = illustSearchFirstUrl(
       query: UiIllustSearchQuery(mode: widget.mode, word: widget.word));
 
@@ -66,6 +73,7 @@ class _SearchScreenState extends State<SearchScreen> {
     setState: setState,
     onSubmitted: (value) {
       if (value.isNotEmpty) {
+        recordTag(value);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(

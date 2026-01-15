@@ -1,6 +1,35 @@
 import Flutter
 import UIKit
 
+private final class AlbumSaverStore {
+  static let shared = AlbumSaverStore()
+  private var savers: [ObjectIdentifier: AlbumSaver] = [:]
+
+  func retain(_ saver: AlbumSaver) {
+    savers[ObjectIdentifier(saver)] = saver
+  }
+
+  func release(_ saver: AlbumSaver) {
+    savers.removeValue(forKey: ObjectIdentifier(saver))
+  }
+}
+
+private final class AlbumSaver: NSObject {
+  private let result: FlutterResult
+  init(_ result: @escaping FlutterResult) {
+    self.result = result
+  }
+
+  @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+    AlbumSaverStore.shared.release(self)
+    if let error = error {
+      result(FlutterError(code: "save_failed", message: error.localizedDescription, details: nil))
+      return
+    }
+    result(true)
+  }
+}
+
 @main
 @objc class AppDelegate: FlutterAppDelegate {
   override func application(
@@ -14,39 +43,32 @@ import UIKit
       channel.setMethodCallHandler { (call, result) in
           Thread {
               if call.method == "root" {
-
                   let documentsPath = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)[0]
-
                   result(documentsPath)
-
-              }
-              if call.method == "downloads_to" {
-                  let docDir = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0];
-                  result(docDir + "/downloads")
-              }
-              else if call.method == "saveImageToGallery"{
-                  if let args = call.arguments as? String{
-
-                      do {
-                          let fileURL: URL = URL(fileURLWithPath: args)
-                              let imageData = try Data(contentsOf: fileURL)
-
-                          if let uiImage = UIImage(data: imageData) {
-                              UIImageWriteToSavedPhotosAlbum(uiImage, nil, nil, nil)
-                              result("OK")
-                          }else{
-                              result(FlutterError(code: "", message: "Error loading image ", details: ""))
-                          }
-
-                      } catch {
-                              result(FlutterError(code: "", message: "Error loading image : \(error)", details: ""))
-                      }
-
-                  }else{
-                      result(FlutterError(code: "", message: "params error", details: ""))
+              } else if call.method == "saveImageToGallery" {
+                  guard let args = call.arguments as? [String: Any],
+                        let path = args["path"] as? String
+                  else {
+                      result(false)
+                      return
                   }
-              }
-              else{
+
+                  guard let image = UIImage(contentsOfFile: path) else {
+                      result(false)
+                      return
+                  }
+
+                  DispatchQueue.main.async {
+                      let saver = AlbumSaver(result)
+                      AlbumSaverStore.shared.retain(saver)
+                      UIImageWriteToSavedPhotosAlbum(
+                        image,
+                        saver,
+                        #selector(AlbumSaver.image(_:didFinishSavingWithError:contextInfo:)),
+                        nil
+                      )
+                  }
+              } else {
                   result(FlutterMethodNotImplemented)
               }
           }.start()

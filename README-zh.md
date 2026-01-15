@@ -33,14 +33,6 @@ PANSY
 |   Windows    |   10 (64bit)    |
 |    Linux     |     - 64bit     |
 
-### 图片下载路径
-
-|   平台   |          路径           |
-|:------------:|:---------------------------:|
-|   Android    | {USER_HOME}/Downloads/pansy/ |
-|   Desktop    | {USER_HOME}/Downloads/pansy/ |
-| iOS / iPadOS |   {PHONE}/pansy/downloads/   |
-
 ## 技术架构
 
 - [rust](https://github.com/rust-lang/rust)
@@ -49,4 +41,3 @@ PANSY
   - 您必须将它从**github**克隆到本地, 并在codeGen中运行" ***cargo install --path .*** "
 
 ![](https://raw.githubusercontent.com/fzyzcjy/flutter_rust_bridge/master/book/logo.png)
-

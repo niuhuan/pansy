@@ -48,3 +48,6 @@ ci/target/
 *.a
 .metadata
 .last_build_id
+
+# FVM Version Cache
+.fvm/

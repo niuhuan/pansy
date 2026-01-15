@@ -1,13 +1,22 @@
 import 'dart:async';
+import 'dart:developer';
+import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:pansy/basic/commons.dart';
+import 'package:pansy/basic/config/download_dir.dart';
+import 'package:pansy/basic/config/download_save_target.dart';
+import 'package:pansy/basic/cross.dart';
+import 'package:pansy/basic/download/download_service.dart';
+import 'package:pansy/src/rust/api/api.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
 import '../../src/rust/pixirust/entities.dart';
-import '../../types.dart';
 import '../illust_info_screen.dart';
-import 'image_size_abel.dart';
-import 'pixiv_image.dart';
+import 'illust_card.dart';
 
 class IllustFlow extends StatefulWidget {
   final FutureOr<List<Illust>> Function() nextPage;
@@ -66,9 +75,7 @@ class _IllustFlowState extends State<IllustFlow> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildFlow(),
-    );
+    return Scaffold(body: _buildFlow());
   }
 
   Widget _buildFlow() {
@@ -101,9 +108,7 @@ class _IllustFlowState extends State<IllustFlow> {
               children: [
                 Container(
                   padding: const EdgeInsets.only(top: 10, bottom: 10),
-                  child: const CupertinoActivityIndicator(
-                    radius: 14,
-                  ),
+                  child: const CupertinoActivityIndicator(radius: 14),
                 ),
                 const Text('加载中'),
               ],
@@ -137,36 +142,244 @@ class _IllustFlowState extends State<IllustFlow> {
   }
 
   Widget _buildImageCard(Illust item) {
-    return GestureDetector(
+    return IllustCard(
+      illust: item,
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (context) {
-            return IllustInfoScreen(item);
-          },
-        ));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) {
+              return IllustInfoScreen(item);
+            },
+          ),
+        );
       },
-      child: Card(
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return Stack(
-              children: [
-                Container(
-                  width: constraints.maxWidth,
-                  child: ScalePixivImage(
-                    url: item.imageUrls.medium,
-                    originSize:
-                        Size(item.width.toDouble(), item.height.toDouble()),
-                  ),
-                ),
-                Container(
-                  width: constraints.maxWidth,
-                  child: imageSizeLabel(item.metaPages.length),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
+      onLongPress: () => _showIllustActions(item),
     );
+  }
+
+  Future<void> _showIllustActions(Illust illust) async {
+    final link = "https://www.pixiv.net/artworks/${illust.id}";
+    final l10n = AppLocalizations.of(context)!;
+    final action = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.link),
+                title: Text(l10n.shareLink),
+                onTap: () => Navigator.of(context).pop(1),
+              ),
+              ListTile(
+                leading: const Icon(Icons.image_outlined),
+                title: Text(l10n.shareImage),
+                onTap: () => Navigator.of(context).pop(2),
+              ),
+              ListTile(
+                leading: const Icon(Icons.copy),
+                title: Text(l10n.copyLink),
+                onTap: () => Navigator.of(context).pop(3),
+              ),
+              ListTile(
+                leading: const Icon(Icons.download_outlined),
+                title: Text(l10n.downloadImage),
+                onTap: () => Navigator.of(context).pop(4),
+              ),
+              if (illust.metaPages.length > 1)
+                ListTile(
+                  leading: const Icon(Icons.collections_outlined),
+                  title: Text(l10n.downloadAllPages),
+                  onTap: () => Navigator.of(context).pop(5),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+    if (action == null) return;
+    if (action == 1) {
+      try {
+        await SharePlus.instance.share(ShareParams(text: link));
+      } catch (e, s) {
+        log("$e\n$s");
+        if (!mounted) return;
+        defaultToast(context, l10n.failed + "\n$e");
+      }
+      return;
+    }
+    if (action == 3) {
+      copyToClipBoard(context, link);
+      return;
+    }
+    if (action == 2) {
+      try {
+        final imageUrl =
+            illust.metaPages.isNotEmpty
+                ? illust.metaPages.first.imageUrls.original
+                : illust.metaSinglePage.originalImageUrl!;
+        final cached = await loadPixivImage(url: imageUrl);
+        await SharePlus.instance.share(
+          ShareParams(text: link, files: [XFile(cached)]),
+        );
+      } catch (e, s) {
+        log("$e\n$s");
+        if (!mounted) return;
+        defaultToast(context, l10n.failed + "\n$e");
+      }
+      return;
+    }
+    if (action == 4 || action == 5) {
+      try {
+        final target = await _chooseSaveTarget();
+        if (target == null) return;
+        if (!await _ensureFileDownloadDirSelectedIfNeeded(target)) return;
+
+        final result = await DownloadService.downloadIllust(
+          illust,
+          allPages: action == 5,
+          target: target,
+        );
+        if (!mounted) return;
+        final dir =
+            result.files.isEmpty
+                ? null
+                : (Platform.isAndroid
+                    ? null
+                    : File(result.files.first).parent.path);
+        if (result.files.isEmpty && result.savedToAlbumCount == 0) {
+          defaultToast(context, l10n.failed);
+          return;
+        }
+
+        if (target == DownloadSaveTarget.album) {
+          defaultToast(context, l10n.downloadSavedToAlbum);
+          return;
+        }
+        if (target == DownloadSaveTarget.fileAndAlbum) {
+          final androidDir = l10n.downloadDirAndroidDesc(
+            l10n.downloadsFolder,
+            downloadDirSignal.value.trim().isEmpty
+                ? 'Pansy'
+                : downloadDirSignal.value.trim(),
+          );
+          defaultToast(
+            context,
+            Platform.isAndroid
+                ? l10n.downloadSavedToFileAndAlbum(androidDir)
+                : l10n.downloadSavedToFileAndAlbum(dir ?? ''),
+          );
+          return;
+        }
+        defaultToast(
+          context,
+          Platform.isAndroid
+              ? l10n.downloadSavedTo(
+                l10n.downloadDirAndroidDesc(
+                  l10n.downloadsFolder,
+                  downloadDirSignal.value.trim().isEmpty
+                      ? 'Pansy'
+                      : downloadDirSignal.value.trim(),
+                ),
+              )
+              : l10n.downloadSavedTo(dir ?? ''),
+        );
+      } catch (e, s) {
+        log("$e\n$s");
+        if (!mounted) return;
+        if (e.toString() == 'download_dir_not_set') {
+          defaultToast(context, l10n.downloadDirRequired);
+          return;
+        }
+        defaultToast(context, l10n.failed + "\n$e");
+      }
+      return;
+    }
+  }
+
+  Future<DownloadSaveTarget?> _chooseSaveTarget() async {
+    if (!(Platform.isAndroid || Platform.isIOS)) {
+      return DownloadSaveTarget.file;
+    }
+
+    final l10n = AppLocalizations.of(context)!;
+    final selected = downloadSaveTargetSignal.value;
+    final action = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text(l10n.saveToFile),
+                selected: selected == DownloadSaveTarget.file,
+                trailing:
+                    selected == DownloadSaveTarget.file
+                        ? const Icon(Icons.check)
+                        : null,
+                onTap: () => Navigator.of(context).pop(1),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_outlined),
+                title: Text(l10n.saveToAlbum),
+                selected: selected == DownloadSaveTarget.album,
+                trailing:
+                    selected == DownloadSaveTarget.album
+                        ? const Icon(Icons.check)
+                        : null,
+                onTap: () => Navigator.of(context).pop(2),
+              ),
+              ListTile(
+                leading: const Icon(Icons.save_outlined),
+                title: Text(l10n.saveToFileAndAlbum),
+                selected: selected == DownloadSaveTarget.fileAndAlbum,
+                trailing:
+                    selected == DownloadSaveTarget.fileAndAlbum
+                        ? const Icon(Icons.check)
+                        : null,
+                onTap: () => Navigator.of(context).pop(3),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    final target = switch (action) {
+      1 => DownloadSaveTarget.file,
+      2 => DownloadSaveTarget.album,
+      3 => DownloadSaveTarget.fileAndAlbum,
+      _ => null,
+    };
+
+    if (target != null) {
+      await setDownloadSaveTarget(target);
+    }
+    return target;
+  }
+
+  Future<bool> _ensureFileDownloadDirSelectedIfNeeded(
+    DownloadSaveTarget target,
+  ) async {
+    if (Platform.isAndroid) return true;
+    if (Platform.isIOS) return true;
+    if (target == DownloadSaveTarget.album) return true;
+
+    if (downloadDirSignal.value.trim().isNotEmpty) return true;
+    final l10n = AppLocalizations.of(context)!;
+    final dir = await FilePicker.platform.getDirectoryPath(
+      dialogTitle: l10n.chooseDownloadDir,
+    );
+    if (dir == null || dir.trim().isEmpty) {
+      defaultToast(context, l10n.downloadDirRequired);
+      return false;
+    }
+    await setDownloadDir(dir);
+    return true;
   }
 }

@@ -6,30 +6,23 @@ use base64::Engine;
 use serde_json::json;
 
 const APP_SERVER: &'static str = "app-api.pixiv.net";
-const APP_SERVER_IP: &'static str = "210.140.131.199";
 const OAUTH_SERVER: &'static str = "oauth.secure.pixiv.net";
-const OAUTH_SERVER_IP: &'static str = "210.140.131.199";
 const IMG_SERVER: &'static str = "i.pximg.net";
-const IMG_SERVER_IP: &'static str = "s.pximg.net";
 
 struct Server {
     pub server: &'static str,
-    pub ip: &'static str,
 }
 
 const APP: Server = Server {
     server: APP_SERVER,
-    ip: APP_SERVER_IP,
 };
 
 const OAUTH: Server = Server {
     server: OAUTH_SERVER,
-    ip: OAUTH_SERVER_IP,
 };
 
 const IMG: Server = Server {
     server: IMG_SERVER,
-    ip: IMG_SERVER_IP,
 };
 
 const SALT: &'static str = "28c1fdd170a5204386cb1313c7077b34f83e4aaf4aa829ce78c231e05b0bae2c";
@@ -39,7 +32,6 @@ const CLIENT_SECRET: &'static str = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj";
 pub struct Client {
     pub access_token: String,
     agent: reqwest::Client,
-    agent_free: bool,
 }
 
 impl Client {
@@ -47,19 +39,6 @@ impl Client {
     pub fn new() -> Self {
         Self {
             agent: reqwest::ClientBuilder::new().build().unwrap(),
-            agent_free: false,
-            access_token: String::default(),
-        }
-    }
-
-    /// 免代理客户端
-    pub fn new_agent_free() -> Self {
-        Self {
-            agent: reqwest::ClientBuilder::new()
-                .danger_accept_invalid_certs(true)
-                .build()
-                .unwrap(),
-            agent_free: true,
             access_token: String::default(),
         }
     }
@@ -106,19 +85,10 @@ impl Client {
 
     /// 请求并获得结果
     async fn load_token(&self, body: serde_json::Value) -> Result<Token> {
-        let req = match self.agent_free {
-            true => self
-                .agent
-                .request(
-                    reqwest::Method::POST,
-                    format!("https://{}/auth/token", OAUTH.ip).as_str(),
-                )
-                .header("Host", OAUTH.server),
-            false => self.agent.request(
-                reqwest::Method::POST,
-                format!("https://{}/auth/token", OAUTH.server).as_str(),
-            ),
-        };
+        let req = self.agent.request(
+            reqwest::Method::POST,
+            format!("https://{}/auth/token", OAUTH.server).as_str(),
+        );
         let rsp = req.form(&body).send().await;
         match rsp {
             Ok(resp) => {
@@ -178,18 +148,7 @@ impl Client {
     }
 
     pub async fn get_from_pixiv_raw(&self, url: String) -> Result<String> {
-        let req = match self.agent_free {
-            true => {
-                if url.starts_with(format!("https://{}", APP.server).as_str()) {
-                    self.agent
-                        .get(url.replacen(APP.server, APP.ip, 1))
-                        .header("Host", APP.server)
-                } else {
-                    self.agent.get(url)
-                }
-            }
-            false => self.agent.get(url),
-        };
+        let req = self.agent.get(url);
         let req = self.sign_request(req);
         let rsp = req.send().await?;
         match &rsp.status().as_u16() {
@@ -268,18 +227,7 @@ impl Client {
     }
 
     pub async fn load_image_data(&self, url: String) -> Result<bytes::Bytes> {
-        let req = match self.agent_free {
-            true => {
-                if url.starts_with(format!("https://{}", IMG.server).as_str()) {
-                    self.agent
-                        .get(url.replacen(IMG.server, IMG.ip, 1))
-                        .header("Host", IMG.server)
-                } else {
-                    self.agent.get(url)
-                }
-            }
-            false => self.agent.get(url),
-        };
+        let req = self.agent.get(url);
         let req = self.sign_request(req);
         let rsp = req.send().await?;
         let status = rsp.status();

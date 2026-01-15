@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:pansy/basic/config/in_china.dart';
-import 'package:pansy/screens/app_screen.dart';
+import 'package:app_links/app_links.dart';
+import 'package:pansy/basic/config/download_dir.dart';
+import 'package:pansy/basic/config/download_save_target.dart';
+import 'package:pansy/basic/config/picture_source.dart';
+import 'package:pansy/basic/stores/tag_history_store.dart';
+import 'package:pansy/screens/hello_screen.dart';
+import 'package:pansy/screens/login_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
 import '../basic/platform.dart';
 import '../cross.dart';
@@ -14,23 +19,53 @@ class InitScreen extends StatefulWidget {
 }
 
 class _InitScreenState extends State<InitScreen> {
+  final _appLinks = AppLinks();
+
   @override
   void initState() {
     _init();
     super.initState();
   }
 
+  Future<bool> _maybeHandleInitialPixivLogin() async {
+    final uri = await _appLinks.getInitialLink();
+    if (uri == null) return false;
+    if (uri.scheme != 'pixiv') return false;
+    if (uri.host != 'account') return false;
+    if (uri.path.isNotEmpty && uri.path != '/login') return false;
+    final code = uri.queryParameters['code'];
+    if (code == null || code.isEmpty) return false;
+
+    final verify = await loadProperty(k: pixivLoginVerifyKey);
+    if (verify.trim().isEmpty) return false;
+
+    if (!mounted) return true;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder:
+            (BuildContext context) => LoginScreen(verify: verify, code: code),
+      ),
+    );
+    return true;
+  }
+
   Future<void> _init() async {
     await initPlatform();
-    await init(
-      root: await cross.root(),
-      downloadsTo: await cross.downloads(),
-    );
-    await initInChina();
+    await init(root: await cross.root());
+    await initPictureSource();
+    await initDownloadDir();
+    await initDownloadSaveTarget();
+    await initTagHistory();
     setPixivLogin(await preLogin());
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-      builder: (BuildContext context) => const AppScreen(),
-    ));
+
+    if (await _maybeHandleInitialPixivLogin()) {
+      return;
+    }
+
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (BuildContext context) => const HelloScreen()),
+    );
   }
 
   @override
@@ -42,10 +77,7 @@ class _InitScreenState extends State<InitScreen> {
           Container(
             padding: const EdgeInsets.all(30),
             child: Center(
-              child: Image.asset(
-                "lib/assets/startup.png",
-                fit: BoxFit.contain,
-              ),
+              child: Image.asset("lib/assets/startup.png", fit: BoxFit.contain),
             ),
           ),
         ],

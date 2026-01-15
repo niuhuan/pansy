@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:pansy/bridge/pixiv.dart';
+import 'package:pansy/basic/stores/tag_history_store.dart';
 import 'package:pansy/screens/components/content_builder.dart';
 import 'package:pansy/screens/components/pixiv_image.dart';
 import 'package:pansy/screens/search_screen.dart';
-
-import '../types.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 class SearchTitleScreen extends StatefulWidget {
   const SearchTitleScreen({Key? key}) : super(key: key);
@@ -47,6 +49,7 @@ class _SearchTitleScreenState extends State<SearchTitleScreen>
                 .map(
                   (e) => GestureDetector(
                     onTap: () {
+                      recordTag(e.tag);
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (BuildContext context) {
                           return SearchScreen(
@@ -90,6 +93,7 @@ class _SearchTitleScreenState extends State<SearchTitleScreen>
             return ListView(
               children: [
                 Container(height: 10),
+                _historySection(),
                 Row(children: [
                   SizedBox(
                     width: 80,
@@ -136,6 +140,7 @@ class _SearchTitleScreenState extends State<SearchTitleScreen>
                     onPressed: () {
                       _editController.text = _editController.text.trim();
                       if (_editController.text.isNotEmpty) {
+                        recordTag(_editController.text);
                         Navigator.of(context).push(
                           MaterialPageRoute(builder: (BuildContext context) {
                             return SearchScreen(
@@ -163,5 +168,60 @@ class _SearchTitleScreenState extends State<SearchTitleScreen>
         );
       },
     );
+  }
+
+  Widget _historySection() {
+    return Watch((context) {
+      final pinned = pinnedTags.map((e) => e.tag).toList();
+      final recent = recentTags.map((e) => e.tag).toList();
+      if (pinned.isEmpty && recent.isEmpty) return const SizedBox.shrink();
+      final tags = [...pinned, ...recent.take(12)];
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.tags,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () => clearTagHistory(),
+                  child: Text(AppLocalizations.of(context)!.clear),
+                ),
+              ],
+            ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: tags.map((t) {
+                final isPinned = pinned.contains(t);
+                return GestureDetector(
+                  onLongPress: () => togglePinTag(t),
+                  child: ActionChip(
+                    avatar: isPinned ? const Icon(Icons.push_pin, size: 16) : null,
+                    label: Text('#$t'),
+                    onPressed: () {
+                      recordTag(t);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) {
+                          return SearchScreen(
+                            mode: ILLUST_SEARCH_MODE_EXACT_MATCH_FOR_TAGS,
+                            word: t,
+                          );
+                        }),
+                      );
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      );
+    });
   }
 }

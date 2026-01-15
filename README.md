@@ -33,14 +33,6 @@ A beautiful illustration clients, support mac, windows, linux, ios, Android.
 |   Windows    |   10 (64bit)    |
 |    Linux     |     - 64bit     |
 
-### Download pictures location
-
-|   Platform   |          Location           |
-|:------------:|:---------------------------:|
-|   Android    | {USER_HOME}/Downloads/pansy/ |
-|   Desktop    | {USER_HOME}/Downloads/pansy/ |
-| iOS / iPadOS |   {PHONE}/pansy/downloads/   |
-
 ## Technical structure
 
 - [rust](https://github.com/rust-lang/rust)
@@ -50,3 +42,6 @@ A beautiful illustration clients, support mac, windows, linux, ios, Android.
 
 ![](https://raw.githubusercontent.com/fzyzcjy/flutter_rust_bridge/master/book/logo.png)
 
+## Icons
+
+Run `bash resources/icon/update_icons.sh` to regenerate platform icons from `resources/icon/background.svg` and `resources/icon/foreground.svg`.

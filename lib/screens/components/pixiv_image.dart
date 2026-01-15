@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'dart:ui' as ui;
 
+import 'package:pansy/basic/config/picture_source.dart';
 import 'package:pansy/src/rust/api/api.dart';
-import 'package:pansy/src/rust/frb_generated.dart';
 
 class PixivUrlImageProvider extends ImageProvider<PixivUrlImageProvider> {
   final String url;
@@ -29,16 +29,15 @@ class PixivUrlImageProvider extends ImageProvider<PixivUrlImageProvider> {
 
   Future<ui.Codec> _loadAsync(PixivUrlImageProvider key) async {
     assert(key == this);
+    final effectiveUrl = rewritePixivImageUrl(url);
     return ui.instantiateImageCodec(
-        await File(await loadPixivImage(url: url)).readAsBytes());
+        await File(await loadPixivImage(url: effectiveUrl)).readAsBytes());
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
-    final PixivUrlImageProvider typedOther = other;
-    return url == typedOther.url && scale == typedOther.scale;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PixivUrlImageProvider && url == other.url && scale == other.scale;
 
   @override
   int get hashCode => Object.hash(url, scale);

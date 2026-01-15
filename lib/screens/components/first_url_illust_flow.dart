@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import '../../src/rust/api/api.dart';
 import '../../src/rust/pixirust/entities.dart';
-import '../../types.dart';
 import 'illust_flow.dart';
 
 class FirstUrlIllustFlow extends StatefulWidget {

@@ -121,9 +121,6 @@ async fn write_token(token: &Token, time: &i64) {
 pub(crate) async fn load_in_china() {
     let mut lock = IN_CHINA.lock().await;
     *lock = load_bool_property("in_china".to_owned()).await.unwrap();
-    if *lock {
-        *(CLIENT.write().await) = Client::new_agent_free();
-    }
 }
 
 pub(crate) async fn load_token() -> Result<bool> {
@@ -160,10 +157,5 @@ pub(crate) async fn set_in_china_(value: bool) {
         .unwrap();
     let mut ic = IN_CHINA.lock().await;
     *ic = value;
-    if *ic {
-        *(CLIENT.write().await) = Client::new_agent_free();
-    } else {
-        *(CLIENT.write().await) = Client::new();
-    }
-    CLIENT.write().await.access_token = TOKEN.lock().await.token.access_token.clone();
+    // Do not change network behavior automatically; "China mode" is only a user preference flag.
 }

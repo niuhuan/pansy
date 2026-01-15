@@ -1,15 +1,12 @@
-import 'package:event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/app_screen_data.dart';
-import 'package:pansy/basic/config/in_china.dart';
-import 'package:pansy/screens/downloads_screen.dart';
 import 'package:pansy/screens/search_title_screen.dart';
 import 'package:pansy/screens/discovery_screen.dart';
 import 'package:pansy/screens/hots_screen.dart';
 import 'package:pansy/screens/settings_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../basic/config/in_china.dart' as c;
 
 class AppScreen extends StatefulWidget {
   const AppScreen({Key? key}) : super(key: key);
@@ -24,20 +21,9 @@ class _AppScreenState extends State<AppScreen>
   bool get wantKeepAlive => true;
 
   @override
-  void initState() {
-    pixivLoginEvent.subscribe(_onLoginChange);
-    super.initState();
-  }
-
-  @override
   void dispose() {
-    pixivLoginEvent.unsubscribe(_onLoginChange);
     _pageViewController.dispose();
     super.dispose();
-  }
-
-  void _onLoginChange(EventArgs? args) {
-    setState(() {});
   }
 
   late final _screens = [
@@ -118,61 +104,48 @@ class _AppScreenState extends State<AppScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (!pixivLogin) {
-      return Scaffold(
-        body: Stack(
-          children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: Image.asset(
-                'lib/assets/startup_bg.png',
-                fit: BoxFit.contain,
+    return Watch((context) {
+      final loggedIn = pixivLoginSignal.value;
+      if (!loggedIn) {
+        return Scaffold(
+          body: Stack(
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: Image.asset(
+                  'lib/assets/startup_bg.png',
+                  fit: BoxFit.contain,
+                ),
               ),
-            ),
-            Column(
-              children: [
-                Expanded(child: Container()),
-                Container(height: 30),
-                Container(height: 30),
-                MaterialButton(
-                  color: Colors.grey.shade50,
-                  onPressed: () async {
-                    pixivLoginAction(context);
-                  },
-                  child: Text(AppLocalizations.of(context)!.login),
-                ),
-                Container(height: 30),
-                const Divider(),
-                Row(
-                  children: [
-                    Expanded(child: Container()),
-                    Text(AppLocalizations.of(context)!.inChineseNetwork),
-                    Switch(
-                      value: inChina,
-                      onChanged: (value) async {
-                        await c.setInChina(value);
-                        setState(() {});
-                      },
-                    ),
-                    Expanded(child: Container()),
-                  ],
-                ),
-                const Divider(),
-                Expanded(child: Container()),
-              ],
-            ),
-          ],
+              Column(
+                children: [
+                  Expanded(child: Container()),
+                  Container(height: 30),
+                  Container(height: 30),
+                  MaterialButton(
+                    color: Colors.grey.shade50,
+                    onPressed: () async {
+                      pixivLoginAction(context);
+                    },
+                    child: Text(AppLocalizations.of(context)!.login),
+                  ),
+                  Container(height: 30),
+                  Expanded(child: Container()),
+                ],
+              ),
+            ],
+          ),
+        );
+      }
+      return Scaffold(
+        appBar: AppBar(
+          elevation: 1,
+          title: _leading(),
+          actions: _screens.map(_actionButton).toList(),
         ),
+        body: _pageView,
       );
-    }
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 1,
-        title: _leading(),
-        actions: _screens.map(_actionButton).toList(),
-      ),
-      body: _pageView,
-    );
+    });
   }
 
   Widget _leading() {
@@ -190,26 +163,12 @@ class _AppScreenState extends State<AppScreen>
               ],
             ),
           ),
-          PopupMenuItem(
-            value: 2,
-            child: Row(
-              children: [
-                Icon(Icons.download, color: Colors.grey.shade600),
-                Container(width: 10),
-                Text(AppLocalizations.of(context)!.downloads),
-              ],
-            ),
-          ),
         ];
       },
       onSelected: (value) {
         if (value == 1) {
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => const SettingsScreen(),
-          ));
-        } else if (value == 2) {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => const DownloadsScreen(),
           ));
         }
       },

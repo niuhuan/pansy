@@ -7,7 +7,7 @@ use crate::pixirust::client::{IllustTrendingTags, UserDetail};
 use crate::pixirust::entities::IllustResponse;
 use crate::pixirust::entities::LoginUrl;
 use crate::udto::*;
-use crate::{download, get_network_image_dir};
+use crate::get_network_image_dir;
 use anyhow::{Context, Ok, Result};
 use std::future::Future;
 use std::path::Path;
@@ -52,36 +52,9 @@ pub fn desktop_root() -> Result<String> {
     panic!("未支持的平台")
 }
 
-// get downloads dir form env
-pub fn downloads_to() -> Result<String> {
-    #[cfg(any(target_os = "windows", target_os = "macos", target_os = "linux"))]
-    {
-        Ok(directories::UserDirs::new()
-            .unwrap()
-            .download_dir()
-            .unwrap()
-            .join("pansy")
-            .to_str()
-            .unwrap()
-            .to_owned())
-    }
-    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
-    {
-        Err(anyhow::Error::msg("not support os"))
-    }
-}
-
-pub fn init(root: String, downloads_to: String) -> Result<()> {
-    crate::init_root(&root, &downloads_to);
+pub fn init(root: String) -> Result<()> {
+    crate::init_root(&root);
     Ok(())
-}
-
-pub fn recreate_downloads_to() -> Result<()> {
-    block_on(crate::recreate_downloads_to())
-}
-
-pub fn set_downloads_to(new_downloads_to: String) -> Result<()> {
-    block_on(crate::set_downloads_to(new_downloads_to))
 }
 
 pub fn save_property(k: String, v: String) -> Result<()> {
@@ -97,18 +70,18 @@ fn block_on<T>(f: impl Future<Output = T>) -> T {
 }
 
 pub fn copy_image_to(src_path: String, to_dir: String) -> Result<()> {
-    let name = Path::new(&src_path)
-        .file_name()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_owned();
-    let ext = image::io::Reader::open(&src_path)?
-        .with_guessed_format()?
-        .format()
-        .with_context(|| anyhow::Error::msg("img format error"))?
-        .extensions_str()[0];
-    let final_name = format!("{}.{}", name, ext);
+    let src = Path::new(&src_path);
+    let name = src.file_name().unwrap().to_str().unwrap();
+    let final_name = if src.extension().is_some() {
+        name.to_owned()
+    } else {
+        let ext = image::ImageReader::open(&src_path)?
+            .with_guessed_format()?
+            .format()
+            .with_context(|| anyhow::Error::msg("img format error"))?
+            .extensions_str()[0];
+        format!("{}.{}", name, ext)
+    };
     let target = join_paths(vec![to_dir.as_str(), final_name.as_str()]);
     std::fs::copy(src_path.as_str(), target.as_str())?;
     Ok(())
@@ -226,14 +199,17 @@ pub fn load_pixiv_image(url: String) -> Result<String> {
             // 没有缓存则下载
             None => {
                 let now = chrono::Local::now().timestamp_millis();
-                let path = format!(
-                    "{}{}",
-                    hex::encode(md5::compute(url.clone()).to_vec()),
-                    &now,
-                );
                 let client = crate::local::client(0).await?;
                 let data: bytes::Bytes = client.load_image_data(url.clone()).await?;
                 drop(client);
+                let f = image::guess_format(data.as_ref())?;
+                let ext = f.extensions_str()[0];
+                let path = format!(
+                    "{}_{}.{}",
+                    hex::encode(md5::compute(url.clone()).to_vec()),
+                    &now,
+                    ext,
+                );
                 let local = join_paths(vec![get_network_image_dir().as_str(), &path]);
                 std::fs::write(local, data).unwrap();
                 network_image::insert(url.clone(), path.clone(), now.clone()).await?;
@@ -246,16 +222,4 @@ pub fn load_pixiv_image(url: String) -> Result<String> {
 
 pub fn user_detail(user_id: i64) -> Result<UserDetail> {
     block_on(async { crate::local::client(2).await?.user_detail(user_id).await })
-}
-
-pub fn append_to_download(values: Vec<UiAppendToDownload>) -> Result<()> {
-    block_on(download::append_to_download(values))
-}
-
-pub fn reset_failed_downloads() -> Result<()> {
-    block_on(download::reset_failed_downloads())
-}
-
-pub fn downloading_list() -> Result<Vec<UiDownloading>> {
-    block_on(download::downloading_list())
 }
