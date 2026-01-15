@@ -1,7 +1,10 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/screens/components/illust_card.dart';
+import 'package:pansy/screens/components/pixiv_image.dart';
 import 'package:pansy/screens/illust_info_screen.dart';
 import 'package:pansy/src/rust/api/api.dart';
 import 'package:pansy/src/rust/pixirust/entities.dart';
@@ -171,7 +174,7 @@ class _SearchScreenState extends State<SearchScreen>
                   label: Text(tag.tag),
                   avatar: tag.illust.imageUrls.squareMedium.isNotEmpty
                       ? CircleAvatar(
-                          backgroundImage: NetworkImage(
+                          backgroundImage: PixivUrlImageProvider(
                             tag.illust.imageUrls.squareMedium,
                           ),
                         )
@@ -310,7 +313,14 @@ class _SearchResultTabState extends State<_SearchResultTab>
         _nextUrl = result.nextUrl;
         _isLoading = false;
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      developer.log(
+        'Failed to load search results',
+        name: 'SEARCH_ERROR',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      print('Search load error: $e');
       setState(() {
         _hasError = true;
         _isLoading = false;
@@ -332,7 +342,14 @@ class _SearchResultTabState extends State<_SearchResultTab>
         _nextUrl = result.nextUrl;
         _isLoading = false;
       });
-    } catch (e) {
+    } catch (e, stackTrace) {
+      developer.log(
+        'Failed to load more search results',
+        name: 'SEARCH_ERROR',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      print('Search load more error: $e');
       setState(() {
         _isLoading = false;
       });

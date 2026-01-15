@@ -412,15 +412,10 @@ class _IllustFlowState extends State<IllustFlow> {
     if (target == DownloadSaveTarget.album) return true;
 
     if (downloadDirSignal.value.trim().isNotEmpty) return true;
+    
+    // 不再弹出选择对话框，直接提示用户去设置
     final l10n = AppLocalizations.of(context)!;
-    final dir = await FilePicker.platform.getDirectoryPath(
-      dialogTitle: l10n.chooseDownloadDir,
-    );
-    if (dir == null || dir.trim().isEmpty) {
-      defaultToast(context, l10n.downloadDirRequired);
-      return false;
-    }
-    await setDownloadDir(dir);
-    return true;
+    defaultToast(context, l10n.downloadDirRequired);
+    return false;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:developer' as developer;
 
 import 'package:pansy/basic/error_types.dart';
 
@@ -43,8 +44,18 @@ class ContentError extends StatelessWidget {
     }
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        print("$error");
-        print("$stackTrace");
+        // 使用 developer.log 输出详细错误信息
+        developer.log(
+          'ContentError',
+          error: error,
+          stackTrace: stackTrace,
+          name: 'UI_ERROR',
+        );
+        // 同时使用 print 以便在某些环境下也能看到
+        print("ERROR: $error");
+        if (stackTrace != null) {
+          print("STACKTRACE:\n$stackTrace");
+        }
         var width = constraints.maxWidth;
         var height = constraints.maxHeight;
         var min = width < height ? width : height;
@@ -120,7 +131,32 @@ class ContentError extends StatelessWidget {
                     ),
                     Text('(下拉刷新)', style: TextStyle(fontSize: tipSize)),
                     Container(height: min / 15),
-                    Text('$error', style: TextStyle(fontSize: infoSize)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: SelectableText(
+                        '$error',
+                        style: TextStyle(
+                          fontSize: infoSize,
+                          color: Colors.red.shade700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    if (stackTrace != null) ...[
+                      Container(height: min / 30),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: SelectableText(
+                          'Stack trace:\n${stackTrace.toString().split('\n').take(5).join('\n')}',
+                          style: TextStyle(
+                            fontSize: infoSize * 0.8,
+                            color: Colors.grey.shade600,
+                            fontFamily: 'monospace',
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ],
                     Expanded(child: Container()),
                   ],
                 ),
