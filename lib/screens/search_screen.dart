@@ -61,7 +61,11 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   late Future<String> _future = illustSearchFirstUrl(
-      query: UiIllustSearchQuery(mode: widget.mode, word: widget.word));
+      query: UiIllustSearchQuery(
+        word: widget.word,
+        searchTarget: widget.mode,
+        sort: 'date_desc',
+      ));
 
   late final TextEditingController _textEditController =
       TextEditingController(text: widget.word);
@@ -133,7 +137,11 @@ class _SearchScreenState extends State<SearchScreen> {
         onRefresh: () async {
           setState(() {
             _future = illustSearchFirstUrl(
-                query: UiIllustSearchQuery(mode: widget.mode, word: widget.word));
+                query: UiIllustSearchQuery(
+                  word: widget.word,
+                  searchTarget: widget.mode,
+                  sort: 'date_desc',
+                ));
           });
         },
         successBuilder: (BuildContext context, AsyncSnapshot<String> snapshot) {

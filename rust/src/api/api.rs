@@ -153,9 +153,11 @@ pub fn illust_recommended_first_url() -> Result<String> {
 
 pub fn illust_search_first_url(query: UiIllustSearchQuery) -> Result<String> {
     block_on(async {
-        Ok(client(-1)
+        let url = client(-1)
             .await?
-            .illust_search_first_url(query.word, query.mode))
+            .illust_search_first_url(query.word, query.search_target, query.sort);
+        println!("Search URL: {}", url);
+        Ok(url)
     })
 }
 

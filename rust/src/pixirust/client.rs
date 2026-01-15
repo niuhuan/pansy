@@ -209,12 +209,13 @@ impl Client {
     ///
     /// sort: [date_desc, date_asc, popular_desc] - popular_desc为会员的热门排序
     ///
-    pub fn illust_search_first_url(&self, word: String, mode: String) -> String {
+    pub fn illust_search_first_url(&self, word: String, search_target: String, sort: String) -> String {
         format!(
-            "https://{}/v1/search/illust?word={}&search_target={}&filter=for_ios",
+            "https://{}/v1/search/illust?word={}&search_target={}&sort={}&merge_plain_keyword_results=true&filter=for_ios",
             APP.server,
             urlencoding::encode(word.as_str()),
-            mode,
+            search_target,
+            sort,
         )
     }
 

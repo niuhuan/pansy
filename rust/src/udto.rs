@@ -8,8 +8,9 @@ pub struct UiLoginByCodeQuery {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct UiIllustSearchQuery {
-    pub mode: String,
     pub word: String,
+    pub search_target: String,
+    pub sort: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

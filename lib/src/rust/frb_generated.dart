@@ -1493,11 +1493,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   UiIllustSearchQuery dco_decode_ui_illust_search_query(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 2)
-      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return UiIllustSearchQuery(
-      mode: dco_decode_String(arr[0]),
-      word: dco_decode_String(arr[1]),
+      word: dco_decode_String(arr[0]),
+      searchTarget: dco_decode_String(arr[1]),
+      sort: dco_decode_String(arr[2]),
     );
   }
 
@@ -2041,9 +2042,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_mode = sse_decode_String(deserializer);
     var var_word = sse_decode_String(deserializer);
-    return UiIllustSearchQuery(mode: var_mode, word: var_word);
+    var var_searchTarget = sse_decode_String(deserializer);
+    var var_sort = sse_decode_String(deserializer);
+    return UiIllustSearchQuery(
+      word: var_word,
+      searchTarget: var_searchTarget,
+      sort: var_sort,
+    );
   }
 
   @protected
@@ -2519,8 +2525,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     SseSerializer serializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.mode, serializer);
     sse_encode_String(self.word, serializer);
+    sse_encode_String(self.searchTarget, serializer);
+    sse_encode_String(self.sort, serializer);
   }
 
   @protected

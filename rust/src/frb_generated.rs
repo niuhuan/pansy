@@ -1643,11 +1643,13 @@ impl SseDecode for crate::udto::UiIllustRankQuery {
 impl SseDecode for crate::udto::UiIllustSearchQuery {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_mode = <String>::sse_decode(deserializer);
         let mut var_word = <String>::sse_decode(deserializer);
+        let mut var_searchTarget = <String>::sse_decode(deserializer);
+        let mut var_sort = <String>::sse_decode(deserializer);
         return crate::udto::UiIllustSearchQuery {
-            mode: var_mode,
             word: var_word,
+            search_target: var_searchTarget,
+            sort: var_sort,
         };
     }
 }
@@ -2233,8 +2235,9 @@ impl flutter_rust_bridge::IntoIntoDart<crate::udto::UiIllustRankQuery>
 impl flutter_rust_bridge::IntoDart for crate::udto::UiIllustSearchQuery {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
-            self.mode.into_into_dart().into_dart(),
             self.word.into_into_dart().into_dart(),
+            self.search_target.into_into_dart().into_dart(),
+            self.sort.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -2699,8 +2702,9 @@ impl SseEncode for crate::udto::UiIllustRankQuery {
 impl SseEncode for crate::udto::UiIllustSearchQuery {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <String>::sse_encode(self.mode, serializer);
         <String>::sse_encode(self.word, serializer);
+        <String>::sse_encode(self.search_target, serializer);
+        <String>::sse_encode(self.sort, serializer);
     }
 }
 

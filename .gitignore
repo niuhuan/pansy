@@ -51,3 +51,4 @@ ci/target/
 
 # FVM Version Cache
 .fvm/
+tmp/

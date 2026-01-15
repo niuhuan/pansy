@@ -96,21 +96,27 @@ class UiIllustRankQuery {
 }
 
 class UiIllustSearchQuery {
-  final String mode;
   final String word;
+  final String searchTarget;
+  final String sort;
 
-  const UiIllustSearchQuery({required this.mode, required this.word});
+  const UiIllustSearchQuery({
+    required this.word,
+    required this.searchTarget,
+    required this.sort,
+  });
 
   @override
-  int get hashCode => mode.hashCode ^ word.hashCode;
+  int get hashCode => word.hashCode ^ searchTarget.hashCode ^ sort.hashCode;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is UiIllustSearchQuery &&
           runtimeType == other.runtimeType &&
-          mode == other.mode &&
-          word == other.word;
+          word == other.word &&
+          searchTarget == other.searchTarget &&
+          sort == other.sort;
 }
 
 class UiLoginByCodeQuery {

@@ -9,6 +9,8 @@ PODS:
     - FlutterMacOS
   - rust_lib_pansy (0.0.1):
     - FlutterMacOS
+  - share_plus (0.0.1):
+    - FlutterMacOS
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
 
@@ -18,6 +20,7 @@ DEPENDENCIES:
   - FlutterMacOS (from `Flutter/ephemeral`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - rust_lib_pansy (from `Flutter/ephemeral/.symlinks/plugins/rust_lib_pansy/macos`)
+  - share_plus (from `Flutter/ephemeral/.symlinks/plugins/share_plus/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
 
 EXTERNAL SOURCES:
@@ -31,6 +34,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
   rust_lib_pansy:
     :path: Flutter/ephemeral/.symlinks/plugins/rust_lib_pansy/macos
+  share_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/share_plus/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
 
@@ -40,6 +45,7 @@ SPEC CHECKSUMS:
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   rust_lib_pansy: 81445ed43e183c669c829ac5c5b57e140240f7bf
+  share_plus: 510bf0af1a42cd602274b4629920c9649c52f4cc
   url_launcher_macos: 0fba8ddabfc33ce0a9afe7c5fef5aab3d8d2d673
 
 PODFILE CHECKSUM: 7eb978b976557c8c1cd717d8185ec483fd090a82

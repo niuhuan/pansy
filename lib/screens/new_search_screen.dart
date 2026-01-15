@@ -205,7 +205,10 @@ class SearchResultScreen extends StatefulWidget {
 class _SearchResultScreenState extends State<SearchResultScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final List<String> _sortOptions = ['date_desc', 'popular_desc'];
+  final List<String> _sortOptions = [
+    'date_desc',
+    // 'popular_desc',
+  ];
 
   @override
   void initState() {
@@ -228,7 +231,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
           controller: _tabController,
           tabs: [
             Tab(text: AppLocalizations.of(context)!.latest),
-            Tab(text: AppLocalizations.of(context)!.popular),
+            // Tab(text: AppLocalizations.of(context)!.popular),
           ],
         ),
       ),
@@ -300,12 +303,15 @@ class _SearchResultTabState extends State<_SearchResultTab>
     });
 
     try {
+      print('Search query: word=${widget.query}, searchTarget=partial_match_for_tags, sort=${widget.sort}');
       final firstUrl = await illustSearchFirstUrl(
         query: UiIllustSearchQuery(
-          mode: widget.sort,
           word: widget.query,
+          searchTarget: 'partial_match_for_tags',
+          sort: widget.sort,
         ),
       );
+      print('First URL: $firstUrl');
       final result = await illustFromUrl(url: firstUrl);
       setState(() {
         _illusts.clear();
