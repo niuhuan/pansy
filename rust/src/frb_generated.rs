@@ -1945,11 +1945,13 @@ impl SseDecode for crate::udto::UiCurrentUser {
         let mut var_name = <String>::sse_decode(deserializer);
         let mut var_account = <String>::sse_decode(deserializer);
         let mut var_profileImageUrl = <String>::sse_decode(deserializer);
+        let mut var_isPremium = <bool>::sse_decode(deserializer);
         return crate::udto::UiCurrentUser {
             user_id: var_userId,
             name: var_name,
             account: var_account,
             profile_image_url: var_profileImageUrl,
+            is_premium: var_isPremium,
         };
     }
 }
@@ -2579,6 +2581,7 @@ impl flutter_rust_bridge::IntoDart for crate::udto::UiCurrentUser {
             self.name.into_into_dart().into_dart(),
             self.account.into_into_dart().into_dart(),
             self.profile_image_url.into_into_dart().into_dart(),
+            self.is_premium.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -3140,6 +3143,7 @@ impl SseEncode for crate::udto::UiCurrentUser {
         <String>::sse_encode(self.name, serializer);
         <String>::sse_encode(self.account, serializer);
         <String>::sse_encode(self.profile_image_url, serializer);
+        <bool>::sse_encode(self.is_premium, serializer);
     }
 }
 

@@ -82,12 +82,14 @@ class UiCurrentUser {
   final String name;
   final String account;
   final String profileImageUrl;
+  final bool isPremium;
 
   const UiCurrentUser({
     required this.userId,
     required this.name,
     required this.account,
     required this.profileImageUrl,
+    required this.isPremium,
   });
 
   @override
@@ -95,7 +97,8 @@ class UiCurrentUser {
       userId.hashCode ^
       name.hashCode ^
       account.hashCode ^
-      profileImageUrl.hashCode;
+      profileImageUrl.hashCode ^
+      isPremium.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -105,7 +108,8 @@ class UiCurrentUser {
           userId == other.userId &&
           name == other.name &&
           account == other.account &&
-          profileImageUrl == other.profileImageUrl;
+          profileImageUrl == other.profileImageUrl &&
+          isPremium == other.isPremium;
 }
 
 class UiIllustRankQuery {

@@ -274,6 +274,7 @@ pub fn current_user() -> Result<Option<UiCurrentUser>> {
             name: user.name.clone(),
             account: user.account.clone(),
             profile_image_url: user.profile_image_urls.px_170x170.clone(),
+            is_premium: user.is_premium,
         }))
     })
 }

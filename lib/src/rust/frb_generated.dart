@@ -1784,13 +1784,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   UiCurrentUser dco_decode_ui_current_user(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 4)
-      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    if (arr.length != 5)
+      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
     return UiCurrentUser(
       userId: dco_decode_i_64(arr[0]),
       name: dco_decode_String(arr[1]),
       account: dco_decode_String(arr[2]),
       profileImageUrl: dco_decode_String(arr[3]),
+      isPremium: dco_decode_bool(arr[4]),
     );
   }
 
@@ -2409,11 +2410,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_name = sse_decode_String(deserializer);
     var var_account = sse_decode_String(deserializer);
     var var_profileImageUrl = sse_decode_String(deserializer);
+    var var_isPremium = sse_decode_bool(deserializer);
     return UiCurrentUser(
       userId: var_userId,
       name: var_name,
       account: var_account,
       profileImageUrl: var_profileImageUrl,
+      isPremium: var_isPremium,
     );
   }
 
@@ -2969,6 +2972,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.name, serializer);
     sse_encode_String(self.account, serializer);
     sse_encode_String(self.profileImageUrl, serializer);
+    sse_encode_bool(self.isPremium, serializer);
   }
 
   @protected

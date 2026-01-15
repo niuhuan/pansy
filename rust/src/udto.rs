@@ -25,6 +25,7 @@ pub struct UiCurrentUser {
     pub name: String,
     pub account: String,
     pub profile_image_url: String,
+    pub is_premium: bool,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

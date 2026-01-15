@@ -251,15 +251,29 @@ class SearchResultScreen extends StatefulWidget {
 class _SearchResultScreenState extends State<SearchResultScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final List<String> _sortOptions = [
-    'date_desc',
-    // 'popular_desc', // TODO: VIP only feature
-  ];
+  List<String> _sortOptions = ['date_desc'];
+  bool _isVip = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _sortOptions.length, vsync: this);
+    _checkVipStatus();
+  }
+
+  Future<void> _checkVipStatus() async {
+    try {
+      final user = await currentUser();
+      final isVip = user?.isPremium ?? false;
+      setState(() {
+        _isVip = isVip;
+        _sortOptions = isVip ? ['date_desc', 'popular_desc'] : ['date_desc'];
+        _tabController = TabController(length: _sortOptions.length, vsync: this);
+      });
+    } catch (e) {
+      setState(() {
+        _tabController = TabController(length: _sortOptions.length, vsync: this);
+      });
+    }
   }
 
   @override
@@ -313,10 +327,13 @@ class _SearchResultScreenState extends State<SearchResultScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          tabs: [
-            Tab(text: AppLocalizations.of(context)!.latest),
-            // Tab(text: AppLocalizations.of(context)!.popular),
-          ],
+          tabs: _sortOptions.map((sort) {
+            if (sort == 'date_desc') {
+              return Tab(text: AppLocalizations.of(context)!.latest);
+            } else {
+              return Tab(text: AppLocalizations.of(context)!.popular);
+            }
+          }).toList(),
         ),
       ),
       body: TabBarView(
