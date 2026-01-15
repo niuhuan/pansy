@@ -68,6 +68,12 @@ class _RecommendScreenState extends State<RecommendScreen>
         _nextUrl = result.nextUrl;
         _isLoading = false;
       });
+      // 刷新成功后滚动到顶部
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(
+          0,
+        );
+      }
     } catch (e) {
       setState(() {
         _hasError = true;
