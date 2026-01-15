@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -599550414;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1024826212;
 
 // Section: executor
 
@@ -327,6 +327,42 @@ fn wire__crate__api__api__execute_download_task_impl(
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok = crate::api::api::execute_download_task(api_id)?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__api__follow_user_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "follow_user",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_user_id = <i64>::sse_decode(&mut deserializer);
+            let api_restrict = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::api::follow_user(api_user_id, api_restrict)?;
                         Ok(output_ok)
                     })(),
                 )
@@ -1053,6 +1089,41 @@ fn wire__crate__api__api__set_in_china_impl(
         },
     )
 }
+fn wire__crate__api__api__unfollow_user_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "unfollow_user",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_user_id = <i64>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::api::unfollow_user(api_user_id)?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__api__update_download_task_status_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -1096,6 +1167,44 @@ fn wire__crate__api__api__update_download_task_status_impl(
         },
     )
 }
+fn wire__crate__api__api__user_bookmarks_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "user_bookmarks",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_user_id = <i64>::sse_decode(&mut deserializer);
+            let api_restrict = <String>::sse_decode(&mut deserializer);
+            let api_tag = <Option<String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok =
+                            crate::api::api::user_bookmarks(api_user_id, api_restrict, api_tag)?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__api__user_detail_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -1131,6 +1240,42 @@ fn wire__crate__api__api__user_detail_impl(
         },
     )
 }
+fn wire__crate__api__api__user_following_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "user_following",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_user_id = <i64>::sse_decode(&mut deserializer);
+            let api_restrict = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::api::user_following(api_user_id, api_restrict)?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__api__user_illusts_first_url_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -1159,6 +1304,41 @@ fn wire__crate__api__api__user_illusts_first_url_impl(
                 transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                     (move || {
                         let output_ok = crate::api::api::user_illusts_first_url(api_user_id)?;
+                        Ok(output_ok)
+                    })(),
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__api__user_previews_from_url_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "user_previews_from_url",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_url = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || {
+                        let output_ok = crate::api::api::user_previews_from_url(api_url)?;
                         Ok(output_ok)
                     })(),
                 )
@@ -1303,7 +1483,7 @@ impl SseDecode for crate::pixirust::entities::IllustResponse {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_illusts = <Vec<crate::pixirust::entities::Illust>>::sse_decode(deserializer);
-        let mut var_nextUrl = <String>::sse_decode(deserializer);
+        let mut var_nextUrl = <Option<String>>::sse_decode(deserializer);
         return crate::pixirust::entities::IllustResponse {
             illusts: var_illusts,
             next_url: var_nextUrl,
@@ -1405,6 +1585,20 @@ impl SseDecode for Vec<crate::pixirust::entities::TrendTag> {
         let mut ans_ = vec![];
         for idx_ in 0..len_ {
             ans_.push(<crate::pixirust::entities::TrendTag>::sse_decode(
+                deserializer,
+            ));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::pixirust::entities::UserPreview> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = vec![];
+        for idx_ in 0..len_ {
+            ans_.push(<crate::pixirust::entities::UserPreview>::sse_decode(
                 deserializer,
             ));
         }
@@ -1711,6 +1905,33 @@ impl SseDecode for crate::pixirust::entities::UserDetail {
     }
 }
 
+impl SseDecode for crate::pixirust::entities::UserPreview {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_user = <crate::pixirust::entities::UserSample>::sse_decode(deserializer);
+        let mut var_illusts = <Vec<crate::pixirust::entities::Illust>>::sse_decode(deserializer);
+        let mut var_isMuted = <bool>::sse_decode(deserializer);
+        return crate::pixirust::entities::UserPreview {
+            user: var_user,
+            illusts: var_illusts,
+            is_muted: var_isMuted,
+        };
+    }
+}
+
+impl SseDecode for crate::pixirust::entities::UserPreviewsResponse {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_userPreviews =
+            <Vec<crate::pixirust::entities::UserPreview>>::sse_decode(deserializer);
+        let mut var_nextUrl = <Option<String>>::sse_decode(deserializer);
+        return crate::pixirust::entities::UserPreviewsResponse {
+            user_previews: var_userPreviews,
+            next_url: var_nextUrl,
+        };
+    }
+}
+
 impl SseDecode for crate::pixirust::entities::UserSample {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -1786,48 +2007,53 @@ fn pde_ffi_dispatcher_primary_impl(
         6 => wire__crate__api__api__delete_download_task_impl(port, ptr, rust_vec_len, data_len),
         7 => wire__crate__api__api__desktop_root_impl(port, ptr, rust_vec_len, data_len),
         8 => wire__crate__api__api__execute_download_task_impl(port, ptr, rust_vec_len, data_len),
-        9 => wire__crate__api__api__get_all_download_tasks_impl(port, ptr, rust_vec_len, data_len),
-        10 => wire__crate__api__api__get_in_china_impl(port, ptr, rust_vec_len, data_len),
-        11 => wire__crate__api__api__get_pending_download_tasks_impl(
+        9 => wire__crate__api__api__follow_user_impl(port, ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__api__get_all_download_tasks_impl(port, ptr, rust_vec_len, data_len),
+        11 => wire__crate__api__api__get_in_china_impl(port, ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__api__get_pending_download_tasks_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        13 => wire__crate__api__api__illust_from_url_impl(port, ptr, rust_vec_len, data_len),
-        14 => wire__crate__api__api__illust_rank_first_url_impl(port, ptr, rust_vec_len, data_len),
-        15 => wire__crate__api__api__illust_recommended_first_url_impl(
+        14 => wire__crate__api__api__illust_from_url_impl(port, ptr, rust_vec_len, data_len),
+        15 => wire__crate__api__api__illust_rank_first_url_impl(port, ptr, rust_vec_len, data_len),
+        16 => wire__crate__api__api__illust_recommended_first_url_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        16 => {
+        17 => {
             wire__crate__api__api__illust_search_first_url_impl(port, ptr, rust_vec_len, data_len)
         }
-        17 => wire__crate__api__api__illust_trending_tags_impl(port, ptr, rust_vec_len, data_len),
-        18 => {
+        18 => wire__crate__api__api__illust_trending_tags_impl(port, ptr, rust_vec_len, data_len),
+        19 => {
             wire__crate__api__api__illust_trending_tags_url_impl(port, ptr, rust_vec_len, data_len)
         }
-        19 => wire__crate__api__api__init_impl(port, ptr, rust_vec_len, data_len),
-        20 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
-        21 => wire__crate__api__api__load_pixiv_image_impl(port, ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__api__load_property_impl(port, ptr, rust_vec_len, data_len),
-        23 => wire__crate__api__api__login_by_code_impl(port, ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__api__per_in_china_impl(port, ptr, rust_vec_len, data_len),
-        25 => wire__crate__api__api__pre_login_impl(port, ptr, rust_vec_len, data_len),
-        26 => wire__crate__api__api__request_url_impl(port, ptr, rust_vec_len, data_len),
-        27 => wire__crate__api__api__retry_download_task_impl(port, ptr, rust_vec_len, data_len),
-        28 => wire__crate__api__api__save_property_impl(port, ptr, rust_vec_len, data_len),
-        29 => wire__crate__api__api__set_in_china_impl(port, ptr, rust_vec_len, data_len),
-        30 => wire__crate__api__api__update_download_task_status_impl(
+        20 => wire__crate__api__api__init_impl(port, ptr, rust_vec_len, data_len),
+        21 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__api__load_pixiv_image_impl(port, ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__api__load_property_impl(port, ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__api__login_by_code_impl(port, ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__api__per_in_china_impl(port, ptr, rust_vec_len, data_len),
+        26 => wire__crate__api__api__pre_login_impl(port, ptr, rust_vec_len, data_len),
+        27 => wire__crate__api__api__request_url_impl(port, ptr, rust_vec_len, data_len),
+        28 => wire__crate__api__api__retry_download_task_impl(port, ptr, rust_vec_len, data_len),
+        29 => wire__crate__api__api__save_property_impl(port, ptr, rust_vec_len, data_len),
+        30 => wire__crate__api__api__set_in_china_impl(port, ptr, rust_vec_len, data_len),
+        31 => wire__crate__api__api__unfollow_user_impl(port, ptr, rust_vec_len, data_len),
+        32 => wire__crate__api__api__update_download_task_status_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        31 => wire__crate__api__api__user_detail_impl(port, ptr, rust_vec_len, data_len),
-        32 => wire__crate__api__api__user_illusts_first_url_impl(port, ptr, rust_vec_len, data_len),
+        33 => wire__crate__api__api__user_bookmarks_impl(port, ptr, rust_vec_len, data_len),
+        34 => wire__crate__api__api__user_detail_impl(port, ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__api__user_following_impl(port, ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__api__user_illusts_first_url_impl(port, ptr, rust_vec_len, data_len),
+        37 => wire__crate__api__api__user_previews_from_url_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1840,7 +2066,7 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        12 => wire__crate__api__simple__greet_impl(ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__simple__greet_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -2324,6 +2550,49 @@ impl flutter_rust_bridge::IntoIntoDart<crate::pixirust::entities::UserDetail>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::pixirust::entities::UserPreview {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.user.into_into_dart().into_dart(),
+            self.illusts.into_into_dart().into_dart(),
+            self.is_muted.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::pixirust::entities::UserPreview
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::pixirust::entities::UserPreview>
+    for crate::pixirust::entities::UserPreview
+{
+    fn into_into_dart(self) -> crate::pixirust::entities::UserPreview {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::pixirust::entities::UserPreviewsResponse {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.user_previews.into_into_dart().into_dart(),
+            self.next_url.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::pixirust::entities::UserPreviewsResponse
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::pixirust::entities::UserPreviewsResponse>
+    for crate::pixirust::entities::UserPreviewsResponse
+{
+    fn into_into_dart(self) -> crate::pixirust::entities::UserPreviewsResponse {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::pixirust::entities::UserSample {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -2468,7 +2737,7 @@ impl SseEncode for crate::pixirust::entities::IllustResponse {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <Vec<crate::pixirust::entities::Illust>>::sse_encode(self.illusts, serializer);
-        <String>::sse_encode(self.next_url, serializer);
+        <Option<String>>::sse_encode(self.next_url, serializer);
     }
 }
 
@@ -2545,6 +2814,16 @@ impl SseEncode for Vec<crate::pixirust::entities::TrendTag> {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
             <crate::pixirust::entities::TrendTag>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::pixirust::entities::UserPreview> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::pixirust::entities::UserPreview>::sse_encode(item, serializer);
         }
     }
 }
@@ -2747,6 +3026,23 @@ impl SseEncode for crate::pixirust::entities::UserDetail {
         );
         <crate::pixirust::entities::User>::sse_encode(self.user, serializer);
         <crate::pixirust::entities::Workspace>::sse_encode(self.workspace, serializer);
+    }
+}
+
+impl SseEncode for crate::pixirust::entities::UserPreview {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::pixirust::entities::UserSample>::sse_encode(self.user, serializer);
+        <Vec<crate::pixirust::entities::Illust>>::sse_encode(self.illusts, serializer);
+        <bool>::sse_encode(self.is_muted, serializer);
+    }
+}
+
+impl SseEncode for crate::pixirust::entities::UserPreviewsResponse {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Vec<crate::pixirust::entities::UserPreview>>::sse_encode(self.user_previews, serializer);
+        <Option<String>>::sse_encode(self.next_url, serializer);
     }
 }
 

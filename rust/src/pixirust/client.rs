@@ -148,11 +148,16 @@ impl Client {
     }
 
     pub async fn get_from_pixiv_raw(&self, url: String) -> Result<String> {
-        let req = self.agent.get(url);
+        let req = self.agent.get(url.as_str());
         let req = self.sign_request(req);
         let rsp = req.send().await?;
         match &rsp.status().as_u16() {
-            200 => Ok(rsp.text().await?),
+            200 => {
+                let text = rsp.text().await?;
+                println!("url: {}", url);
+                println!("rsp text: {}", text);
+                Ok(text)
+            },
             _ => {
                 let ae: AppError = serde_json::from_str(rsp.text().await?.as_str())?;
                 Err(Error::msg(ae.error.message))
@@ -163,6 +168,22 @@ impl Client {
     async fn get_from_pixiv<T: for<'de> serde::Deserialize<'de>>(&self, url: String) -> Result<T> {
         let text = self.get_from_pixiv_raw(url).await?;
         Ok(serde_json::from_str(text.as_str())?)
+    }
+
+    async fn post_form_pixiv<T: for<'de> serde::Deserialize<'de>>(&self, url: String, form: Vec<(&str, String)>) -> Result<T> {
+        let req = self.agent.post(url);
+        let req = self.sign_request(req);
+        let rsp = req.form(&form).send().await?;
+        match &rsp.status().as_u16() {
+            200 => {
+                let text = rsp.text().await?;
+                Ok(serde_json::from_str(text.as_str())?)
+            },
+            _ => {
+                let ae: AppError = serde_json::from_str(rsp.text().await?.as_str())?;
+                Err(Error::msg(ae.error.message))
+            }
+        }
     }
 
     pub fn illust_recommended_first_url(&self) -> String {
@@ -187,6 +208,10 @@ impl Client {
     }
 
     pub async fn illust_from_url(&self, url: String) -> Result<IllustResponse> {
+        self.get_from_pixiv(url).await
+    }
+
+    pub async fn user_previews_from_url(&self, url: String) -> Result<UserPreviewsResponse> {
         self.get_from_pixiv(url).await
     }
 
@@ -223,6 +248,44 @@ impl Client {
         self.get_from_pixiv(format!(
             "https://{}/v1/user/detail?filter=for_android&user_id={}",
             APP.server, user_id,
+        ))
+        .await
+    }
+
+    pub async fn follow_user(&self, user_id: i64, restrict: String) -> Result<()> {
+        let _result: serde_json::Value = self.post_form_pixiv(
+            format!("https://{}/v1/user/follow/add", APP.server),
+            vec![
+                ("user_id", user_id.to_string()),
+                ("restrict", restrict),
+            ],
+        )
+        .await?;
+        Ok(())
+    }
+
+    pub async fn unfollow_user(&self, user_id: i64) -> Result<()> {
+        let _result: serde_json::Value = self.post_form_pixiv(
+            format!("https://{}/v1/user/follow/delete", APP.server),
+            vec![("user_id", user_id.to_string())],
+        )
+        .await?;
+        Ok(())
+    }
+
+    pub async fn user_following(&self, user_id: i64, restrict: String) -> Result<UserPreviewsResponse> {
+        self.get_from_pixiv(format!(
+            "https://{}/v1/user/following?filter=for_android&user_id={}&restrict={}",
+            APP.server, user_id, restrict,
+        ))
+        .await
+    }
+
+    pub async fn user_bookmarks(&self, user_id: i64, restrict: String, tag: Option<String>) -> Result<IllustResponse> {
+        let tag_param = tag.map(|t| format!("&tag={}", urlencoding::encode(&t))).unwrap_or_default();
+        self.get_from_pixiv(format!(
+            "https://{}/v1/user/bookmarks/illust?user_id={}&restrict={}{}",
+            APP.server, user_id, restrict, tag_param,
         ))
         .await
     }

@@ -146,5 +146,12 @@
   "retrying": "Retrying...",
   "confirm": "Confirm",
   "cancel": "Cancel",
-  "delete": "Delete"
+  "delete": "Delete",
+  "follow": "Follow",
+  "following": "Following",
+  "unfollow": "Unfollow",
+  "followingList": "Following List",
+  "bookmarks": "Bookmarks",
+  "public_": "Public",
+  "private_": "Private"
 }

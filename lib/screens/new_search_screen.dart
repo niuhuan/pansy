@@ -207,7 +207,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
   late TabController _tabController;
   final List<String> _sortOptions = [
     'date_desc',
-    // 'popular_desc',
+    'popular_desc',
   ];
 
   @override
@@ -231,7 +231,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
           controller: _tabController,
           tabs: [
             Tab(text: AppLocalizations.of(context)!.latest),
-            // Tab(text: AppLocalizations.of(context)!.popular),
+            Tab(text: AppLocalizations.of(context)!.popular),
           ],
         ),
       ),

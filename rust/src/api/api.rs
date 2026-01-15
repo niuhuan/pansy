@@ -4,7 +4,7 @@ use crate::local::{
     set_token,
 };
 use crate::pixirust::client::{IllustTrendingTags, UserDetail};
-use crate::pixirust::entities::IllustResponse;
+use crate::pixirust::entities::{IllustResponse, UserPreviewsResponse};
 use crate::pixirust::entities::LoginUrl;
 use crate::udto::*;
 use crate::get_network_image_dir;
@@ -143,6 +143,13 @@ pub fn illust_from_url(url: String) -> Result<IllustResponse> {
     })
 }
 
+pub fn user_previews_from_url(url: String) -> Result<UserPreviewsResponse> {
+    block_on(async {
+        let result = client(2).await?.user_previews_from_url(url).await?;
+        Ok(result.into())
+    })
+}
+
 pub fn illust_recommended_first_url() -> Result<String> {
     block_on(async {
         Ok(crate::local::client(1)
@@ -224,6 +231,27 @@ pub fn load_pixiv_image(url: String) -> Result<String> {
 
 pub fn user_detail(user_id: i64) -> Result<UserDetail> {
     block_on(async { crate::local::client(2).await?.user_detail(user_id).await })
+}
+
+pub fn follow_user(user_id: i64, restrict: String) -> Result<()> {
+    block_on(async { crate::local::client(2).await?.follow_user(user_id, restrict).await })
+}
+
+pub fn unfollow_user(user_id: i64) -> Result<()> {
+    block_on(async { crate::local::client(2).await?.unfollow_user(user_id).await })
+}
+
+pub fn user_following(user_id: i64, restrict: String) -> Result<UserPreviewsResponse> {
+    block_on(async { 
+        crate::local::client(2).await?.user_following(user_id, restrict).await
+    })
+}
+
+pub fn user_bookmarks(user_id: i64, restrict: String, tag: Option<String>) -> Result<IllustResponse> {
+    block_on(async {
+        let result = crate::local::client(2).await?.user_bookmarks(user_id, restrict, tag).await?;
+        Ok(result.into())
+    })
 }
 
 // ============= Download Task Management =============
@@ -355,7 +383,7 @@ async fn _execute_single_download(task: &download_task::Model) -> Result<()> {
     // Download the image to cache first
     let _lock = hash_lock(&task.url).await;
     let db_image = network_image::find_by_url(task.url.clone()).await?;
-    let cached_path = match db_image {
+    let _cached_path = match db_image {
         Some(db_image) => {
             join_paths(vec![get_network_image_dir().as_str(), &db_image.path])
         }

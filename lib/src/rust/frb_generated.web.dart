@@ -86,6 +86,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<TrendTag> dco_decode_list_trend_tag(dynamic raw);
 
   @protected
+  List<UserPreview> dco_decode_list_user_preview(dynamic raw);
+
+  @protected
   LoginUrl dco_decode_login_url(dynamic raw);
 
   @protected
@@ -144,6 +147,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   UserDetail dco_decode_user_detail(dynamic raw);
+
+  @protected
+  UserPreview dco_decode_user_preview(dynamic raw);
+
+  @protected
+  UserPreviewsResponse dco_decode_user_previews_response(dynamic raw);
 
   @protected
   UserSample dco_decode_user_sample(dynamic raw);
@@ -222,6 +231,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<TrendTag> sse_decode_list_trend_tag(SseDeserializer deserializer);
 
   @protected
+  List<UserPreview> sse_decode_list_user_preview(SseDeserializer deserializer);
+
+  @protected
   LoginUrl sse_decode_login_url(SseDeserializer deserializer);
 
   @protected
@@ -288,6 +300,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   UserDetail sse_decode_user_detail(SseDeserializer deserializer);
+
+  @protected
+  UserPreview sse_decode_user_preview(SseDeserializer deserializer);
+
+  @protected
+  UserPreviewsResponse sse_decode_user_previews_response(
+    SseDeserializer deserializer,
+  );
 
   @protected
   UserSample sse_decode_user_sample(SseDeserializer deserializer);
@@ -383,6 +403,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_list_trend_tag(List<TrendTag> self, SseSerializer serializer);
 
   @protected
+  void sse_encode_list_user_preview(
+    List<UserPreview> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_login_url(LoginUrl self, SseSerializer serializer);
 
   @protected
@@ -465,6 +491,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_user_detail(UserDetail self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_user_preview(UserPreview self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_user_previews_response(
+    UserPreviewsResponse self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_user_sample(UserSample self, SseSerializer serializer);

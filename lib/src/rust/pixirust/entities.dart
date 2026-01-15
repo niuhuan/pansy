@@ -115,9 +115,9 @@ class Illust {
 
 class IllustResponse {
   final List<Illust> illusts;
-  final String nextUrl;
+  final String? nextUrl;
 
-  const IllustResponse({required this.illusts, required this.nextUrl});
+  const IllustResponse({required this.illusts, this.nextUrl});
 
   @override
   int get hashCode => illusts.hashCode ^ nextUrl.hashCode;
@@ -550,6 +550,48 @@ class UserDetail {
           profilePublicity == other.profilePublicity &&
           user == other.user &&
           workspace == other.workspace;
+}
+
+class UserPreview {
+  final UserSample user;
+  final List<Illust> illusts;
+  final bool isMuted;
+
+  const UserPreview({
+    required this.user,
+    required this.illusts,
+    required this.isMuted,
+  });
+
+  @override
+  int get hashCode => user.hashCode ^ illusts.hashCode ^ isMuted.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserPreview &&
+          runtimeType == other.runtimeType &&
+          user == other.user &&
+          illusts == other.illusts &&
+          isMuted == other.isMuted;
+}
+
+class UserPreviewsResponse {
+  final List<UserPreview> userPreviews;
+  final String? nextUrl;
+
+  const UserPreviewsResponse({required this.userPreviews, this.nextUrl});
+
+  @override
+  int get hashCode => userPreviews.hashCode ^ nextUrl.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserPreviewsResponse &&
+          runtimeType == other.runtimeType &&
+          userPreviews == other.userPreviews &&
+          nextUrl == other.nextUrl;
 }
 
 class UserSample {

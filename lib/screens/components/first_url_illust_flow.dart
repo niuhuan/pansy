@@ -16,13 +16,13 @@ class FirstUrlIllustFlow extends StatefulWidget {
 
 class _FirstUrlIllustFlowState extends State<FirstUrlIllustFlow> {
 
-  String _nextUrl = "";
+  String? _nextUrl;
 
   Future<List<Illust>> _next() async {
-    if (_nextUrl == "") {
+    if (_nextUrl == null) {
       _nextUrl = widget.firstUrl;
     }
-    var response = await illustFromUrl(url: _nextUrl);
+    var response = await illustFromUrl(url: _nextUrl!);
     _nextUrl = response.nextUrl;
     return response.illusts;
   }

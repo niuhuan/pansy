@@ -53,7 +53,8 @@ pub struct UserMessageDetails {}
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct IllustResponse {
     pub illusts: Vec<Illust>,
-    pub next_url: String,
+    #[serde(default)]
+    pub next_url: Option<String>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -226,4 +227,19 @@ pub struct Workspace {
     pub tablet: String,
     pub tool: String,
     pub workspace_image_url: Option<String>,
+}
+
+// User following response
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct UserPreviewsResponse {
+    pub user_previews: Vec<UserPreview>,
+    #[serde(default)]
+    pub next_url: Option<String>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct UserPreview {
+    pub user: UserSample,
+    pub illusts: Vec<Illust>,
+    pub is_muted: bool,
 }

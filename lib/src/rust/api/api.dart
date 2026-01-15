@@ -48,6 +48,9 @@ Future<String> requestUrl({required String params}) =>
 Future<IllustResponse> illustFromUrl({required String url}) =>
     RustLib.instance.api.crateApiApiIllustFromUrl(url: url);
 
+Future<UserPreviewsResponse> userPreviewsFromUrl({required String url}) =>
+    RustLib.instance.api.crateApiApiUserPreviewsFromUrl(url: url);
+
 Future<String> illustRecommendedFirstUrl() =>
     RustLib.instance.api.crateApiApiIllustRecommendedFirstUrl();
 
@@ -72,6 +75,35 @@ Future<String> loadPixivImage({required String url}) =>
 
 Future<UserDetail> userDetail({required PlatformInt64 userId}) =>
     RustLib.instance.api.crateApiApiUserDetail(userId: userId);
+
+Future<void> followUser({
+  required PlatformInt64 userId,
+  required String restrict,
+}) => RustLib.instance.api.crateApiApiFollowUser(
+  userId: userId,
+  restrict: restrict,
+);
+
+Future<void> unfollowUser({required PlatformInt64 userId}) =>
+    RustLib.instance.api.crateApiApiUnfollowUser(userId: userId);
+
+Future<UserPreviewsResponse> userFollowing({
+  required PlatformInt64 userId,
+  required String restrict,
+}) => RustLib.instance.api.crateApiApiUserFollowing(
+  userId: userId,
+  restrict: restrict,
+);
+
+Future<IllustResponse> userBookmarks({
+  required PlatformInt64 userId,
+  required String restrict,
+  String? tag,
+}) => RustLib.instance.api.crateApiApiUserBookmarks(
+  userId: userId,
+  restrict: restrict,
+  tag: tag,
+);
 
 Future<PlatformInt64> createDownloadTask({
   required PlatformInt64 illustId,

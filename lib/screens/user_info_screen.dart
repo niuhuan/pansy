@@ -10,6 +10,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../src/rust/pixirust/entities.dart';
 import 'user_illusts_screen.dart';
+import 'user_following_screen.dart';
+import 'user_bookmarks_screen.dart';
 
 class UserInfoScreen extends StatefulWidget {
   final UserSample userSample;
@@ -25,12 +27,15 @@ const _avatarSize = 95.0;
 class _UserInfoScreenState extends State<UserInfoScreen> {
   late Future<UserDetail> _future;
   late ScrollController _scrollController;
+  bool _isFollowing = false;
+  bool _isFollowLoading = false;
 
   @override
   void initState() {
     _future = userDetail(userId: widget.userSample.id);
     _scrollController = ScrollController();
     _scrollController.addListener(_setState);
+    _isFollowing = widget.userSample.isFollowed ?? false;
     super.initState();
   }
 
@@ -164,7 +169,78 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           ),
         ),
       ),
+      actions: [
+        _isFollowLoading
+            ? Container(
+                padding: const EdgeInsets.all(12),
+                child: const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+              )
+            : ShadowIconButton(
+                icon: _isFollowing ? Icons.person_remove : Icons.person_add,
+                onPressed: _toggleFollow,
+              ),
+        Container(width: 8),
+      ],
     );
+  }
+
+  Future<void> _toggleFollow() async {
+    if (_isFollowLoading) return;
+    
+    setState(() {
+      _isFollowLoading = true;
+    });
+
+    try {
+      if (_isFollowing) {
+        await unfollowUser(userId: widget.userSample.id);
+        setState(() {
+          _isFollowing = false;
+          _isFollowLoading = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.unfollow),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
+      } else {
+        await followUser(userId: widget.userSample.id, restrict: "public");
+        setState(() {
+          _isFollowing = true;
+          _isFollowLoading = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.following),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isFollowLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildBody(UserDetail userDetail) {
@@ -231,16 +307,30 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           Expanded(
             child: Container(),
           ),
-          Text(
-            "${userDetail.profile.totalFollowUsers}",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.secondary,
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => UserFollowingScreen(
+                  userId: widget.userSample.id,
+                  userName: widget.userSample.name,
+                ),
+              ));
+            },
+            child: Row(
+              children: [
+                Text(
+                  "${userDetail.profile.totalFollowUsers}",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                ),
+                const Text(" "),
+                Text(
+                  AppLocalizations.of(context)!.followers,
+                  style: const TextStyle(),
+                ),
+              ],
             ),
-          ),
-          const Text(" "),
-          Text(
-            AppLocalizations.of(context)!.followers,
-            style: const TextStyle(),
           ),
           Container(width: 25),
           Text(
@@ -258,6 +348,37 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             child: Container(),
           ),
         ]),
+        Container(height: 15),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton.icon(
+              icon: const Icon(Icons.people, size: 18),
+              label: Text(AppLocalizations.of(context)!.followingList),
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => UserFollowingScreen(
+                    userId: widget.userSample.id,
+                    userName: widget.userSample.name,
+                  ),
+                ));
+              },
+            ),
+            Container(width: 15),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.bookmark, size: 18),
+              label: Text(AppLocalizations.of(context)!.bookmarks),
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => UserBookmarksScreen(
+                    userId: widget.userSample.id,
+                    userName: widget.userSample.name,
+                  ),
+                ));
+              },
+            ),
+          ],
+        ),
         Container(height: 20),
         _buildInfos(userDetail),
         Container(height: 20),

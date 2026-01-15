@@ -146,5 +146,12 @@
   "retrying": "正在重试...",
   "confirm": "确定",
   "cancel": "取消",
-  "delete": "删除"
+  "delete": "删除",
+  "follow": "关注",
+  "following": "关注中",
+  "unfollow": "取消关注",
+  "followingList": "关注列表",
+  "bookmarks": "收藏",
+  "public_": "公开",
+  "private_": "私密"
 }
