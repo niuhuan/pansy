@@ -115,9 +115,9 @@ class _HelloScreenState extends State<HelloScreen> {
       },
       destinations: [
         NavigationRailDestination(
-          icon: const Icon(Icons.home_outlined),
-          selectedIcon: const Icon(Icons.home),
-          label: Text(i18n.home),
+          icon: const Icon(Icons.explore_outlined),
+          selectedIcon: const Icon(Icons.explore),
+          label: Text(i18n.discover),
         ),
         NavigationRailDestination(
           icon: const Icon(Icons.leaderboard_outlined),
@@ -155,9 +155,9 @@ class _HelloScreenState extends State<HelloScreen> {
           },
           destinations: [
             NavigationDestination(
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home),
-              label: i18n.home,
+              icon: const Icon(Icons.explore_outlined),
+              selectedIcon: const Icon(Icons.explore),
+              label: i18n.discover,
             ),
             NavigationDestination(
               icon: const Icon(Icons.leaderboard_outlined),

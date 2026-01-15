@@ -3,7 +3,9 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/ranks.dart';
 import 'package:pansy/screens/components/illust_card.dart';
+import 'package:pansy/screens/components/pixiv_image.dart';
 import 'package:pansy/screens/illust_info_screen.dart';
+import 'package:pansy/screens/user_info_screen.dart';
 import 'package:pansy/src/rust/api/api.dart';
 import 'package:pansy/src/rust/pixirust/entities.dart';
 import 'package:pansy/src/rust/udto.dart';
@@ -67,7 +69,52 @@ class _RankingScreenState extends State<RankingScreen>
             SliverAppBar(
               floating: true,
               pinned: true,
-              title: Text(AppLocalizations.of(context)!.ranking),
+              leading: FutureBuilder(
+                future: currentUser(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    final user = snapshot.data!;
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => UserInfoScreen(
+                              UserSample(
+                                id: user.userId,
+                                name: user.name,
+                                account: user.account,
+                                profileImageUrls: ProfileImageUrls(
+                                  medium: user.profileImageUrl,
+                                ),
+                                isFollowed: false,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              radius: 16,
+                              backgroundImage: PixivUrlImageProvider(
+                                user.profileImageUrl,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+              title: Align(
+                alignment: Alignment.centerRight,
+                child: Text(AppLocalizations.of(context)!.ranking),
+              ),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.date_range),

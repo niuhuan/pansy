@@ -19,6 +19,14 @@ pub struct UiIllustRankQuery {
     pub date: String,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UiCurrentUser {
+    pub user_id: i64,
+    pub name: String,
+    pub account: String,
+    pub profile_image_url: String,
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct DownloadTaskDto {
     pub id: i64,
@@ -36,4 +44,5 @@ pub struct DownloadTaskDto {
     pub created_time: i64,
     pub updated_time: i64,
 }
+
 

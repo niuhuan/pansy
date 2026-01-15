@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pansy/basic/format_utils.dart';
 import 'package:pansy/screens/components/image_size_abel.dart';
 import 'package:pansy/screens/components/pixiv_image.dart';
 import 'package:pansy/src/rust/pixirust/entities.dart';
@@ -93,7 +94,7 @@ class IllustCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          illust.totalBookmarks.toString(),
+                          formatNumber(illust.totalBookmarks),
                           style: TextStyle(
                             fontSize: 12,
                             color: textColor.withAlpha(160),
@@ -107,7 +108,7 @@ class IllustCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          illust.totalView.toString(),
+                          formatNumber(illust.totalView),
                           style: TextStyle(
                             fontSize: 12,
                             color: textColor.withAlpha(160),

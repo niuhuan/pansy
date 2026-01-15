@@ -34,6 +34,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Series dco_decode_box_autoadd_series(dynamic raw);
 
   @protected
+  UiCurrentUser dco_decode_box_autoadd_ui_current_user(dynamic raw);
+
+  @protected
   UiIllustRankQuery dco_decode_box_autoadd_ui_illust_rank_query(dynamic raw);
 
   @protected
@@ -108,6 +111,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Series? dco_decode_opt_box_autoadd_series(dynamic raw);
 
   @protected
+  UiCurrentUser? dco_decode_opt_box_autoadd_ui_current_user(dynamic raw);
+
+  @protected
   Profile dco_decode_profile(dynamic raw);
 
   @protected
@@ -127,6 +133,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   int dco_decode_u_8(dynamic raw);
+
+  @protected
+  UiCurrentUser dco_decode_ui_current_user(dynamic raw);
 
   @protected
   UiIllustRankQuery dco_decode_ui_illust_rank_query(dynamic raw);
@@ -169,6 +178,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Series sse_decode_box_autoadd_series(SseDeserializer deserializer);
+
+  @protected
+  UiCurrentUser sse_decode_box_autoadd_ui_current_user(
+    SseDeserializer deserializer,
+  );
 
   @protected
   UiIllustRankQuery sse_decode_box_autoadd_ui_illust_rank_query(
@@ -255,6 +269,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Series? sse_decode_opt_box_autoadd_series(SseDeserializer deserializer);
 
   @protected
+  UiCurrentUser? sse_decode_opt_box_autoadd_ui_current_user(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   Profile sse_decode_profile(SseDeserializer deserializer);
 
   @protected
@@ -274,6 +293,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   int sse_decode_u_8(SseDeserializer deserializer);
+
+  @protected
+  UiCurrentUser sse_decode_ui_current_user(SseDeserializer deserializer);
 
   @protected
   UiIllustRankQuery sse_decode_ui_illust_rank_query(
@@ -327,6 +349,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_box_autoadd_series(Series self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_ui_current_user(
+    UiCurrentUser self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_box_autoadd_ui_illust_rank_query(
@@ -437,6 +465,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_ui_current_user(
+    UiCurrentUser? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_profile(Profile self, SseSerializer serializer);
 
   @protected
@@ -462,6 +496,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_u_8(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_ui_current_user(UiCurrentUser self, SseSerializer serializer);
 
   @protected
   void sse_encode_ui_illust_rank_query(

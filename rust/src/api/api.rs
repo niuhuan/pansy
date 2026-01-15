@@ -254,6 +254,22 @@ pub fn user_bookmarks(user_id: i64, restrict: String, tag: Option<String>) -> Re
     })
 }
 
+pub fn current_user() -> Result<Option<UiCurrentUser>> {
+    block_on(async {
+        let period = crate::local::TOKEN.lock().await;
+        if period.created_time == 0 {
+            return Ok(None);
+        }
+        let user = &period.token.user;
+        Ok(Some(UiCurrentUser {
+            user_id: user.id.parse().unwrap_or(0),
+            name: user.name.clone(),
+            account: user.account.clone(),
+            profile_image_url: user.profile_image_urls.px_170x170.clone(),
+        }))
+    })
+}
+
 // ============= Download Task Management =============
 
 pub fn create_download_task(

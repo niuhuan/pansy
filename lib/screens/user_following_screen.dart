@@ -10,11 +10,13 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class UserFollowingScreen extends StatefulWidget {
   final int userId;
   final String userName;
+  final bool isOwnProfile;
 
   const UserFollowingScreen({
     Key? key,
     required this.userId,
     required this.userName,
+    this.isOwnProfile = false,
   }) : super(key: key);
 
   @override
@@ -27,6 +29,7 @@ class _UserFollowingScreenState extends State<UserFollowingScreen> {
   bool _hasError = false;
   String? _nextUrl;
   final ScrollController _scrollController = ScrollController();
+  String _restrict = 'public';
 
   @override
   void initState() {
@@ -61,7 +64,7 @@ class _UserFollowingScreenState extends State<UserFollowingScreen> {
     try {
       final result = await userFollowing(
         userId: widget.userId,
-        restrict: 'public',
+        restrict: _restrict,
       );
       setState(() {
         _users.clear();
@@ -105,6 +108,24 @@ class _UserFollowingScreenState extends State<UserFollowingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.userName} - ${AppLocalizations.of(context)!.following}'),
+        actions: widget.isOwnProfile ? [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _restrict = _restrict == 'public' ? 'private' : 'public';
+              });
+              _loadUsers();
+            },
+            child: Text(
+              _restrict == 'public' 
+                ? AppLocalizations.of(context)!.public 
+                : AppLocalizations.of(context)!.private,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+        ] : null,
       ),
       body: _buildBody(context),
     );

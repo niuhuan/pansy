@@ -29,6 +29,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
   late ScrollController _scrollController;
   bool _isFollowing = false;
   bool _isFollowLoading = false;
+  bool _isOwnProfile = false;
 
   @override
   void initState() {
@@ -36,7 +37,17 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     _scrollController = ScrollController();
     _scrollController.addListener(_setState);
     _isFollowing = widget.userSample.isFollowed ?? false;
+    _checkIfOwnProfile();
     super.initState();
+  }
+
+  Future<void> _checkIfOwnProfile() async {
+    final currentUserInfo = await currentUser();
+    if (currentUserInfo != null && currentUserInfo.userId == widget.userSample.id) {
+      setState(() {
+        _isOwnProfile = true;
+      });
+    }
   }
 
   @override
@@ -170,22 +181,23 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         ),
       ),
       actions: [
-        _isFollowLoading
-            ? Container(
-                padding: const EdgeInsets.all(12),
-                child: const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        if (!_isOwnProfile)
+          _isFollowLoading
+              ? Container(
+                  padding: const EdgeInsets.all(12),
+                  child: const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
                   ),
+                )
+              : ShadowIconButton(
+                  icon: _isFollowing ? Icons.person_remove : Icons.person_add,
+                  onPressed: _toggleFollow,
                 ),
-              )
-            : ShadowIconButton(
-                icon: _isFollowing ? Icons.person_remove : Icons.person_add,
-                onPressed: _toggleFollow,
-              ),
         Container(width: 8),
       ],
     );
@@ -316,6 +328,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                     builder: (context) => UserFollowingScreen(
                       userId: widget.userSample.id,
                       userName: widget.userSample.name,
+                      isOwnProfile: _isOwnProfile,
                     ),
                   ));
                 },
@@ -342,6 +355,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                     builder: (context) => UserBookmarksScreen(
                       userId: widget.userSample.id,
                       userName: widget.userSample.name,
+                      isOwnProfile: _isOwnProfile,
                     ),
                   ));
                 },

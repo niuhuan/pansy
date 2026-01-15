@@ -77,6 +77,37 @@ class DownloadTaskDto {
           updatedTime == other.updatedTime;
 }
 
+class UiCurrentUser {
+  final PlatformInt64 userId;
+  final String name;
+  final String account;
+  final String profileImageUrl;
+
+  const UiCurrentUser({
+    required this.userId,
+    required this.name,
+    required this.account,
+    required this.profileImageUrl,
+  });
+
+  @override
+  int get hashCode =>
+      userId.hashCode ^
+      name.hashCode ^
+      account.hashCode ^
+      profileImageUrl.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UiCurrentUser &&
+          runtimeType == other.runtimeType &&
+          userId == other.userId &&
+          name == other.name &&
+          account == other.account &&
+          profileImageUrl == other.profileImageUrl;
+}
+
 class UiIllustRankQuery {
   final String mode;
   final String date;

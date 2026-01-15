@@ -28,14 +28,28 @@ pub(crate) fn join_paths<P: AsRef<Path>>(paths: Vec<P>) -> String {
 }
 
 lazy_static::lazy_static! {
-    static ref TOKEN:Mutex<TokenPeriod> = Mutex::<TokenPeriod>::new(
+    pub(crate) static ref TOKEN:Mutex<TokenPeriod> = Mutex::<TokenPeriod>::new(
         TokenPeriod{
             token:Token{
-                access_token: String::default (),
+                access_token: String::default(),
                 expires_in: 0,
-                token_type: String::default (),
-                scope: String::default (),
-                refresh_token: String::default (),
+                token_type: String::default(),
+                scope: String::default(),
+                refresh_token: String::default(),
+                user: crate::pixirust::entities::TokenUser{
+                    profile_image_urls: crate::pixirust::entities::TokenProfileImageUrls{
+                        px_16x16: String::default(),
+                        px_50x50: String::default(),
+                        px_170x170: String::default(),
+                    },
+                    id: String::default(),
+                    name: String::default(),
+                    account: String::default(),
+                    mail_address: String::default(),
+                    is_premium: false,
+                    x_restrict: 0,
+                    is_mail_authorized: false,
+                },
             },
             created_time:0,
         }

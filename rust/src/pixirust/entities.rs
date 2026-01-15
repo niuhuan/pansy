@@ -6,7 +6,7 @@ pub struct LoginUrl {
     pub url: String,
 }
 
-// user 和 response 省略
+// Token response with user information
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Token {
     pub access_token: String,
@@ -14,6 +14,26 @@ pub struct Token {
     pub token_type: String,
     pub scope: String,
     pub refresh_token: String,
+    pub user: TokenUser,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TokenUser {
+    pub profile_image_urls: TokenProfileImageUrls,
+    pub id: String,
+    pub name: String,
+    pub account: String,
+    pub mail_address: String,
+    pub is_premium: bool,
+    pub x_restrict: i64,
+    pub is_mail_authorized: bool,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TokenProfileImageUrls {
+    pub px_16x16: String,
+    pub px_50x50: String,
+    pub px_170x170: String,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

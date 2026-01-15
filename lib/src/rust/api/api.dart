@@ -105,6 +105,9 @@ Future<IllustResponse> userBookmarks({
   tag: tag,
 );
 
+Future<UiCurrentUser?> currentUser() =>
+    RustLib.instance.api.crateApiApiCurrentUser();
+
 Future<PlatformInt64> createDownloadTask({
   required PlatformInt64 illustId,
   required String illustTitle,

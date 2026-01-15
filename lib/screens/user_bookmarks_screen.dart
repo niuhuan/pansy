@@ -12,11 +12,13 @@ import 'package:signals_flutter/signals_flutter.dart';
 class UserBookmarksScreen extends StatefulWidget {
   final int userId;
   final String userName;
+  final bool isOwnProfile;
 
   const UserBookmarksScreen({
     Key? key,
     required this.userId,
     required this.userName,
+    this.isOwnProfile = false,
   }) : super(key: key);
 
   @override
@@ -29,6 +31,7 @@ class _UserBookmarksScreenState extends State<UserBookmarksScreen> {
   bool _hasError = false;
   String? _nextUrl;
   final ScrollController _scrollController = ScrollController();
+  String _restrict = 'public';
 
   @override
   void initState() {
@@ -63,7 +66,7 @@ class _UserBookmarksScreenState extends State<UserBookmarksScreen> {
     try {
       final result = await userBookmarks(
         userId: widget.userId,
-        restrict: 'public',
+        restrict: _restrict,
         tag: null,
       );
       setState(() {
@@ -107,6 +110,24 @@ class _UserBookmarksScreenState extends State<UserBookmarksScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.userName} - ${AppLocalizations.of(context)!.bookmarks}'),
+        actions: widget.isOwnProfile ? [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _restrict = _restrict == 'public' ? 'private' : 'public';
+              });
+              _loadBookmarks();
+            },
+            child: Text(
+              _restrict == 'public' 
+                ? AppLocalizations.of(context)!.public 
+                : AppLocalizations.of(context)!.private,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
+        ] : null,
       ),
       body: _buildBody(context),
     );

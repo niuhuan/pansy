@@ -154,8 +154,6 @@ impl Client {
         match &rsp.status().as_u16() {
             200 => {
                 let text = rsp.text().await?;
-                println!("url: {}", url);
-                println!("rsp text: {}", text);
                 Ok(text)
             },
             _ => {
