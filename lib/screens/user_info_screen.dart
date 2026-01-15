@@ -303,79 +303,86 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
           ),
         ),
         Container(height: 10),
-        Row(children: [
-          Expanded(
-            child: Container(),
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => UserFollowingScreen(
-                  userId: widget.userSample.id,
-                  userName: widget.userSample.name,
+        Center(
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 25,
+            runSpacing: 8,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => UserFollowingScreen(
+                      userId: widget.userSample.id,
+                      userName: widget.userSample.name,
+                    ),
+                  ));
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "${userDetail.profile.totalFollowUsers}",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                    ),
+                    const Text(" "),
+                    Text(
+                      AppLocalizations.of(context)!.followers,
+                      style: const TextStyle(),
+                    ),
+                  ],
                 ),
-              ));
-            },
-            child: Row(
-              children: [
-                Text(
-                  "${userDetail.profile.totalFollowUsers}",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.secondary,
-                  ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => UserBookmarksScreen(
+                      userId: widget.userSample.id,
+                      userName: widget.userSample.name,
+                    ),
+                  ));
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (userDetail.profile.totalIllustBookmarksPublic > 0) ...[
+                      Text(
+                        "${userDetail.profile.totalIllustBookmarksPublic}",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
+                      const Text(" "),
+                    ],
+                    Text(
+                      AppLocalizations.of(context)!.bookmarks,
+                      style: const TextStyle(),
+                    ),
+                  ],
                 ),
-                const Text(" "),
-                Text(
-                  AppLocalizations.of(context)!.followers,
-                  style: const TextStyle(),
-                ),
-              ],
-            ),
-          ),
-          Container(width: 25),
-          Text(
-            "${userDetail.profile.totalMypixivUsers}",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.secondary,
-            ),
-          ),
-          const Text(" "),
-          Text(
-            AppLocalizations.of(context)!.pFriends,
-            style: const TextStyle(),
-          ),
-          Container(width: 25),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => UserBookmarksScreen(
-                  userId: widget.userSample.id,
-                  userName: widget.userSample.name,
-                ),
-              ));
-            },
-            child: Row(
-              children: [
-                if (userDetail.profile.totalIllustBookmarksPublic > 0) ...[
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text(
-                    "${userDetail.profile.totalIllustBookmarksPublic}",
+                    "${userDetail.profile.totalMypixivUsers}",
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.secondary,
                     ),
                   ),
                   const Text(" "),
+                  Text(
+                    AppLocalizations.of(context)!.pFriends,
+                    style: const TextStyle(),
+                  ),
                 ],
-                Text(
-                  AppLocalizations.of(context)!.bookmarks,
-                  style: const TextStyle(),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Expanded(
-            child: Container(),
-          ),
-        ]),
+        ),
         Container(height: 20),
         _buildInfos(userDetail),
         Container(height: 20),

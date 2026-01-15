@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:pansy/basic/config/illust_display.dart';
+import 'package:pansy/screens/search_screen.dart' show chooseMode, tagModeNameAlias, ILLUST_SEARCH_MODE_PARTIAL_MATCH_FOR_TAGS;
 import 'package:pansy/screens/components/illust_card.dart';
 import 'package:pansy/screens/components/pixiv_image.dart';
 import 'package:pansy/screens/illust_info_screen.dart';
@@ -235,8 +236,13 @@ class _SearchScreenState extends State<SearchScreen>
 /// 搜索结果页面
 class SearchResultScreen extends StatefulWidget {
   final String query;
+  final String mode;
 
-  const SearchResultScreen({Key? key, required this.query}) : super(key: key);
+  const SearchResultScreen({
+    Key? key,
+    required this.query,
+    this.mode = ILLUST_SEARCH_MODE_PARTIAL_MATCH_FOR_TAGS,
+  }) : super(key: key);
 
   @override
   State<SearchResultScreen> createState() => _SearchResultScreenState();
@@ -267,6 +273,44 @@ class _SearchResultScreenState extends State<SearchResultScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.query),
+        actions: [
+          Column(
+            children: [
+              Expanded(child: Container()),
+              MaterialButton(
+                minWidth: 50,
+                onPressed: () async {
+                  String? mode = await chooseMode(context);
+                  if (mode != null && mode != widget.mode) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return SearchResultScreen(
+                            query: widget.query,
+                            mode: mode,
+                          );
+                        },
+                      ),
+                    );
+                  }
+                },
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.style,
+                      size: 20,
+                    ),
+                    Text(
+                      tagModeNameAlias(widget.mode),
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(child: Container()),
+            ],
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -281,6 +325,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
           return _SearchResultTab(
             query: widget.query,
             sort: sort,
+            mode: widget.mode,
           );
         }).toList(),
       ),
@@ -291,10 +336,12 @@ class _SearchResultScreenState extends State<SearchResultScreen>
 class _SearchResultTab extends StatefulWidget {
   final String query;
   final String sort;
+  final String mode;
 
   const _SearchResultTab({
     required this.query,
     required this.sort,
+    required this.mode,
   });
 
   @override
@@ -343,11 +390,11 @@ class _SearchResultTabState extends State<_SearchResultTab>
     });
 
     try {
-      print('Search query: word=${widget.query}, searchTarget=partial_match_for_tags, sort=${widget.sort}');
+      print('Search query: word=${widget.query}, searchTarget=${widget.mode}, sort=${widget.sort}');
       final firstUrl = await illustSearchFirstUrl(
         query: UiIllustSearchQuery(
           word: widget.query,
-          searchTarget: 'partial_match_for_tags',
+          searchTarget: widget.mode,
           sort: widget.sort,
         ),
       );
