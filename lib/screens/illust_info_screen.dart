@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:date_format/date_format.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/config/download_dir.dart';
@@ -11,12 +10,13 @@ import 'package:pansy/basic/config/download_save_target.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:pansy/basic/download/download_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:pansy/src/rust/api/api.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../src/rust/pixirust/entities.dart';
 import 'components/appbar.dart';
 import 'components/pixiv_image.dart';
 import 'search_screen.dart';
+import 'user_info_screen.dart';
 
 class IllustInfoScreen extends StatefulWidget {
   final Illust illust;
@@ -28,6 +28,13 @@ class IllustInfoScreen extends StatefulWidget {
 }
 
 class _IllustInfoScreenState extends State<IllustInfoScreen> {
+  static const _sectionMargin = EdgeInsets.only(top: .5, bottom: .5);
+  static const _sectionShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.zero,
+  );
+
+  final GlobalKey _moreMenuKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +42,7 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: buildUserSampleAppBar(context, widget.illust.user, [
         _moreButton(),
@@ -42,9 +50,11 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
       body: ListView(
         children: [
           ..._buildPictures(),
+          _buildTitleAuthor(),
           _buildInfos(),
-          _buildTitle(),
+          if (_plainCaption(widget.illust.caption).isNotEmpty) _buildCaption(),
           _buildTags(),
+          if (widget.illust.tools.isNotEmpty) _buildTools(l10n),
           SafeArea(top: false, child: Container()),
         ],
       ),
@@ -100,38 +110,41 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
     final textColorTitle = (theme.textTheme.titleMedium?.color ?? Colors.black);
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(top: .5, bottom: .5),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      child: Container(
-        margin: const EdgeInsets.all(10),
-        child: Row(
+      margin: _sectionMargin,
+      shape: _sectionShape,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Wrap(
+          spacing: 14,
+          runSpacing: 10,
           children: [
-            Text(
-              formatDate(
+            _infoPill(
+              icon: Icons.calendar_today_outlined,
+              text: formatDate(
                 DateTime.parse(widget.illust.createDate),
-                [
-                  yyyy,
-                  '-',
-                  mm,
-                  '-',
-                  dd,
-                ], // [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn, ':', ss],
+                [yyyy, '-', mm, '-', dd],
               ),
-              style: TextStyle(color: textColor),
+              color: textColor,
             ),
-            Container(width: 10),
-            Text(
-              "${widget.illust.totalView} ${AppLocalizations.of(context)!.totalViews}",
-              style: TextStyle(color: textColor),
+            _infoPill(
+              icon: Icons.image_outlined,
+              text: '${widget.illust.pageCount}P',
+              color: textColor,
             ),
-            Container(width: 10),
-            Text(
-              "${widget.illust.totalBookmarks} ",
-              style: TextStyle(color: textColorTitle),
+            _infoPill(
+              icon: Icons.photo_size_select_large_outlined,
+              text: '${widget.illust.width}×${widget.illust.height}',
+              color: textColor,
             ),
-            Text(
-              AppLocalizations.of(context)!.totalBookmarks,
-              style: TextStyle(color: textColor),
+            _infoPill(
+              icon: Icons.remove_red_eye_outlined,
+              text: widget.illust.totalView.toString(),
+              color: textColor,
+            ),
+            _infoPill(
+              icon: Icons.favorite_border,
+              text: widget.illust.totalBookmarks.toString(),
+              color: textColorTitle.withOpacity(.85),
             ),
           ],
         ),
@@ -139,75 +152,209 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
     );
   }
 
-  Widget _buildTitle() {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      child: Text(widget.illust.title),
-    );
-  }
-
-  Widget _buildTags() {
+  Widget _buildTitleAuthor() {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final textColor = (theme.textTheme.bodyMedium?.color ?? Colors.black)
-        .withOpacity(.85);
-    final textColorTitle = theme.colorScheme.primary;
+    final muted = (theme.textTheme.bodySmall?.color ?? Colors.black)
+        .withOpacity(.7);
+
     return Card(
       elevation: 0,
-      margin: const EdgeInsets.only(top: .5, bottom: .5),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      child: Container(
-        margin: const EdgeInsets.all(10),
-        child: Wrap(
-          alignment: WrapAlignment.start,
-          crossAxisAlignment: WrapCrossAlignment.start,
-          children:
-              widget.illust.tags
-                  .map(
-                    (e) => Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "#${e.name}",
-                            style: TextStyle(color: textColorTitle),
-                            recognizer:
-                                TapGestureRecognizer()
-                                  ..onTap = () async {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) {
-                                          return SearchScreen(
-                                            mode:
-                                                ILLUST_SEARCH_MODE_EXACT_MATCH_FOR_TAGS,
-                                            word: e.name,
-                                          );
-                                        },
-                                      ),
-                                    );
-                                    ;
-                                  },
-                          ),
-                          ...e.translatedName != null
-                              ? [
-                                const TextSpan(text: " "),
-                                TextSpan(
-                                  text: e.translatedName!,
-                                  style: TextStyle(color: textColor),
-                                ),
-                              ]
-                              : [],
-                          const TextSpan(text: "    "),
-                        ],
+      margin: _sectionMargin,
+      shape: _sectionShape,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.illust.title,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(50)),
+                child: SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: ScalePixivImage(
+                    url: widget.illust.user.profileImageUrls.medium,
+                  ),
+                ),
+              ),
+              title: Text(widget.illust.user.name),
+              subtitle:
+                  widget.illust.series == null
+                      ? Text('${l10n.illustId}: ${widget.illust.id}',
+                          style: TextStyle(color: muted))
+                      : Text(
+                        '${l10n.illustId}: ${widget.illust.id} · ${widget.illust.series!.title}',
+                        style: TextStyle(color: muted),
                       ),
-                    ),
-                  )
-                  .toList(),
+              trailing: IconButton(
+                tooltip: l10n.webpage,
+                icon: const Icon(Icons.open_in_new),
+                onPressed: _openInWeb,
+              ),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => UserInfoScreen(widget.illust.user),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 
+  Widget _buildTags() {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final titleStyle = theme.textTheme.titleMedium;
+
+    return Card(
+      elevation: 0,
+      margin: _sectionMargin,
+      shape: _sectionShape,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.tags, style: titleStyle),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children:
+                  widget.illust.tags.map((e) {
+                    final label =
+                        e.translatedName == null
+                            ? '#${e.name}'
+                            : '#${e.name}  ${e.translatedName}';
+                    return ActionChip(
+                      label: Text(label),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) {
+                              return SearchScreen(
+                                mode: ILLUST_SEARCH_MODE_EXACT_MATCH_FOR_TAGS,
+                                word: e.name,
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTools(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 0,
+      margin: _sectionMargin,
+      shape: _sectionShape,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.tools, style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children:
+                  widget.illust.tools
+                      .map((t) => Chip(label: Text(t)))
+                      .toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCaption() {
+    final l10n = AppLocalizations.of(context)!;
+    final caption = _plainCaption(widget.illust.caption);
+    return Card(
+      elevation: 0,
+      margin: _sectionMargin,
+      shape: _sectionShape,
+      child: ExpansionTile(
+        title: Text(l10n.caption),
+        initiallyExpanded: caption.length <= 120,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: SelectableText(caption),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoPill({
+    required IconData icon,
+    required String text,
+    required Color color,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: color.withOpacity(.9)),
+        const SizedBox(width: 6),
+        Text(text, style: TextStyle(color: color)),
+      ],
+    );
+  }
+
+  String _plainCaption(String raw) {
+    var s = raw;
+    s = s.replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n');
+    s = s.replaceAll(RegExp(r'</p\s*>', caseSensitive: false), '\n');
+    s = s.replaceAll(RegExp(r'<p[^>]*>', caseSensitive: false), '');
+    s = s.replaceAll(RegExp(r'<[^>]+>'), '');
+    s = s.replaceAll('&amp;', '&');
+    s = s.replaceAll('&lt;', '<');
+    s = s.replaceAll('&gt;', '>');
+    s = s.replaceAll('&quot;', '"');
+    s = s.replaceAll('&#39;', "'");
+    return s.trim();
+  }
+
+  Future<void> _openInWeb() async {
+    final uri = Uri.parse('https://www.pixiv.net/artworks/${widget.illust.id}');
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && mounted) {
+        defaultToast(context, AppLocalizations.of(context)!.failed);
+      }
+    } catch (e) {
+      if (mounted) {
+        defaultToast(context, AppLocalizations.of(context)!.failed + "\n$e");
+      }
+    }
+  }
+
   Widget _moreButton() {
     return PopupMenuButton<int>(
+      key: _moreMenuKey,
       icon: const Icon(Icons.more_vert, size: 24),
       itemBuilder: (BuildContext context) {
         return [
@@ -223,25 +370,6 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
                   ),
                   const TextSpan(text: "  "),
                   TextSpan(text: AppLocalizations.of(context)!.shareLink),
-                ],
-              ),
-            ),
-          ),
-          PopupMenuItem(
-            value: 2,
-            child: Text.rich(
-              TextSpan(
-                children: [
-                  const WidgetSpan(
-                    alignment: PlaceholderAlignment.middle,
-                    baseline: TextBaseline.alphabetic,
-                    child: Opacity(
-                      opacity: .8,
-                      child: Icon(Icons.image_outlined),
-                    ),
-                  ),
-                  const TextSpan(text: "  "),
-                  TextSpan(text: AppLocalizations.of(context)!.shareImage),
                 ],
               ),
             ),
@@ -290,7 +418,9 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
         final link = "https://www.pixiv.net/artworks/${widget.illust.id}";
         if (value == 1) {
           try {
-            await SharePlus.instance.share(ShareParams(text: link));
+            await SharePlus.instance.share(
+              ShareParams(text: link, sharePositionOrigin: _shareOriginRect()),
+            );
           } catch (e, s) {
             log("$e\n$s");
             if (!mounted) return;
@@ -301,26 +431,6 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
               );
               return;
             }
-            defaultToast(
-              context,
-              AppLocalizations.of(context)!.failed + "\n$e",
-            );
-          }
-          return;
-        }
-        if (value == 2) {
-          try {
-            final imageUrl =
-                widget.illust.metaPages.isNotEmpty
-                    ? widget.illust.metaPages.first.imageUrls.original
-                    : widget.illust.metaSinglePage.originalImageUrl!;
-            final cached = await loadPixivImage(url: imageUrl);
-            await SharePlus.instance.share(
-              ShareParams(text: link, files: [XFile(cached)]),
-            );
-          } catch (e, s) {
-            log("$e\n$s");
-            if (!mounted) return;
             defaultToast(
               context,
               AppLocalizations.of(context)!.failed + "\n$e",
@@ -400,6 +510,23 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
         }
       },
     );
+  }
+
+  Rect _shareOriginRect() {
+    final menuContext = _moreMenuKey.currentContext;
+    final overlayBox =
+        Overlay.of(context).context.findRenderObject() as RenderBox?;
+    final buttonBox = menuContext?.findRenderObject() as RenderBox?;
+    if (overlayBox != null && buttonBox != null) {
+      final topLeft = buttonBox.localToGlobal(
+        Offset.zero,
+        ancestor: overlayBox,
+      );
+      return topLeft & buttonBox.size;
+    }
+
+    final size = MediaQuery.of(context).size;
+    return Rect.fromLTWH(size.width / 2, size.height / 2, 1, 1);
   }
 
   Future<DownloadSaveTarget?> _chooseSaveTarget() async {

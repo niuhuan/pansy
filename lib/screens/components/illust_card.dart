@@ -7,12 +7,14 @@ class IllustCard extends StatelessWidget {
   final Illust illust;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+  final bool onlyShowImages;
 
   const IllustCard({
     Key? key,
     required this.illust,
     this.onTap,
     this.onLongPress,
+    this.onlyShowImages = false,
   }) : super(key: key);
 
   @override
@@ -56,63 +58,69 @@ class IllustCard extends StatelessWidget {
                 ),
               );
             }),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    illust.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: textColor,
+            if (!onlyShowImages)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      illust.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    illust.user.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: textColor.withAlpha(160),
+                    const SizedBox(height: 2),
+                    Text(
+                      illust.user.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: textColor.withAlpha(160),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Icon(Icons.favorite_border,
-                          size: 14, color: textColor.withAlpha(160)),
-                      const SizedBox(width: 4),
-                      Text(
-                        illust.totalBookmarks.toString(),
-                        style: TextStyle(
-                          fontSize: 12,
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.favorite_border,
+                          size: 14,
                           color: textColor.withAlpha(160),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Icon(Icons.remove_red_eye_outlined,
-                          size: 14, color: textColor.withAlpha(160)),
-                      const SizedBox(width: 4),
-                      Text(
-                        illust.totalView.toString(),
-                        style: TextStyle(
-                          fontSize: 12,
+                        const SizedBox(width: 4),
+                        Text(
+                          illust.totalBookmarks.toString(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: textColor.withAlpha(160),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Icon(
+                          Icons.remove_red_eye_outlined,
+                          size: 14,
                           color: textColor.withAlpha(160),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 4),
+                        Text(
+                          illust.totalView.toString(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: textColor.withAlpha(160),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),
     );
   }
 }
-

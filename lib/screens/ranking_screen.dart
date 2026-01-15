@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/ranks.dart';
 import 'package:pansy/screens/components/illust_card.dart';
 import 'package:pansy/screens/illust_info_screen.dart';
@@ -7,6 +8,7 @@ import 'package:pansy/src/rust/api/api.dart';
 import 'package:pansy/src/rust/pixirust/entities.dart';
 import 'package:pansy/src/rust/udto.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 /// 排行榜页面 - 带Tab切换
 class RankingScreen extends StatefulWidget {
@@ -228,61 +230,66 @@ class _RankingTabState extends State<_RankingTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (_hasError && _illusts.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(AppLocalizations.of(context)!.loadFailed),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadRanking,
-              child: Text(AppLocalizations.of(context)!.retry),
+    return Watch((context) {
+      final onlyImages = illustOnlyShowImagesSignal.value;
+
+      if (_hasError && _illusts.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(AppLocalizations.of(context)!.loadFailed),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadRanking,
+                child: Text(AppLocalizations.of(context)!.retry),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return RefreshIndicator(
+        onRefresh: _loadRanking,
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.all(4),
+              sliver: SliverMasonryGrid.count(
+                crossAxisCount: _getCrossAxisCount(context),
+                mainAxisSpacing: 4,
+                crossAxisSpacing: 4,
+                childCount: _illusts.length,
+                itemBuilder: (context, index) {
+                  final illust = _illusts[index];
+                  return IllustCard(
+                    illust: illust,
+                    onlyShowImages: onlyImages,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => IllustInfoScreen(illust),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
+            if (_isLoading)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              ),
           ],
         ),
       );
-    }
-
-    return RefreshIndicator(
-      onRefresh: _loadRanking,
-      child: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.all(4),
-            sliver: SliverMasonryGrid.count(
-              crossAxisCount: _getCrossAxisCount(context),
-              mainAxisSpacing: 4,
-              crossAxisSpacing: 4,
-              childCount: _illusts.length,
-              itemBuilder: (context, index) {
-                final illust = _illusts[index];
-                return IllustCard(
-                  illust: illust,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => IllustInfoScreen(illust),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          if (_isLoading)
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            ),
-        ],
-      ),
-    );
+    });
   }
 
   int _getCrossAxisCount(BuildContext context) {

@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pansy/basic/config/download_dir.dart';
 import 'package:pansy/basic/config/download_save_target.dart';
+import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/config/picture_source.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -33,6 +34,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           _sectionTitle(context, AppLocalizations.of(context)!.network),
           _imageHostCard(context, _customHostController),
+          _sectionTitle(context, AppLocalizations.of(context)!.display),
+          _onlyShowImagesCard(context),
           _sectionTitle(context, AppLocalizations.of(context)!.download),
           if (platformSupportsAlbum) _downloadTargetCard(context),
           _downloadDirCard(context),
@@ -210,6 +213,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ],
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _onlyShowImagesCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Watch((context) {
+      final enabled = illustOnlyShowImagesSignal.value;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Card(
+          child: SwitchListTile(
+            value: enabled,
+            onChanged: (v) async => setIllustOnlyShowImages(v),
+            title: Text(l10n.onlyShowImages),
+            subtitle: Text(l10n.onlyShowImagesDesc),
           ),
         ),
       );

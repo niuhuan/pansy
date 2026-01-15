@@ -9,10 +9,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/config/download_dir.dart';
 import 'package:pansy/basic/config/download_save_target.dart';
+import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:pansy/basic/download/download_service.dart';
 import 'package:pansy/src/rust/api/api.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
 import '../../src/rust/pixirust/entities.dart';
 import '../illust_info_screen.dart';
@@ -75,10 +77,15 @@ class _IllustFlowState extends State<IllustFlow> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: _buildFlow());
+    return Scaffold(
+      body: Watch((context) {
+        final onlyImages = illustOnlyShowImagesSignal.value;
+        return _buildFlow(onlyImages: onlyImages);
+      }),
+    );
   }
 
-  Widget _buildFlow() {
+  Widget _buildFlow({required bool onlyImages}) {
     return WaterfallFlow.builder(
       controller: _controller,
       physics: const AlwaysScrollableScrollPhysics(),
@@ -93,7 +100,7 @@ class _IllustFlowState extends State<IllustFlow> {
         if (index >= _data.length) {
           return _buildLoadingCard();
         }
-        return _buildImageCard(_data[index]);
+        return _buildImageCard(_data[index], onlyImages: onlyImages);
       },
     );
   }
@@ -141,9 +148,10 @@ class _IllustFlowState extends State<IllustFlow> {
     );
   }
 
-  Widget _buildImageCard(Illust item) {
+  Widget _buildImageCard(Illust item, {required bool onlyImages}) {
     return IllustCard(
       illust: item,
+      onlyShowImages: onlyImages,
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -202,7 +210,9 @@ class _IllustFlowState extends State<IllustFlow> {
     if (action == null) return;
     if (action == 1) {
       try {
-        await SharePlus.instance.share(ShareParams(text: link));
+        await SharePlus.instance.share(
+          ShareParams(text: link, sharePositionOrigin: _shareOriginRect()),
+        );
       } catch (e, s) {
         log("$e\n$s");
         if (!mounted) return;
@@ -222,7 +232,11 @@ class _IllustFlowState extends State<IllustFlow> {
                 : illust.metaSinglePage.originalImageUrl!;
         final cached = await loadPixivImage(url: imageUrl);
         await SharePlus.instance.share(
-          ShareParams(text: link, files: [XFile(cached)]),
+          ShareParams(
+            text: link,
+            files: [XFile(cached)],
+            sharePositionOrigin: _shareOriginRect(),
+          ),
         );
       } catch (e, s) {
         log("$e\n$s");
@@ -297,6 +311,18 @@ class _IllustFlowState extends State<IllustFlow> {
       }
       return;
     }
+  }
+
+  Rect _shareOriginRect() {
+    final box = context.findRenderObject() as RenderBox?;
+    final overlayBox = Overlay.of(context).context.findRenderObject() as RenderBox?;
+    if (box != null && overlayBox != null) {
+      final topLeft = box.localToGlobal(Offset.zero, ancestor: overlayBox);
+      return topLeft & box.size;
+    }
+
+    final size = MediaQuery.of(context).size;
+    return Rect.fromLTWH(size.width / 2, size.height / 2, 1, 1);
   }
 
   Future<DownloadSaveTarget?> _chooseSaveTarget() async {

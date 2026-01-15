@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:app_links/app_links.dart';
 import 'package:pansy/basic/config/download_dir.dart';
 import 'package:pansy/basic/config/download_save_target.dart';
+import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/config/picture_source.dart';
 import 'package:pansy/basic/stores/tag_history_store.dart';
 import 'package:pansy/screens/hello_screen.dart';
@@ -55,6 +56,7 @@ class _InitScreenState extends State<InitScreen> {
     await initPictureSource();
     await initDownloadDir();
     await initDownloadSaveTarget();
+    await initIllustOnlyShowImages();
     await initTagHistory();
     setPixivLogin(await preLogin());
 

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/screens/components/illust_card.dart';
 import 'package:pansy/screens/illust_info_screen.dart';
 import 'package:pansy/src/rust/api/api.dart';
 import 'package:pansy/src/rust/pixirust/entities.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 /// 推荐页面 - 采用瀑布流布局
 class RecommendScreen extends StatefulWidget {
@@ -97,72 +99,80 @@ class _RecommendScreenState extends State<RecommendScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: _loadRecommendations,
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            SliverAppBar(
-              floating: true,
-              title: Text(AppLocalizations.of(context)!.home),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: _loadRecommendations,
-                ),
-              ],
-            ),
-            if (_hasError && _illusts.isEmpty)
-              SliverFillRemaining(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      Text(AppLocalizations.of(context)!.loadFailed),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadRecommendations,
-                        child: Text(AppLocalizations.of(context)!.retry),
-                      ),
-                    ],
+      body: Watch((context) {
+        final onlyImages = illustOnlyShowImagesSignal.value;
+        return RefreshIndicator(
+          onRefresh: _loadRecommendations,
+          child: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverAppBar(
+                floating: true,
+                title: Text(AppLocalizations.of(context)!.home),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.refresh),
+                    onPressed: _loadRecommendations,
+                  ),
+                ],
+              ),
+              if (_hasError && _illusts.isEmpty)
+                SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(AppLocalizations.of(context)!.loadFailed),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _loadRecommendations,
+                          child: Text(AppLocalizations.of(context)!.retry),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.all(4),
+                  sliver: SliverMasonryGrid.count(
+                    crossAxisCount: _getCrossAxisCount(context),
+                    mainAxisSpacing: 4,
+                    crossAxisSpacing: 4,
+                    childCount: _illusts.length,
+                    itemBuilder: (context, index) {
+                      final illust = _illusts[index];
+                      return IllustCard(
+                        illust: illust,
+                        onlyShowImages: onlyImages,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => IllustInfoScreen(illust),
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.all(4),
-                sliver: SliverMasonryGrid.count(
-                  crossAxisCount: _getCrossAxisCount(context),
-                  mainAxisSpacing: 4,
-                  crossAxisSpacing: 4,
-                  childCount: _illusts.length,
-                  itemBuilder: (context, index) {
-                    final illust = _illusts[index];
-                    return IllustCard(
-                      illust: illust,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => IllustInfoScreen(illust),
-                          ),
-                        );
-                      },
-                    );
-                  },
+              if (_isLoading)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
                 ),
-              ),
-            if (_isLoading)
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      }),
     );
   }
 
