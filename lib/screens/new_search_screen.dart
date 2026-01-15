@@ -166,25 +166,65 @@ class _SearchScreenState extends State<SearchScreen>
               ),
             )
           else if (_trendingTags != null)
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _trendingTags!.map((tag) {
-                return ActionChip(
-                  label: Text(tag.tag),
-                  avatar: tag.illust.imageUrls.squareMedium.isNotEmpty
-                      ? CircleAvatar(
-                          backgroundImage: PixivUrlImageProvider(
-                            tag.illust.imageUrls.squareMedium,
-                          ),
-                        )
-                      : null,
-                  onPressed: () {
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 1,
+              ),
+              itemCount: _trendingTags!.length,
+              itemBuilder: (context, index) {
+                final tag = _trendingTags![index];
+                return InkWell(
+                  onTap: () {
                     _searchController.text = tag.tag;
                     _onSearch(tag.tag);
                   },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: tag.illust.imageUrls.squareMedium.isNotEmpty
+                          ? DecorationImage(
+                              image: PixivUrlImageProvider(
+                                tag.illust.imageUrls.squareMedium,
+                              ),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.7),
+                          ],
+                        ),
+                      ),
+                      alignment: Alignment.bottomCenter,
+                      padding: const EdgeInsets.all(8),
+                      child: Text(
+                        tag.tag,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
                 );
-              }).toList(),
+              },
             ),
         ],
       ),
@@ -207,7 +247,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
   late TabController _tabController;
   final List<String> _sortOptions = [
     'date_desc',
-    'popular_desc',
+    // 'popular_desc', // TODO: VIP only feature
   ];
 
   @override

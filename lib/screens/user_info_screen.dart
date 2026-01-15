@@ -344,41 +344,38 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             AppLocalizations.of(context)!.pFriends,
             style: const TextStyle(),
           ),
+          Container(width: 25),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => UserBookmarksScreen(
+                  userId: widget.userSample.id,
+                  userName: widget.userSample.name,
+                ),
+              ));
+            },
+            child: Row(
+              children: [
+                if (userDetail.profile.totalIllustBookmarksPublic > 0) ...[
+                  Text(
+                    "${userDetail.profile.totalIllustBookmarksPublic}",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                  ),
+                  const Text(" "),
+                ],
+                Text(
+                  AppLocalizations.of(context)!.bookmarks,
+                  style: const TextStyle(),
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: Container(),
           ),
         ]),
-        Container(height: 15),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton.icon(
-              icon: const Icon(Icons.people, size: 18),
-              label: Text(AppLocalizations.of(context)!.followingList),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => UserFollowingScreen(
-                    userId: widget.userSample.id,
-                    userName: widget.userSample.name,
-                  ),
-                ));
-              },
-            ),
-            Container(width: 15),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.bookmark, size: 18),
-              label: Text(AppLocalizations.of(context)!.bookmarks),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => UserBookmarksScreen(
-                    userId: widget.userSample.id,
-                    userName: widget.userSample.name,
-                  ),
-                ));
-              },
-            ),
-          ],
-        ),
         Container(height: 20),
         _buildInfos(userDetail),
         Container(height: 20),
