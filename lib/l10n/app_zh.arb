@@ -151,6 +151,8 @@
   "following": "关注中",
   "unfollow": "取消关注",
   "followingList": "关注列表",
+  "bookmarked": "已收藏",
+  "unbookmark": "取消收藏",
   "bookmarks": "收藏",
   "public_": "公开",
   "private_": "私密"

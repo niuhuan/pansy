@@ -105,6 +105,17 @@ Future<IllustResponse> userBookmarks({
   tag: tag,
 );
 
+Future<void> addBookmark({
+  required PlatformInt64 illustId,
+  required String restrict,
+}) => RustLib.instance.api.crateApiApiAddBookmark(
+  illustId: illustId,
+  restrict: restrict,
+);
+
+Future<void> deleteBookmark({required PlatformInt64 illustId}) =>
+    RustLib.instance.api.crateApiApiDeleteBookmark(illustId: illustId);
+
 Future<UiCurrentUser?> currentUser() =>
     RustLib.instance.api.crateApiApiCurrentUser();
 

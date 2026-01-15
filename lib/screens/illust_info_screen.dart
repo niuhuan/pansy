@@ -36,10 +36,13 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
   );
 
   final GlobalKey _moreMenuKey = GlobalKey();
+  late bool _isBookmarked;
+  bool _isBookmarkLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _isBookmarked = widget.illust.isBookmarked;
   }
 
   @override
@@ -47,6 +50,7 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: buildUserSampleAppBar(context, widget.illust.user, [
+        _bookmarkButton(),
         _moreButton(),
       ]),
       body: ListView(
@@ -355,6 +359,74 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
     } catch (e) {
       if (mounted) {
         defaultToast(context, AppLocalizations.of(context)!.failed + "\n$e");
+      }
+    }
+  }
+
+  Widget _bookmarkButton() {
+    return IconButton(
+      icon: _isBookmarkLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Icon(
+              _isBookmarked ? Icons.favorite : Icons.favorite_border,
+              color: _isBookmarked ? Colors.red : null,
+            ),
+      onPressed: _isBookmarkLoading ? null : _toggleBookmark,
+    );
+  }
+
+  Future<void> _toggleBookmark() async {
+    if (_isBookmarkLoading) return;
+
+    setState(() {
+      _isBookmarkLoading = true;
+    });
+
+    try {
+      if (_isBookmarked) {
+        await deleteBookmark(illustId: widget.illust.id);
+        setState(() {
+          _isBookmarked = false;
+          _isBookmarkLoading = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.unbookmark),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
+      } else {
+        await addBookmark(illustId: widget.illust.id, restrict: "public");
+        setState(() {
+          _isBookmarked = true;
+          _isBookmarkLoading = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.bookmarked),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _isBookmarkLoading = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
     }
   }

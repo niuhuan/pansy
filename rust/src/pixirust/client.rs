@@ -288,6 +288,27 @@ impl Client {
         .await
     }
 
+    pub async fn add_bookmark(&self, illust_id: i64, restrict: String) -> Result<()> {
+        let _result: serde_json::Value = self.post_form_pixiv(
+            format!("https://{}/v2/illust/bookmark/add", APP.server),
+            vec![
+                ("illust_id", illust_id.to_string()),
+                ("restrict", restrict),
+            ],
+        )
+        .await?;
+        Ok(())
+    }
+
+    pub async fn delete_bookmark(&self, illust_id: i64) -> Result<()> {
+        let _result: serde_json::Value = self.post_form_pixiv(
+            format!("https://{}/v1/illust/bookmark/delete", APP.server),
+            vec![("illust_id", illust_id.to_string())],
+        )
+        .await?;
+        Ok(())
+    }
+
     pub async fn load_image_data(&self, url: String) -> Result<bytes::Bytes> {
         let req = self.agent.get(url);
         let req = self.sign_request(req);

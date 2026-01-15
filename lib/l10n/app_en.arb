@@ -153,6 +153,8 @@
   "following": "Following",
   "unfollow": "Unfollow",
   "followingList": "Following List",
+  "bookmarked": "Bookmarked",
+  "unbookmark": "Remove Bookmark",
   "bookmarks": "Bookmarks",
   "public_": "Public",
   "private_": "Private"

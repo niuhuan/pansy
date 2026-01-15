@@ -254,6 +254,14 @@ pub fn user_bookmarks(user_id: i64, restrict: String, tag: Option<String>) -> Re
     })
 }
 
+pub fn add_bookmark(illust_id: i64, restrict: String) -> Result<()> {
+    block_on(async { crate::local::client(2).await?.add_bookmark(illust_id, restrict).await })
+}
+
+pub fn delete_bookmark(illust_id: i64) -> Result<()> {
+    block_on(async { crate::local::client(2).await?.delete_bookmark(illust_id).await })
+}
+
 pub fn current_user() -> Result<Option<UiCurrentUser>> {
     block_on(async {
         let period = crate::local::TOKEN.lock().await;
