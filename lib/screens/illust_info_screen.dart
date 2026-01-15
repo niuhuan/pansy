@@ -48,21 +48,171 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final foregroundColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
+
     return Scaffold(
-      appBar: buildUserSampleAppBar(context, widget.illust.user, [
-        _bookmarkButton(),
-        _moreButton(),
-      ]),
-      body: ListView(
-        children: [
-          ..._buildPictures(),
-          _buildTitleAuthor(),
-          _buildInfos(),
-          if (_plainCaption(widget.illust.caption).isNotEmpty) _buildCaption(),
-          _buildTags(),
-          if (widget.illust.tools.isNotEmpty) _buildTools(l10n),
-          SafeArea(top: false, child: Container()),
+      extendBodyBehindAppBar: true,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            floating: false,
+            snap: false,
+            expandedHeight: kToolbarHeight + MediaQuery.of(context).padding.top,
+            collapsedHeight: kToolbarHeight,
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            foregroundColor: foregroundColor,
+            elevation: 0,
+            leading: _buildFloatingBackButton(context, foregroundColor),
+            actions: [
+              _buildFloatingIconButton(_bookmarkButton()),
+              _buildFloatingIconButton(_moreButton()),
+            ],
+            flexibleSpace: LayoutBuilder(
+              builder: (context, constraints) {
+                final expandRatio = _calculateExpandRatio(constraints);
+                final animation = AlwaysStoppedAnimation(expandRatio);
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _buildAppBarBackground(context, animation),
+                    _buildAppBarTitle(context, animation),
+                  ],
+                );
+              },
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate([
+              ..._buildPictures(),
+              _buildTitleAuthor(),
+              _buildInfos(),
+              if (_plainCaption(widget.illust.caption).isNotEmpty)
+                _buildCaption(),
+              _buildTags(),
+              if (widget.illust.tools.isNotEmpty) _buildTools(l10n),
+              SafeArea(top: false, child: Container()),
+            ]),
+          ),
         ],
+      ),
+    );
+  }
+
+  double _calculateExpandRatio(BoxConstraints constraints) {
+    final expandedHeight =
+        kToolbarHeight + MediaQuery.of(context).padding.top;
+    final collapsedHeight =
+        kToolbarHeight + MediaQuery.of(context).padding.top;
+    final maxScrollExtent = expandedHeight - collapsedHeight;
+    final currentExtent = constraints.maxHeight - collapsedHeight;
+    return (currentExtent / (maxScrollExtent == 0 ? 1 : maxScrollExtent))
+        .clamp(0.0, 1.0);
+  }
+
+  Widget _buildFloatingBackButton(BuildContext context, Color foregroundColor) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(Icons.arrow_back, color: foregroundColor),
+        onPressed: () => Navigator.of(context).pop(),
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+      ),
+    );
+  }
+
+  Widget _buildFloatingIconButton(Widget child) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
+        shape: BoxShape.circle,
+      ),
+      child: child,
+    );
+  }
+
+  Widget _buildAppBarBackground(
+      BuildContext context, Animation<double> animation) {
+    return FadeTransition(
+      opacity: animation,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 1,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppBarTitle(BuildContext context, Animation<double> animation) {
+    final theme = Theme.of(context);
+    final foregroundColor = theme.textTheme.bodyLarge?.color ?? Colors.black;
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    return Positioned(
+      top: topPadding,
+      left: 56,
+      right: 100,
+      height: kToolbarHeight,
+      child: FadeTransition(
+        opacity: animation,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => UserInfoScreen(widget.illust.user),
+              ),
+            );
+          },
+          child: Row(
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 3,
+                    style: BorderStyle.solid,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(50)),
+                  child: ScalePixivImage(
+                      url: widget.illust.user.profileImageUrls.medium),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  widget.illust.user.name,
+                  style: TextStyle(
+                    color: foregroundColor,
+                    fontSize: 16,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
