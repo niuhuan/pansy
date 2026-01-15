@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pansy/basic/config/download_dir.dart';
 import 'package:pansy/basic/config/download_save_target.dart';
+import 'package:pansy/basic/download/download_manager.dart';
 import 'package:pansy/basic/platform.dart';
 import 'package:pansy/cross.dart';
 import 'package:pansy/src/rust/api/api.dart';
@@ -17,6 +18,7 @@ class DownloadResult {
 }
 
 class DownloadService {
+  /// 下载插画（立即下载）
   static Future<DownloadResult> downloadIllust(
     Illust illust, {
     required bool allPages,
@@ -94,6 +96,32 @@ class DownloadService {
     return DownloadResult(files: saved, savedToAlbumCount: savedToAlbumCount);
   }
 
+  /// 下载插画（添加到队列）
+  static Future<void> downloadIllustQueued(
+    Illust illust, {
+    required bool allPages,
+    required DownloadSaveTarget target,
+  }) async {
+    final urls = <String>[];
+    if (illust.metaPages.isNotEmpty) {
+      for (final page in illust.metaPages) {
+        urls.add(page.imageUrls.original);
+        if (!allPages) break;
+      }
+    } else {
+      final u = illust.metaSinglePage.originalImageUrl;
+      if (u != null && u.trim().isNotEmpty) urls.add(u);
+    }
+
+    await downloadManager.addTasks(
+      illustId: illust.id,
+      illustTitle: illust.title,
+      urls: urls,
+      saveTarget: target,
+    );
+  }
+
+  /// 下载单张图片（立即下载）
   static Future<DownloadResult> downloadSingleImage(
     Illust illust, {
     required int pageIndex,
@@ -158,6 +186,23 @@ class DownloadService {
     }
 
     return DownloadResult(files: saved, savedToAlbumCount: savedToAlbumCount);
+  }
+
+  /// 下载单张图片（添加到队列）
+  static Future<void> downloadSingleImageQueued(
+    Illust illust, {
+    required int pageIndex,
+    required String url,
+    required DownloadSaveTarget target,
+  }) async {
+    await downloadManager.addTask(
+      illustId: illust.id,
+      illustTitle: illust.title,
+      pageIndex: pageIndex,
+      pageCount: illust.metaPages.length > 0 ? illust.metaPages.length : 1,
+      url: url,
+      saveTarget: target,
+    );
   }
 
   static Future<void> _ensurePermissionsIfNeeded(

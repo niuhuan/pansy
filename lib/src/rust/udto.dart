@@ -6,6 +6,77 @@
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
+class DownloadTaskDto {
+  final PlatformInt64 id;
+  final PlatformInt64 illustId;
+  final String illustTitle;
+  final int pageIndex;
+  final int pageCount;
+  final String url;
+  final String targetPath;
+  final String saveTarget;
+  final String status;
+  final int progress;
+  final String errorMessage;
+  final int retryCount;
+  final PlatformInt64 createdTime;
+  final PlatformInt64 updatedTime;
+
+  const DownloadTaskDto({
+    required this.id,
+    required this.illustId,
+    required this.illustTitle,
+    required this.pageIndex,
+    required this.pageCount,
+    required this.url,
+    required this.targetPath,
+    required this.saveTarget,
+    required this.status,
+    required this.progress,
+    required this.errorMessage,
+    required this.retryCount,
+    required this.createdTime,
+    required this.updatedTime,
+  });
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      illustId.hashCode ^
+      illustTitle.hashCode ^
+      pageIndex.hashCode ^
+      pageCount.hashCode ^
+      url.hashCode ^
+      targetPath.hashCode ^
+      saveTarget.hashCode ^
+      status.hashCode ^
+      progress.hashCode ^
+      errorMessage.hashCode ^
+      retryCount.hashCode ^
+      createdTime.hashCode ^
+      updatedTime.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is DownloadTaskDto &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          illustId == other.illustId &&
+          illustTitle == other.illustTitle &&
+          pageIndex == other.pageIndex &&
+          pageCount == other.pageCount &&
+          url == other.url &&
+          targetPath == other.targetPath &&
+          saveTarget == other.saveTarget &&
+          status == other.status &&
+          progress == other.progress &&
+          errorMessage == other.errorMessage &&
+          retryCount == other.retryCount &&
+          createdTime == other.createdTime &&
+          updatedTime == other.updatedTime;
+}
+
 class UiIllustRankQuery {
   final String mode;
   final String date;

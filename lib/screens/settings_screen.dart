@@ -5,8 +5,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pansy/basic/config/download_dir.dart';
 import 'package:pansy/basic/config/download_save_target.dart';
+import 'package:pansy/basic/config/use_download_queue.dart';
 import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/config/picture_source.dart';
+import 'package:pansy/screens/download_list_screen.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -37,6 +39,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _sectionTitle(context, AppLocalizations.of(context)!.display),
           _onlyShowImagesCard(context),
           _sectionTitle(context, AppLocalizations.of(context)!.download),
+          _downloadListEntryCard(context),
+          _useDownloadQueueCard(context),
           if (platformSupportsAlbum) _downloadTargetCard(context),
           _downloadDirCard(context),
         ],
@@ -306,6 +310,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
               };
               if (t != null) await setDownloadSaveTarget(t);
             },
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _downloadListEntryCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Card(
+        child: ListTile(
+          leading: const Icon(Icons.download_outlined),
+          title: Text(l10n.downloads),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const DownloadListScreen(),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _useDownloadQueueCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Watch((context) {
+      final enabled = useDownloadQueueSignal.value;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Card(
+          child: SwitchListTile(
+            value: enabled,
+            onChanged: (v) async => setUseDownloadQueue(v),
+            title: Text(l10n.useDownloadQueue),
+            subtitle: Text(l10n.useDownloadQueueDesc),
           ),
         ),
       );

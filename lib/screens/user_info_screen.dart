@@ -60,7 +60,12 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             body: Text("${widget.userSample.id} : ${snapshot.error}"),
           );
         }
-        return const Center(child: CircularProgressIndicator());
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text(""),
+          ),
+          body: const Center(child: CircularProgressIndicator()),
+        );
       },
     );
   }

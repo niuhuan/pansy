@@ -9,6 +9,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/config/download_dir.dart';
 import 'package:pansy/basic/config/download_save_target.dart';
+import 'package:pansy/basic/config/use_download_queue.dart';
 import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:pansy/basic/download/download_service.dart';
@@ -251,6 +252,20 @@ class _IllustFlowState extends State<IllustFlow> {
         if (target == null) return;
         if (!await _ensureFileDownloadDirSelectedIfNeeded(target)) return;
 
+        final useQueue = useDownloadQueueSignal.value;
+        if (useQueue) {
+          // 使用下载队列
+          await DownloadService.downloadIllustQueued(
+            illust,
+            allPages: action == 5,
+            target: target,
+          );
+          if (!mounted) return;
+          defaultToast(context, l10n.addedToDownloadQueue);
+          return;
+        }
+
+        // 立即下载
         final result = await DownloadService.downloadIllust(
           illust,
           allPages: action == 5,

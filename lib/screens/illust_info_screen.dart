@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:pansy/basic/commons.dart';
 import 'package:pansy/basic/config/download_dir.dart';
 import 'package:pansy/basic/config/download_save_target.dart';
+import 'package:pansy/basic/config/use_download_queue.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:pansy/basic/download/download_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -460,6 +461,23 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
             if (target == null) return;
             if (!await _ensureFileDownloadDirSelectedIfNeeded(target)) return;
 
+            final useQueue = useDownloadQueueSignal.value;
+            if (useQueue) {
+              // 使用下载队列
+              await DownloadService.downloadIllustQueued(
+                widget.illust,
+                allPages: widget.illust.metaPages.length > 1,
+                target: target,
+              );
+              if (!mounted) return;
+              defaultToast(
+                context,
+                AppLocalizations.of(context)!.addedToDownloadQueue,
+              );
+              return;
+            }
+
+            // 立即下载
             final result = await DownloadService.downloadIllust(
               widget.illust,
               allPages: widget.illust.metaPages.length > 1,
@@ -699,6 +717,24 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
       if (target == null) return;
       if (!await _ensureFileDownloadDirSelectedIfNeeded(target)) return;
 
+      final useQueue = useDownloadQueueSignal.value;
+      if (useQueue) {
+        // 使用下载队列
+        await DownloadService.downloadSingleImageQueued(
+          widget.illust,
+          pageIndex: pageIndex,
+          url: url,
+          target: target,
+        );
+        if (!mounted) return;
+        defaultToast(
+          context,
+          AppLocalizations.of(context)!.addedToDownloadQueue,
+        );
+        return;
+      }
+
+      // 立即下载
       final result = await DownloadService.downloadSingleImage(
         widget.illust,
         pageIndex: pageIndex,

@@ -6,7 +6,7 @@ mod local;
 mod udto;
 mod pixirust;
 
-use crate::entities::{init_databases, property};
+use crate::entities::init_databases;
 use crate::local::join_paths;
 use once_cell::sync::OnceCell;
 use std::path::Path;

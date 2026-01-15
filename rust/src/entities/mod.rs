@@ -8,9 +8,11 @@ use tokio::sync::Mutex;
 
 pub(crate) mod network_image;
 pub(crate) mod property;
+pub(crate) mod download_task;
 
 static IMAGE_CACHE_DB: OnceCell<Mutex<DatabaseConnection>> = OnceCell::new();
 static PROPERTIES_DB: OnceCell<Mutex<DatabaseConnection>> = OnceCell::new();
+static DOWNLOAD_TASK_DB: OnceCell<Mutex<DatabaseConnection>> = OnceCell::new();
 
 pub(crate) async fn init_databases(){
     {
@@ -24,6 +26,12 @@ pub(crate) async fn init_databases(){
         let db = connect_db(&path).await;
         setup_properties_db(&db).await;
         PROPERTIES_DB.set(Mutex::new(db)).unwrap();
+    }
+    {
+        let path = join_paths(vec![get_root().as_str(),"download_tasks.db"]);
+        let db = connect_db(&path).await;
+        setup_download_task_db(&db).await;
+        DOWNLOAD_TASK_DB.set(Mutex::new(db)).unwrap();
     }
 }
 
@@ -129,4 +137,8 @@ async fn setup_image_cache_db(db: &DatabaseConnection) {
 
 async fn setup_properties_db(db: &DatabaseConnection) {
     property::init(db).await
+}
+
+async fn setup_download_task_db(db: &DatabaseConnection) {
+    download_task::init(db).await
 }

@@ -8,7 +8,7 @@ import '../pixirust/entities.dart';
 import '../udto.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `block_on`
+// These functions are ignored because they are not marked as `pub`: `_execute_single_download`, `block_on`
 
 Future<String> desktopRoot() => RustLib.instance.api.crateApiApiDesktopRoot();
 
@@ -72,3 +72,51 @@ Future<String> loadPixivImage({required String url}) =>
 
 Future<UserDetail> userDetail({required PlatformInt64 userId}) =>
     RustLib.instance.api.crateApiApiUserDetail(userId: userId);
+
+Future<PlatformInt64> createDownloadTask({
+  required PlatformInt64 illustId,
+  required String illustTitle,
+  required int pageIndex,
+  required int pageCount,
+  required String url,
+  required String targetPath,
+  required String saveTarget,
+}) => RustLib.instance.api.crateApiApiCreateDownloadTask(
+  illustId: illustId,
+  illustTitle: illustTitle,
+  pageIndex: pageIndex,
+  pageCount: pageCount,
+  url: url,
+  targetPath: targetPath,
+  saveTarget: saveTarget,
+);
+
+Future<List<DownloadTaskDto>> getAllDownloadTasks() =>
+    RustLib.instance.api.crateApiApiGetAllDownloadTasks();
+
+Future<List<DownloadTaskDto>> getPendingDownloadTasks() =>
+    RustLib.instance.api.crateApiApiGetPendingDownloadTasks();
+
+Future<void> updateDownloadTaskStatus({
+  required PlatformInt64 id,
+  required String status,
+  required int progress,
+  required String errorMessage,
+}) => RustLib.instance.api.crateApiApiUpdateDownloadTaskStatus(
+  id: id,
+  status: status,
+  progress: progress,
+  errorMessage: errorMessage,
+);
+
+Future<void> retryDownloadTask({required PlatformInt64 id}) =>
+    RustLib.instance.api.crateApiApiRetryDownloadTask(id: id);
+
+Future<void> deleteDownloadTask({required PlatformInt64 id}) =>
+    RustLib.instance.api.crateApiApiDeleteDownloadTask(id: id);
+
+Future<void> deleteCompletedDownloadTasks() =>
+    RustLib.instance.api.crateApiApiDeleteCompletedDownloadTasks();
+
+Future<void> executeDownloadTask({required PlatformInt64 id}) =>
+    RustLib.instance.api.crateApiApiExecuteDownloadTask(id: id);

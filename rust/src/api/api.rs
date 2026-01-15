@@ -1,4 +1,4 @@
-use crate::entities::{network_image, property};
+use crate::entities::{network_image, property, download_task};
 use crate::local::{
     client, get_in_china_, hash_lock, join_paths, load_in_china, load_token, set_in_china_,
     set_token,
@@ -223,3 +223,162 @@ pub fn load_pixiv_image(url: String) -> Result<String> {
 pub fn user_detail(user_id: i64) -> Result<UserDetail> {
     block_on(async { crate::local::client(2).await?.user_detail(user_id).await })
 }
+
+// ============= Download Task Management =============
+
+pub fn create_download_task(
+    illust_id: i64,
+    illust_title: String,
+    page_index: i32,
+    page_count: i32,
+    url: String,
+    target_path: String,
+    save_target: String,
+) -> Result<i64> {
+    block_on(async {
+        let task = download_task::insert(
+            illust_id,
+            illust_title,
+            page_index,
+            page_count,
+            url,
+            target_path,
+            save_target,
+        )
+        .await?;
+        Ok(task.id)
+    })
+}
+
+pub fn get_all_download_tasks() -> Result<Vec<DownloadTaskDto>> {
+    block_on(async {
+        let tasks = download_task::find_all().await?;
+        Ok(tasks.into_iter().map(|t| DownloadTaskDto {
+            id: t.id,
+            illust_id: t.illust_id,
+            illust_title: t.illust_title,
+            page_index: t.page_index,
+            page_count: t.page_count,
+            url: t.url,
+            target_path: t.target_path,
+            save_target: t.save_target,
+            status: t.status,
+            progress: t.progress,
+            error_message: t.error_message,
+            retry_count: t.retry_count,
+            created_time: t.created_time,
+            updated_time: t.updated_time,
+        }).collect())
+    })
+}
+
+pub fn get_pending_download_tasks() -> Result<Vec<DownloadTaskDto>> {
+    block_on(async {
+        let tasks = download_task::find_pending().await?;
+        Ok(tasks.into_iter().map(|t| DownloadTaskDto {
+            id: t.id,
+            illust_id: t.illust_id,
+            illust_title: t.illust_title,
+            page_index: t.page_index,
+            page_count: t.page_count,
+            url: t.url,
+            target_path: t.target_path,
+            save_target: t.save_target,
+            status: t.status,
+            progress: t.progress,
+            error_message: t.error_message,
+            retry_count: t.retry_count,
+            created_time: t.created_time,
+            updated_time: t.updated_time,
+        }).collect())
+    })
+}
+
+pub fn update_download_task_status(
+    id: i64,
+    status: String,
+    progress: i32,
+    error_message: String,
+) -> Result<()> {
+    block_on(async {
+        download_task::update_status(id, status, progress, error_message).await?;
+        Ok(())
+    })
+}
+
+pub fn retry_download_task(id: i64) -> Result<()> {
+    block_on(async {
+        download_task::retry_failed_task(id).await?;
+        Ok(())
+    })
+}
+
+pub fn delete_download_task(id: i64) -> Result<()> {
+    block_on(async {
+        download_task::delete_by_id(id).await?;
+        Ok(())
+    })
+}
+
+pub fn delete_completed_download_tasks() -> Result<()> {
+    block_on(async {
+        download_task::delete_completed().await?;
+        Ok(())
+    })
+}
+
+pub fn execute_download_task(id: i64) -> Result<()> {
+    block_on(async {
+        let task = download_task::find_by_id(id).await?;
+        if let Some(task) = task {
+            // Update status to downloading
+            download_task::update_status(id, "downloading".to_string(), 0, "".to_string()).await?;
+            
+            match _execute_single_download(&task).await {
+                std::result::Result::Ok(_) => {
+                    download_task::update_status(id, "completed".to_string(), 100, "".to_string()).await?;
+                }
+                Err(e) => {
+                    let error_msg = format!("{:?}", e);
+                    download_task::update_status(id, "failed".to_string(), 0, error_msg).await?;
+                    download_task::update_retry_count(id, task.retry_count + 1).await?;
+                }
+            }
+        }
+        Ok(())
+    })
+}
+
+async fn _execute_single_download(task: &download_task::Model) -> Result<()> {
+    // Download the image to cache first
+    let _lock = hash_lock(&task.url).await;
+    let db_image = network_image::find_by_url(task.url.clone()).await?;
+    let cached_path = match db_image {
+        Some(db_image) => {
+            join_paths(vec![get_network_image_dir().as_str(), &db_image.path])
+        }
+        None => {
+            let now = chrono::Local::now().timestamp_millis();
+            let client = crate::local::client(0).await?;
+            let data: bytes::Bytes = client.load_image_data(task.url.clone()).await?;
+            drop(client);
+            let f = image::guess_format(data.as_ref())?;
+            let ext = f.extensions_str()[0];
+            let path = format!(
+                "{}_{}.{}",
+                hex::encode(md5::compute(task.url.clone()).to_vec()),
+                &now,
+                ext,
+            );
+            let local = join_paths(vec![get_network_image_dir().as_str(), &path]);
+            std::fs::write(&local, data)?;
+            network_image::insert(task.url.clone(), path.clone(), now).await?;
+            local
+        }
+    };
+
+    // The actual saving to target will be handled by Flutter side
+    // This just ensures the image is cached
+    Ok(())
+}
+

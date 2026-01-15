@@ -107,22 +107,24 @@ class _RankingScreenState extends State<RankingScreen>
   }
 
   String _getRankName(BuildContext context, String mode) {
-    final names = {
-      'day': '日榜',
-      'week': '周榜',
-      'month': '月榜',
-      'day_male': '男性向',
-      'day_female': '女性向',
-      'week_original': '原创',
-      'week_rookie': '新人',
-      'day_r18': 'R18日榜',
-      'day_male_r18': 'R18男性',
-      'day_female_r18': 'R18女性',
-      'week_r18': 'R18周榜',
-      'week_r18g': 'R18G',
+    final l10n = AppLocalizations.of(context)!;
+    return switch (mode) {
+      'day' => l10n.rankDay,
+      'week' => l10n.rankWeek,
+      'month' => l10n.rankMonth,
+      'day_male' => l10n.rankDayMale,
+      'day_female' => l10n.rankDayFemale,
+      'week_original' => l10n.rankWeekOriginal,
+      'week_rookie' => l10n.rankWeekRookie,
+      'day_r18' => l10n.rankDayR18,
+      'day_male_r18' => l10n.rankDayMaleR18,
+      'day_female_r18' => l10n.rankDayFemaleR18,
+      'week_r18' => l10n.rankWeekR18,
+      'week_r18g' => l10n.rankWeekR18G,
+      _ => mode,
     };
-    return names[mode] ?? mode;
   }
+
 }
 
 class _RankingTab extends StatefulWidget {
