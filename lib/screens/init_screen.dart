@@ -5,6 +5,7 @@ import 'package:pansy/basic/config/download_save_target.dart';
 import 'package:pansy/basic/config/use_download_queue.dart';
 import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/config/picture_source.dart';
+import 'package:pansy/basic/config/sni_bypass.dart';
 import 'package:pansy/basic/stores/tag_history_store.dart';
 import 'package:pansy/screens/hello_screen.dart';
 import 'package:pansy/screens/login_screen.dart';
@@ -55,6 +56,8 @@ class _InitScreenState extends State<InitScreen> {
     await initPlatform();
     await init(root: await cross.root());
     await initPictureSource();
+    await initSniBypass();
+    await initSniBypassHosts();
     await initDownloadDir();
     await initDownloadSaveTarget();
     await initUseDownloadQueue();

@@ -1,6 +1,7 @@
 use crate::entities::{network_image, property, download_task};
 use crate::local::{
-    client, get_in_china_, hash_lock, join_paths, load_in_china, load_token, set_in_china_,
+    client, get_in_china_, hash_lock, init_bypass_sni_settings, join_paths,
+    load_in_china, load_token, set_bypass_sni_cache, set_bypass_sni_hosts_cache, set_in_china_,
     set_token,
 };
 use crate::pixirust::client::{IllustTrendingTags, UserDetail};
@@ -9,6 +10,7 @@ use crate::pixirust::entities::LoginUrl;
 use crate::udto::*;
 use crate::get_network_image_dir;
 use anyhow::{Context, Ok, Result};
+use std::collections::HashMap;
 use std::future::Future;
 use std::path::Path;
 
@@ -54,11 +56,31 @@ pub fn desktop_root() -> Result<String> {
 
 pub fn init(root: String) -> Result<()> {
     crate::init_root(&root);
+    block_on(async {
+        load_in_china().await;
+        init_bypass_sni_settings().await;
+    });
     Ok(())
 }
 
 pub fn save_property(k: String, v: String) -> Result<()> {
-    block_on(async move { Ok(property::save_property(k, v).await?) })
+    block_on(async move {
+        let key = k.clone();
+        let value = v.clone();
+        property::save_property(k, v).await?;
+        if key == "bypass_sni" {
+            let vv = value.trim().to_lowercase();
+            let parsed = vv == "true" || vv == "1" || vv == "yes";
+            set_bypass_sni_cache(parsed).await;
+        } else if key == "bypass_sni_hosts" {
+            if let std::result::Result::Ok(map) =
+                serde_json::from_str::<HashMap<String, String>>(&value)
+            {
+                set_bypass_sni_hosts_cache(map).await;
+            }
+        }        
+        Ok(())
+    })    
 }
 
 pub fn load_property(k: String) -> Result<String> {
@@ -436,4 +458,3 @@ async fn _execute_single_download(task: &download_task::Model) -> Result<()> {
     // This just ensures the image is cached
     Ok(())
 }
-

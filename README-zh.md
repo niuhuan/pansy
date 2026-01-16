@@ -33,6 +33,12 @@ PANSY
 |   Windows    |   10 (64bit)    |
 |    Linux     |     - 64bit     |
 
+## 网络
+
+- `设置 > 网络 > 图片站点`：切换图片加载域名（默认 / 代理 / 自定义）。
+- `设置 > 网络 > 绕过 SNI（不安全）`：通过直连 Pixiv 的 IP 尝试绕过基于 SNI 的干扰；会关闭 TLS 证书校验。
+- `设置 > 网络 > SNI 绕过映射`：维护绕过 SNI 时使用的 域名→IP 映射。
+
 ## 技术架构
 
 - [rust](https://github.com/rust-lang/rust)

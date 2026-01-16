@@ -3,6 +3,7 @@ use super::utils::*;
 pub use anyhow::Error;
 pub use anyhow::Result;
 use base64::Engine;
+use reqwest::header;
 use serde_json::json;
 
 const APP_SERVER: &'static str = "app-api.pixiv.net";
@@ -32,6 +33,7 @@ const CLIENT_SECRET: &'static str = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj";
 pub struct Client {
     pub access_token: String,
     agent: reqwest::Client,
+    agent_sni_bypass: reqwest::Client,
 }
 
 impl Client {
@@ -39,8 +41,45 @@ impl Client {
     pub fn new() -> Self {
         Self {
             agent: reqwest::ClientBuilder::new().build().unwrap(),
+            agent_sni_bypass: reqwest::ClientBuilder::new()
+                .danger_accept_invalid_certs(true)
+                .danger_accept_invalid_hostnames(true)
+                .http1_only()
+                .build()
+                .unwrap(),
             access_token: String::default(),
         }
+    }
+
+    async fn build_request(
+        &self,
+        method: reqwest::Method,
+        url: &str,
+    ) -> reqwest::RequestBuilder {
+        let bypass = crate::local::get_bypass_sni_().await;
+        if !bypass {
+            return self.agent.request(method, url);
+        }
+
+        let parsed = reqwest::Url::parse(url);
+        if let Ok(mut parsed) = parsed {
+            if parsed.scheme() != "https" {
+                return self.agent.request(method, parsed);
+            }
+            let host = parsed.host_str().map(|h| h.to_string());
+            if let Some(host) = host {
+                if let Some(ip) = crate::local::get_bypass_sni_ip_for_host(&host).await {
+                    if parsed.set_host(Some(ip.as_str())).is_ok() {
+                        return self
+                            .agent_sni_bypass
+                            .request(method, parsed)
+                            .header(header::HOST, host);
+                    }
+                }
+            }
+            return self.agent.request(method, parsed);
+        }
+        self.agent.request(method, url)
     }
 
     /// pixiv的base64格式
@@ -85,10 +124,8 @@ impl Client {
 
     /// 请求并获得结果
     async fn load_token(&self, body: serde_json::Value) -> Result<Token> {
-        let req = self.agent.request(
-            reqwest::Method::POST,
-            format!("https://{}/auth/token", OAUTH.server).as_str(),
-        );
+        let url = format!("https://{}/auth/token", OAUTH.server);
+        let req = self.build_request(reqwest::Method::POST, url.as_str()).await;
         let rsp = req.form(&body).send().await;
         match rsp {
             Ok(resp) => {
@@ -148,7 +185,7 @@ impl Client {
     }
 
     pub async fn get_from_pixiv_raw(&self, url: String) -> Result<String> {
-        let req = self.agent.get(url.as_str());
+        let req = self.build_request(reqwest::Method::GET, url.as_str()).await;
         let req = self.sign_request(req);
         let rsp = req.send().await?;
         match &rsp.status().as_u16() {
@@ -169,7 +206,7 @@ impl Client {
     }
 
     async fn post_form_pixiv<T: for<'de> serde::Deserialize<'de>>(&self, url: String, form: Vec<(&str, String)>) -> Result<T> {
-        let req = self.agent.post(url);
+        let req = self.build_request(reqwest::Method::POST, url.as_str()).await;
         let req = self.sign_request(req);
         let rsp = req.form(&form).send().await?;
         match &rsp.status().as_u16() {
@@ -310,7 +347,7 @@ impl Client {
     }
 
     pub async fn load_image_data(&self, url: String) -> Result<bytes::Bytes> {
-        let req = self.agent.get(url);
+        let req = self.build_request(reqwest::Method::GET, url.as_str()).await;
         let req = self.sign_request(req);
         let rsp = req.send().await?;
         let status = rsp.status();

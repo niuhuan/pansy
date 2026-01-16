@@ -33,6 +33,12 @@ A beautiful illustration clients, support mac, windows, linux, ios, Android.
 |   Windows    |   10 (64bit)    |
 |    Linux     |     - 64bit     |
 
+## Network
+
+- `Settings > Network > Image host`: switch image CDN host (default / proxy / custom).
+- `Settings > Network > Bypass SNI (insecure)`: connects to Pixiv IP directly to avoid SNI-based blocking; disables TLS certificate verification.
+- `Settings > Network > SNI bypass hosts`: maintain the domain → IP mapping used by SNI bypass.
+
 ## Technical structure
 
 - [rust](https://github.com/rust-lang/rust)

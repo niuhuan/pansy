@@ -6,6 +6,7 @@ use crate::pixirust::client::Client;
 use crate::pixirust::entities::Token;
 use anyhow::{Result, Ok};
 use serde_derive::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::Hasher;
 use std::path::{Path, PathBuf};
@@ -56,6 +57,9 @@ lazy_static::lazy_static! {
     );
     static ref IN_CHINA: Mutex<bool> = Mutex::new(false);
     static ref CLIENT: Arc<RwLock<Client>> = Arc::new(RwLock::new(Client::new()));
+    static ref BYPASS_SNI_INITED: Mutex<bool> = Mutex::new(false);
+    static ref BYPASS_SNI: RwLock<bool> = RwLock::new(false);
+    static ref BYPASS_SNI_HOSTS: RwLock<HashMap<String,String>> = RwLock::new(HashMap::new());
     static ref HASH_LOCK: Vec<Mutex::<()>> = {
         let mut mutex_vec: Vec<Mutex::<()>>  = vec![];
         for _ in 0..16 {
@@ -172,4 +176,82 @@ pub(crate) async fn set_in_china_(value: bool) {
     let mut ic = IN_CHINA.lock().await;
     *ic = value;
     // Do not change network behavior automatically; "China mode" is only a user preference flag.
+}
+
+fn default_bypass_sni_hosts() -> HashMap<String, String> {
+    HashMap::from([
+        ("app-api.pixiv.net".to_owned(), "210.140.139.155".to_owned()),
+        ("oauth.secure.pixiv.net".to_owned(), "210.140.139.155".to_owned()),
+        ("i.pximg.net".to_owned(), "210.140.139.133".to_owned()),
+        ("s.pximg.net".to_owned(), "210.140.139.133".to_owned()),
+    ])
+}
+
+pub(crate) async fn init_bypass_sni_settings() {
+    let mut inited = BYPASS_SNI_INITED.lock().await;
+    if *inited {
+        return;
+    }
+    *inited = true;
+
+    let bypass = load_bool_property("bypass_sni".to_owned()).await.unwrap_or(false);
+    *BYPASS_SNI.write().await = bypass;
+
+    let raw = load_property("bypass_sni_hosts".to_owned()).await.unwrap_or_default();
+    let parsed: Option<HashMap<String, String>> = if raw.trim().is_empty() {
+        None
+    } else {
+        serde_json::from_str::<HashMap<String, String>>(&raw).ok()
+    };
+    let parsed_valid = parsed.as_ref().is_some_and(|m| !m.is_empty());
+    let hosts = if parsed_valid {
+        parsed.unwrap()
+    } else {
+        default_bypass_sni_hosts()
+    };
+
+    if raw.trim().is_empty() || !parsed_valid {
+        let _ = save_property(
+            "bypass_sni_hosts".to_owned(),
+            serde_json::to_string(&hosts).unwrap_or_default(),
+        )
+        .await;
+    }
+    *BYPASS_SNI_HOSTS.write().await = hosts;
+}
+
+pub(crate) async fn set_bypass_sni_cache(value: bool) {
+    *BYPASS_SNI.write().await = value;
+}
+
+pub(crate) async fn set_bypass_sni_hosts_cache(value: HashMap<String, String>) {
+    let mut normalized: HashMap<String, String> = HashMap::new();
+    for (k, v) in value {
+        let kk = k.trim();
+        let vv = v.trim();
+        if kk.is_empty() || vv.is_empty() {
+            continue;
+        }
+        normalized.insert(kk.to_owned(), vv.to_owned());
+    }
+    if normalized.is_empty() {
+        normalized = default_bypass_sni_hosts();
+    }
+    *BYPASS_SNI_HOSTS.write().await = normalized;
+}
+
+pub(crate) async fn get_bypass_sni_() -> bool {
+    init_bypass_sni_settings().await;
+    *BYPASS_SNI.read().await
+}
+
+pub(crate) async fn get_bypass_sni_ip_for_host(host: &str) -> Option<String> {
+    init_bypass_sni_settings().await;
+    if let Some(v) = BYPASS_SNI_HOSTS.read().await.get(host) {
+        let vv = v.trim();
+        if !vv.is_empty() {
+            return Some(vv.to_owned());
+        }
+    }
+    default_bypass_sni_hosts().get(host).cloned()
 }
