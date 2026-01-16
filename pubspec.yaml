@@ -3,7 +3,7 @@ description: A unoffical pixiv client.
 
 publish_to: 'none'
 
-version: 0.0.8+8
+version: 0.0.9+9
 
 
 environment:

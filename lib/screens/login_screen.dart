@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pansy/src/rust/api/api.dart';
 import 'package:pansy/screens/hello_screen.dart';
 import 'package:pansy/screens/components/content_builder.dart';
+import 'package:pansy/screens/settings_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -27,9 +28,11 @@ class _LoginScreenState extends State<LoginScreen> {
     await clearPendingPixivLogin();
     setPixivLogin(true);
     if (!mounted) return;
+    if (ModalRoute.of(context)?.isCurrent != true) return;
     Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const HelloScreen()),
-        (route) => false);
+      MaterialPageRoute(builder: (context) => const HelloScreen()),
+      (route) => false,
+    );
   }
 
   @override
@@ -43,7 +46,26 @@ class _LoginScreenState extends State<LoginScreen> {
           });
         },
         successBuilder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-          return Container();
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(AppLocalizations.of(context)!.success),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => const HelloScreen(),
+                      ),
+                      (route) => false,
+                    );
+                  },
+                  child: Text(AppLocalizations.of(context)!.ok),
+                ),
+              ],
+            ),
+          );
         },
         loadingLabel: AppLocalizations.of(context)!.logging,
       ),

@@ -7,6 +7,7 @@ import 'package:pansy/screens/settings_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'dart:io';
 
 /// 主界面 - 仿照pixez的底部导航栏设计
 class HelloScreen extends StatefulWidget {
@@ -95,6 +96,26 @@ class _HelloScreenState extends State<HelloScreen> {
                 ),
                 const Spacer(),
               ],
+            ),
+          ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: Platform.isWindows || Platform.isLinux || Platform.isMacOS ? 0 : 40,
+                left: 8
+              ),
+              child: IconButton(
+                tooltip: AppLocalizations.of(context)!.settings,
+                icon: const Icon(Icons.settings_outlined),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => const SettingsScreen(),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],
