@@ -43,7 +43,8 @@ class _RankingScreenState extends State<RankingScreen>
   Future<void> _selectDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now().subtract(const Duration(days: 2)),
+      initialDate:
+          _selectedDate ?? DateTime.now().subtract(const Duration(days: 2)),
       firstDate: DateTime(2007, 9, 13),
       lastDate: DateTime.now().subtract(const Duration(days: 1)),
     );
@@ -64,11 +65,13 @@ class _RankingScreenState extends State<RankingScreen>
     super.build(context);
     return Scaffold(
       body: NestedScrollView(
+        floatHeaderSlivers: true,
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
               floating: true,
-              pinned: true,
+              snap: true,
+              pinned: false,
               leading: FutureBuilder(
                 future: currentUser(),
                 builder: (context, snapshot) {
@@ -78,17 +81,18 @@ class _RankingScreenState extends State<RankingScreen>
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => UserInfoScreen(
-                              UserSample(
-                                id: user.userId,
-                                name: user.name,
-                                account: user.account,
-                                profileImageUrls: ProfileImageUrls(
-                                  medium: user.profileImageUrl,
+                            builder:
+                                (context) => UserInfoScreen(
+                                  UserSample(
+                                    id: user.userId,
+                                    name: user.name,
+                                    account: user.account,
+                                    profileImageUrls: ProfileImageUrls(
+                                      medium: user.profileImageUrl,
+                                    ),
+                                    isFollowed: false,
+                                  ),
                                 ),
-                                isFollowed: false,
-                              ),
-                            ),
                           ),
                         );
                       },
@@ -135,19 +139,24 @@ class _RankingScreenState extends State<RankingScreen>
                 controller: _tabController,
                 isScrollable: true,
                 tabAlignment: TabAlignment.start,
-                tabs: ranks.map((mode) => Tab(text: _getRankName(context, mode))).toList(),
+                tabs:
+                    ranks
+                        .map((mode) => Tab(text: _getRankName(context, mode)))
+                        .toList(),
               ),
             ),
           ];
         },
         body: TabBarView(
           controller: _tabController,
-          children: ranks.map((mode) {
-            return _RankingTab(
-              mode: mode,
-              date: _selectedDate != null ? _formatDate(_selectedDate!) : '',
-            );
-          }).toList(),
+          children:
+              ranks.map((mode) {
+                return _RankingTab(
+                  mode: mode,
+                  date:
+                      _selectedDate != null ? _formatDate(_selectedDate!) : '',
+                );
+              }).toList(),
         ),
       ),
     );
@@ -171,17 +180,13 @@ class _RankingScreenState extends State<RankingScreen>
       _ => mode,
     };
   }
-
 }
 
 class _RankingTab extends StatefulWidget {
   final String mode;
   final String date;
 
-  const _RankingTab({
-    required this.mode,
-    required this.date,
-  });
+  const _RankingTab({required this.mode, required this.date});
 
   @override
   State<_RankingTab> createState() => _RankingTabState();
@@ -196,13 +201,11 @@ class _RankingTabState extends State<_RankingTab>
   bool _isLoading = false;
   bool _hasError = false;
   String? _nextUrl;
-  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _loadRanking();
-    _scrollController.addListener(_onScroll);
   }
 
   @override
@@ -213,19 +216,11 @@ class _RankingTabState extends State<_RankingTab>
     }
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 500) {
-      if (!_isLoading && _nextUrl != null) {
-        _loadMore();
-      }
-    }
+  bool _maybeLoadMore(ScrollMetrics metrics) {
+    if (_isLoading || _nextUrl == null) return false;
+    if (metrics.extentAfter > 500) return false;
+    _loadMore();
+    return true;
   }
 
   Future<void> _loadRanking() async {
@@ -302,40 +297,49 @@ class _RankingTabState extends State<_RankingTab>
 
       return RefreshIndicator(
         onRefresh: _loadRanking,
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.all(4),
-              sliver: SliverMasonryGrid.count(
-                crossAxisCount: _getCrossAxisCount(context),
-                mainAxisSpacing: 4,
-                crossAxisSpacing: 4,
-                childCount: _illusts.length,
-                itemBuilder: (context, index) {
-                  final illust = _illusts[index];
-                  return IllustCard(
-                    illust: illust,
-                    onlyShowImages: onlyImages,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => IllustInfoScreen(illust),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            if (_isLoading)
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: CircularProgressIndicator()),
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.axis != Axis.vertical) return false;
+            if (notification is ScrollUpdateNotification ||
+                notification is OverscrollNotification) {
+              return _maybeLoadMore(notification.metrics);
+            }
+            return false;
+          },
+          child: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.all(4),
+                sliver: SliverMasonryGrid.count(
+                  crossAxisCount: _getCrossAxisCount(context),
+                  mainAxisSpacing: 4,
+                  crossAxisSpacing: 4,
+                  childCount: _illusts.length,
+                  itemBuilder: (context, index) {
+                    final illust = _illusts[index];
+                    return IllustCard(
+                      illust: illust,
+                      onlyShowImages: onlyImages,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => IllustInfoScreen(illust),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
-          ],
+              if (_isLoading)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+            ],
+          ),
         ),
       );
     });

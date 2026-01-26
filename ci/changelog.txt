@@ -3,6 +3,7 @@ v0.0.10
 - [x] update icons
 - [x] upgrade check
 - [x] in app webview login
+- [x] better ranking scroll
 
 v0.0.9
 
