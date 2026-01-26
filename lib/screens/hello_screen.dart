@@ -30,7 +30,7 @@ class _HelloScreenState extends State<HelloScreen> {
     _pages = [
       const RecommendScreen(), // 推荐
       const RankingScreen(),   // 排行
-      const SearchScreen(),    // 搜索
+      const SearchHomeScreen(),    // 搜索
       const SettingsScreen(),  // 设置
     ];
 

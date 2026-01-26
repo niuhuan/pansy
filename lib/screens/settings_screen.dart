@@ -39,22 +39,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.settings)),
-      body: ListView(
-        children: [
-          _sectionTitle(context, AppLocalizations.of(context)!.display),
-          _onlyShowImagesCard(context),
-          _sectionTitle(context, AppLocalizations.of(context)!.download),
-          _downloadListEntryCard(context),
-          _useDownloadQueueCard(context),
-          if (platformSupportsAlbum) _downloadTargetCard(context),
-          _downloadDirCard(context),
-          _sectionTitle(context, AppLocalizations.of(context)!.network),
-          _imageHostCard(context, _customHostController),
-          _sniBypassCard(context),
-          _sectionTitle(context, AppLocalizations.of(context)!.app),
-          _updateCard(context),
-        ],
+      body: NestedScrollView(
+        floatHeaderSlivers: true,
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              pinned: false,
+              title: Text(AppLocalizations.of(context)!.settings),
+            ),
+          ];
+        },
+        body: ListView(
+          children: [
+            _sectionTitle(context, AppLocalizations.of(context)!.display),
+            _onlyShowImagesCard(context),
+            _sectionTitle(context, AppLocalizations.of(context)!.download),
+            _downloadListEntryCard(context),
+            _useDownloadQueueCard(context),
+            if (platformSupportsAlbum) _downloadTargetCard(context),
+            _downloadDirCard(context),
+            _sectionTitle(context, AppLocalizations.of(context)!.network),
+            _imageHostCard(context, _customHostController),
+            _sniBypassCard(context),
+            _sectionTitle(context, AppLocalizations.of(context)!.app),
+            _updateCard(context),
+          ],
+        ),
       ),
     );
   }

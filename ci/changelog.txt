@@ -4,6 +4,7 @@ v0.0.10
 - [x] upgrade check
 - [x] in app webview login
 - [x] better ranking scroll
+- [x] better search
 
 v0.0.9
 

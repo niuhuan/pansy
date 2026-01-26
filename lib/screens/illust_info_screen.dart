@@ -17,7 +17,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../src/rust/pixirust/entities.dart';
 import 'components/appbar.dart';
 import 'components/pixiv_image.dart';
-import 'search_screen.dart';
+import 'search_common.dart';
+import 'search_result_screen.dart';
 import 'user_info_screen.dart';
 
 class IllustInfoScreen extends StatefulWidget {
@@ -406,9 +407,16 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return SearchScreen(
+                              return SearchResultScreen(
+                                query: e.name,
                                 mode: ILLUST_SEARCH_MODE_EXACT_MATCH_FOR_TAGS,
-                                word: e.name,
+                                onOpenIllust: (context, illust) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => IllustInfoScreen(illust),
+                                    ),
+                                  );
+                                },
                               );
                             },
                           ),
