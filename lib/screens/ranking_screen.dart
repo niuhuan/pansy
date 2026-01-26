@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/ranks.dart';
-import 'package:pansy/screens/components/illust_card.dart';
+import 'package:pansy/screens/components/first_url_illust_flow.dart';
 import 'package:pansy/screens/components/pixiv_image.dart';
-import 'package:pansy/screens/illust_info_screen.dart';
 import 'package:pansy/screens/user_info_screen.dart';
 import 'package:pansy/src/rust/api/api.dart';
 import 'package:pansy/src/rust/pixirust/entities.dart';
 import 'package:pansy/src/rust/udto.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:signals_flutter/signals_flutter.dart';
 
 /// 排行榜页面 - 带Tab切换
 class RankingScreen extends StatefulWidget {
@@ -81,18 +77,17 @@ class _RankingScreenState extends State<RankingScreen>
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder:
-                                (context) => UserInfoScreen(
-                                  UserSample(
-                                    id: user.userId,
-                                    name: user.name,
-                                    account: user.account,
-                                    profileImageUrls: ProfileImageUrls(
-                                      medium: user.profileImageUrl,
-                                    ),
-                                    isFollowed: false,
-                                  ),
+                            builder: (context) => UserInfoScreen(
+                              UserSample(
+                                id: user.userId,
+                                name: user.name,
+                                account: user.account,
+                                profileImageUrls: ProfileImageUrls(
+                                  medium: user.profileImageUrl,
                                 ),
+                                isFollowed: false,
+                              ),
+                            ),
                           ),
                         );
                       },
@@ -139,24 +134,22 @@ class _RankingScreenState extends State<RankingScreen>
                 controller: _tabController,
                 isScrollable: true,
                 tabAlignment: TabAlignment.start,
-                tabs:
-                    ranks
-                        .map((mode) => Tab(text: _getRankName(context, mode)))
-                        .toList(),
+                tabs: ranks
+                    .map((mode) => Tab(text: _getRankName(context, mode)))
+                    .toList(),
               ),
             ),
           ];
         },
         body: TabBarView(
           controller: _tabController,
-          children:
-              ranks.map((mode) {
-                return _RankingTab(
-                  mode: mode,
-                  date:
-                      _selectedDate != null ? _formatDate(_selectedDate!) : '',
-                );
-              }).toList(),
+          children: ranks.map((mode) {
+            return _RankingTab(
+              key: ValueKey('$mode|${_selectedDate?.toIso8601String()}'),
+              mode: mode,
+              date: _selectedDate != null ? _formatDate(_selectedDate!) : '',
+            );
+          }).toList(),
         ),
       ),
     );
@@ -186,7 +179,7 @@ class _RankingTab extends StatefulWidget {
   final String mode;
   final String date;
 
-  const _RankingTab({required this.mode, required this.date});
+  const _RankingTab({super.key, required this.mode, required this.date});
 
   @override
   State<_RankingTab> createState() => _RankingTabState();
@@ -197,49 +190,28 @@ class _RankingTabState extends State<_RankingTab>
   @override
   bool get wantKeepAlive => true;
 
-  final List<Illust> _illusts = [];
-  bool _isLoading = false;
+  String? _firstUrl;
+  bool _isLoading = true;
   bool _hasError = false;
-  String? _nextUrl;
 
   @override
   void initState() {
     super.initState();
-    _loadRanking();
+    _loadFirstUrl();
   }
 
-  @override
-  void didUpdateWidget(_RankingTab oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.date != widget.date) {
-      _loadRanking();
-    }
-  }
-
-  bool _maybeLoadMore(ScrollMetrics metrics) {
-    if (_isLoading || _nextUrl == null) return false;
-    if (metrics.extentAfter > 500) return false;
-    _loadMore();
-    return true;
-  }
-
-  Future<void> _loadRanking() async {
-    if (_isLoading) return;
-
+  Future<void> _loadFirstUrl() async {
     setState(() {
       _isLoading = true;
       _hasError = false;
     });
 
     try {
-      final firstUrl = await illustRankFirstUrl(
+      final url = await illustRankFirstUrl(
         query: UiIllustRankQuery(mode: widget.mode, date: widget.date),
       );
-      final result = await illustFromUrl(url: firstUrl);
       setState(() {
-        _illusts.clear();
-        _illusts.addAll(result.illusts);
-        _nextUrl = result.nextUrl;
+        _firstUrl = url;
         _isLoading = false;
       });
     } catch (e) {
@@ -250,105 +222,32 @@ class _RankingTabState extends State<_RankingTab>
     }
   }
 
-  Future<void> _loadMore() async {
-    if (_isLoading || _nextUrl == null) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final result = await illustFromUrl(url: _nextUrl!);
-      setState(() {
-        _illusts.addAll(result.illusts);
-        _nextUrl = result.nextUrl;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Watch((context) {
-      final onlyImages = illustOnlyShowImagesSignal.value;
 
-      if (_hasError && _illusts.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-              const SizedBox(height: 16),
-              Text(AppLocalizations.of(context)!.loadFailed),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadRanking,
-                child: Text(AppLocalizations.of(context)!.retry),
-              ),
-            ],
-          ),
-        );
-      }
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-      return RefreshIndicator(
-        onRefresh: _loadRanking,
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            if (notification.metrics.axis != Axis.vertical) return false;
-            if (notification is ScrollUpdateNotification ||
-                notification is OverscrollNotification) {
-              return _maybeLoadMore(notification.metrics);
-            }
-            return false;
-          },
-          child: CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.all(4),
-                sliver: SliverMasonryGrid.count(
-                  crossAxisCount: _getCrossAxisCount(context),
-                  mainAxisSpacing: 4,
-                  crossAxisSpacing: 4,
-                  childCount: _illusts.length,
-                  itemBuilder: (context, index) {
-                    final illust = _illusts[index];
-                    return IllustCard(
-                      illust: illust,
-                      onlyShowImages: onlyImages,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => IllustInfoScreen(illust),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-              if (_isLoading)
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                ),
-            ],
-          ),
+    if (_hasError || _firstUrl == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(AppLocalizations.of(context)!.loadFailed),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadFirstUrl,
+              child: Text(AppLocalizations.of(context)!.retry),
+            ),
+          ],
         ),
       );
-    });
-  }
+    }
 
-  int _getCrossAxisCount(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    if (width > 1200) return 4;
-    if (width > 800) return 3;
-    return 2;
+    return FirstUrlIllustFlow(firstUrl: _firstUrl!);
   }
 }

@@ -27,6 +27,21 @@
   "copyLoginUrl": "复制登录链接",
   "pcLoginNotice": "1. 请您打开VPN或代理, 然后点击下面的打开登录链接\n2. 打开浏览器后按F12呼出浏览器的调试菜单, 找到network或网络\n3. 您登录成功后将显示红色pixiv开头的url\n4. 请将CODE部分填入下面的位置点击确定 (code=*CODE*&via=login)",
   "settings": "设置",
+  "cache": "缓存",
+  "confirmClearCache": "确定要清除缓存吗？",
+  "clearImageCache": "清除图片缓存",
+  "clearImageCacheDesc": "清除已缓存的 Pixiv 图片（不影响下载文件）。",
+  "cacheCleared": "已清除",
+  "rememberMyChoice": "记住我的选择",
+  "rememberMyChoiceDesc": "下载时默认使用上次确认的保存位置。",
+  "cacheClearFailed": "清除失败：{error}",
+  "@cacheClearFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "network": "网络",
   "display": "显示",
   "onlyShowImages": "只显示图片",

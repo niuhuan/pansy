@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pansy/screens/components/pixiv_image.dart';
-import 'package:pansy/screens/illust_info_screen.dart';
 import 'package:pansy/screens/search_result_screen.dart';
 import 'package:pansy/src/rust/api/api.dart';
 import 'package:pansy/src/rust/pixirust/entities.dart';
@@ -71,15 +70,7 @@ class _SearchScreenState extends State<SearchHomeScreen>
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder:
-            (context) => SearchResultScreen(
-              query: trimmed,
-              onOpenIllust: (context, illust) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => IllustInfoScreen(illust)),
-                );
-              },
-            ),
+        builder: (context) => SearchResultScreen(query: trimmed),
       ),
     );
   }

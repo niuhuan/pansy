@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -13,6 +12,7 @@ import 'package:pansy/basic/config/use_download_queue.dart';
 import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:pansy/basic/download/download_service.dart';
+import 'package:pansy/screens/components/download_actions.dart';
 import 'package:pansy/src/rust/api/api.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:signals_flutter/signals_flutter.dart';
@@ -24,14 +24,16 @@ import 'illust_card.dart';
 class IllustFlow extends StatefulWidget {
   final FutureOr<List<Illust>> Function() nextPage;
 
-  const IllustFlow({required this.nextPage, Key? key}) : super(key: key);
+  const IllustFlow({
+    required this.nextPage,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _IllustFlowState();
 }
 
 class _IllustFlowState extends State<IllustFlow> {
-  late ScrollController _controller;
   late Future _joinFuture;
   late var _joining = false;
   final List<Illust> _data = [];
@@ -51,58 +53,48 @@ class _IllustFlowState extends State<IllustFlow> {
 
   @override
   void initState() {
-    _controller = ScrollController();
-    _controller.addListener(_onScroll);
-    _joinFuture = _join();
     super.initState();
+    _joinFuture = _join();
   }
 
-  @override
-  void dispose() {
-    _controller.removeListener(_onScroll);
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_joining) {
-      return;
-    }
-    if (_controller.position.pixels < _controller.position.maxScrollExtent) {
-      return;
-    }
+  bool _onScrollNotification(ScrollNotification notification) {
+    if (notification.metrics.axis != Axis.vertical) return false;
+    if (_joining) return false;
+    if (notification.metrics.extentAfter > 200) return false;
+    
     setState(() {
       _joinFuture = _join();
     });
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Watch((context) {
-        final onlyImages = illustOnlyShowImagesSignal.value;
-        return _buildFlow(onlyImages: onlyImages);
-      }),
-    );
+    return Watch((context) {
+      final onlyImages = illustOnlyShowImagesSignal.value;
+      return _buildFlow(onlyImages: onlyImages);
+    });
   }
 
   Widget _buildFlow({required bool onlyImages}) {
-    return WaterfallFlow.builder(
-      controller: _controller,
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(top: 10, bottom: 10),
-      itemCount: _data.length + 1,
-      gridDelegate: const SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 0,
-        mainAxisSpacing: 0,
+    return NotificationListener<ScrollNotification>(
+      onNotification: _onScrollNotification,
+      child: WaterfallFlow.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(top: 10, bottom: 10),
+        itemCount: _data.length + 1,
+        gridDelegate: const SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 0,
+          mainAxisSpacing: 0,
+        ),
+        itemBuilder: (BuildContext context, int index) {
+          if (index >= _data.length) {
+            return _buildLoadingCard();
+          }
+          return _buildImageCard(_data[index], onlyImages: onlyImages);
+        },
       ),
-      itemBuilder: (BuildContext context, int index) {
-        if (index >= _data.length) {
-          return _buildLoadingCard();
-        }
-        return _buildImageCard(_data[index], onlyImages: onlyImages);
-      },
     );
   }
 
@@ -149,19 +141,19 @@ class _IllustFlowState extends State<IllustFlow> {
     );
   }
 
+  void _onTap(Illust illust) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => IllustInfoScreen(illust),
+      ),
+    );
+  }
+
   Widget _buildImageCard(Illust item, {required bool onlyImages}) {
     return IllustCard(
       illust: item,
       onlyShowImages: onlyImages,
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) {
-              return IllustInfoScreen(item);
-            },
-          ),
-        );
-      },
+      onTap: () => _onTap(item),
       onLongPress: () => _showIllustActions(item),
     );
   }
@@ -341,81 +333,12 @@ class _IllustFlowState extends State<IllustFlow> {
   }
 
   Future<DownloadSaveTarget?> _chooseSaveTarget() async {
-    if (!(Platform.isAndroid || Platform.isIOS)) {
-      return DownloadSaveTarget.file;
-    }
-
-    final l10n = AppLocalizations.of(context)!;
-    final selected = downloadSaveTargetSignal.value;
-    final action = await showModalBottomSheet<int>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.folder_outlined),
-                title: Text(l10n.saveToFile),
-                selected: selected == DownloadSaveTarget.file,
-                trailing:
-                    selected == DownloadSaveTarget.file
-                        ? const Icon(Icons.check)
-                        : null,
-                onTap: () => Navigator.of(context).pop(1),
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_outlined),
-                title: Text(l10n.saveToAlbum),
-                selected: selected == DownloadSaveTarget.album,
-                trailing:
-                    selected == DownloadSaveTarget.album
-                        ? const Icon(Icons.check)
-                        : null,
-                onTap: () => Navigator.of(context).pop(2),
-              ),
-              ListTile(
-                leading: const Icon(Icons.save_outlined),
-                title: Text(l10n.saveToFileAndAlbum),
-                selected: selected == DownloadSaveTarget.fileAndAlbum,
-                trailing:
-                    selected == DownloadSaveTarget.fileAndAlbum
-                        ? const Icon(Icons.check)
-                        : null,
-                onTap: () => Navigator.of(context).pop(3),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-
-    final target = switch (action) {
-      1 => DownloadSaveTarget.file,
-      2 => DownloadSaveTarget.album,
-      3 => DownloadSaveTarget.fileAndAlbum,
-      _ => null,
-    };
-
-    if (target != null) {
-      await setDownloadSaveTarget(target);
-    }
-    return target;
+    return resolveSaveTargetForDownload(context);
   }
 
   Future<bool> _ensureFileDownloadDirSelectedIfNeeded(
     DownloadSaveTarget target,
   ) async {
-    if (Platform.isAndroid) return true;
-    if (Platform.isIOS) return true;
-    if (target == DownloadSaveTarget.album) return true;
-
-    if (downloadDirSignal.value.trim().isNotEmpty) return true;
-    
-    // 不再弹出选择对话框，直接提示用户去设置
-    final l10n = AppLocalizations.of(context)!;
-    defaultToast(context, l10n.downloadDirRequired);
-    return false;
+    return ensureFileDownloadDirSelectedIfNeeded(context, target);
   }
 }

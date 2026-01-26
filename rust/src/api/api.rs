@@ -225,8 +225,32 @@ pub fn load_pixiv_image(url: String) -> Result<String> {
         // 查找图片是否有缓存
         let db_image = network_image::find_by_url(url.clone()).await?;
         let path = match db_image {
-            // 有缓存直接使用
-            Some(db_image) => db_image.path,
+            // 有缓存直接使用（如果文件仍存在）
+            Some(db_image) => {
+                let local = join_paths(vec![get_network_image_dir().as_str(), &db_image.path]);
+                if Path::new(&local).exists() {
+                    db_image.path
+                } else {
+                    // db 有记录但文件被清理/丢失，删除记录并重新下载
+                    let _ = network_image::delete_by_url(url.clone()).await;
+                    let now = chrono::Local::now().timestamp_millis();
+                    let client = crate::local::client(0).await?;
+                    let data: bytes::Bytes = client.load_image_data(url.clone()).await?;
+                    drop(client);
+                    let f = image::guess_format(data.as_ref())?;
+                    let ext = f.extensions_str()[0];
+                    let path = format!(
+                        "{}_{}.{}",
+                        hex::encode(md5::compute(url.clone()).to_vec()),
+                        &now,
+                        ext,
+                    );
+                    let local = join_paths(vec![get_network_image_dir().as_str(), &path]);
+                    std::fs::write(local, data).unwrap();
+                    network_image::insert(url.clone(), path.clone(), now.clone()).await?;
+                    path
+                }
+            }
             // 没有缓存则下载
             None => {
                 let now = chrono::Local::now().timestamp_millis();
@@ -248,6 +272,26 @@ pub fn load_pixiv_image(url: String) -> Result<String> {
             }
         };
         Ok(join_paths(vec![get_network_image_dir().as_str(), &path]))
+    })
+}
+
+/// 清除图片缓存（Pixiv 图片缓存 + 索引表）
+pub fn clear_image_cache() -> Result<()> {
+    block_on(async {
+        // 先清理索引表（避免并发读取到旧记录）
+        let _ = network_image::delete_all().await?;
+        // 再删除实际缓存文件
+        let dir = get_network_image_dir().clone();
+        if Path::new(dir.as_str()).exists() {
+            for entry in std::fs::read_dir(dir.as_str())? {
+                let entry = entry?;
+                let path = entry.path();
+                if path.is_file() {
+                    let _ = std::fs::remove_file(path);
+                }
+            }
+        }
+        Ok(())
     })
 }
 

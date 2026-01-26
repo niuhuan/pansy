@@ -32,6 +32,20 @@ pub(crate) async fn insert(url: String, path: String, cache_time: i64) -> Result
     }.insert(IMAGE_CACHE_DB.get().unwrap().lock().await.deref()).await
 }
 
+pub(crate) async fn delete_by_url(url: String) -> Result<u64, sea_orm::DbErr> {
+    let res = Entity::delete_by_id(url)
+        .exec(IMAGE_CACHE_DB.get().unwrap().lock().await.deref())
+        .await?;
+    Ok(res.rows_affected)
+}
+
+pub(crate) async fn delete_all() -> Result<u64, sea_orm::DbErr> {
+    let res = Entity::delete_many()
+        .exec(IMAGE_CACHE_DB.get().unwrap().lock().await.deref())
+        .await?;
+    Ok(res.rows_affected)
+}
+
 pub(crate) async fn init(db: &DatabaseConnection) {
     create_table_if_not_exists(&db, Entity).await;
     if !index_exists(db, "network_image", "network_image_uk_url").await {

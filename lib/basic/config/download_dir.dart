@@ -9,11 +9,16 @@ const downloadDirKey = 'download_dir';
 /// Empty means using platform default.
 final downloadDirSignal = signal<String>('');
 
+/// macOS sandbox permissions may be lost across restarts; force a per-session
+/// folder re-pick the first time the user downloads to file.
+final downloadDirSessionConfirmedSignal = signal<bool>(false);
+
 Future<void> initDownloadDir() async {
   final v = await loadProperty(k: downloadDirKey);
   if (v.trim().isNotEmpty) {
     downloadDirSignal.value = v.trim();
   }
+  downloadDirSessionConfirmedSignal.value = false;
 }
 
 Future<void> setDownloadDir(String dir) async {
@@ -23,6 +28,10 @@ Future<void> setDownloadDir(String dir) async {
 }
 
 Future<void> resetDownloadDir() => setDownloadDir('');
+
+void confirmDownloadDirForSession() {
+  downloadDirSessionConfirmedSignal.value = true;
+}
 
 Future<String> effectiveDownloadDir() async {
   final configured = downloadDirSignal.value.trim();

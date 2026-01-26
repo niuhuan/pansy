@@ -4,20 +4,25 @@ import 'package:pansy/screens/components/image_size_abel.dart';
 import 'package:pansy/screens/components/pixiv_image.dart';
 import 'package:pansy/src/rust/pixirust/entities.dart';
 
-class IllustCard extends StatelessWidget {
+class IllustCard extends StatefulWidget {
   final Illust illust;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final bool onlyShowImages;
 
   const IllustCard({
-    Key? key,
+    super.key,
     required this.illust,
     this.onTap,
     this.onLongPress,
     this.onlyShowImages = false,
-  }) : super(key: key);
+  });
 
+  @override
+  State<IllustCard> createState() => _IllustCardState();
+}
+
+class _IllustCardState extends State<IllustCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -25,48 +30,48 @@ class IllustCard extends StatelessWidget {
         (theme.textTheme.bodyMedium?.color ?? Colors.black).withAlpha(230);
 
     return Card(
-      margin: const EdgeInsets.all(6),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        child: Column(
+        margin: const EdgeInsets.all(6),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             LayoutBuilder(builder: (context, constraints) {
               final width = constraints.maxWidth;
-              final height = width * illust.height / illust.width;
+              final height = width * widget.illust.height / widget.illust.width;
               return SizedBox(
                 width: width,
                 height: height,
                 child: Stack(
                   children: [
                     ScalePixivImage(
-                      url: illust.imageUrls.medium,
+                      url: widget.illust.imageUrls.medium,
                       originSize: Size(
-                        illust.width.toDouble(),
-                        illust.height.toDouble(),
+                        widget.illust.width.toDouble(),
+                        widget.illust.height.toDouble(),
                       ),
                     ),
                     Align(
                       alignment: Alignment.topRight,
                       child: Padding(
                         padding: const EdgeInsets.all(4),
-                        child: imageSizeLabel(illust.metaPages.length),
+                        child: imageSizeLabel(widget.illust.metaPages.length),
                       ),
                     ),
                   ],
                 ),
               );
             }),
-            if (!onlyShowImages)
+            if (!widget.onlyShowImages)
               Padding(
                 padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      illust.title,
+                      widget.illust.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -76,7 +81,7 @@ class IllustCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      illust.user.name,
+                      widget.illust.user.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -94,7 +99,7 @@ class IllustCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          formatNumber(illust.totalBookmarks),
+                          formatNumber(widget.illust.totalBookmarks),
                           style: TextStyle(
                             fontSize: 12,
                             color: textColor.withAlpha(160),
@@ -108,7 +113,7 @@ class IllustCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          formatNumber(illust.totalView),
+                          formatNumber(widget.illust.totalView),
                           style: TextStyle(
                             fontSize: 12,
                             color: textColor.withAlpha(160),

@@ -410,13 +410,6 @@ class _IllustInfoScreenState extends State<IllustInfoScreen> {
                               return SearchResultScreen(
                                 query: e.name,
                                 mode: ILLUST_SEARCH_MODE_EXACT_MATCH_FOR_TAGS,
-                                onOpenIllust: (context, illust) {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => IllustInfoScreen(illust),
-                                    ),
-                                  );
-                                },
                               );
                             },
                           ),

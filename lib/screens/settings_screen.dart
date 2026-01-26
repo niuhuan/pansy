@@ -10,6 +10,7 @@ import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/config/picture_source.dart';
 import 'package:pansy/basic/config/sni_bypass.dart';
 import 'package:pansy/basic/update_checker.dart';
+import 'package:pansy/cross.dart';
 import 'package:pansy/screens/download_list_screen.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -55,17 +56,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             _sectionTitle(context, AppLocalizations.of(context)!.display),
             _onlyShowImagesCard(context),
-            _sectionTitle(context, AppLocalizations.of(context)!.download),
-            _downloadListEntryCard(context),
-            _useDownloadQueueCard(context),
-            if (platformSupportsAlbum) _downloadTargetCard(context),
-            _downloadDirCard(context),
-            _sectionTitle(context, AppLocalizations.of(context)!.network),
-            _imageHostCard(context, _customHostController),
-            _sniBypassCard(context),
-            _sectionTitle(context, AppLocalizations.of(context)!.app),
-            _updateCard(context),
+          _sectionTitle(context, AppLocalizations.of(context)!.download),
+          _downloadListEntryCard(context),
+          _useDownloadQueueCard(context),
+          if (platformSupportsAlbum) _rememberSaveTargetCard(context),
+          if (platformSupportsAlbum) _downloadTargetCard(context),
+          if (!Platform.isIOS) _downloadDirCard(context),
+          _sectionTitle(context, AppLocalizations.of(context)!.network),
+          _imageHostCard(context, _customHostController),
+          _sniBypassCard(context),
+          _sectionTitle(context, AppLocalizations.of(context)!.cache),
+          _clearImageCacheCard(context),
+          _sectionTitle(context, AppLocalizations.of(context)!.app),
+          _updateCard(context),
           ],
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _confirmClearCache(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(l10n.confirm),
+          content: Text(l10n.confirmClearCache),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.ok),
+            ),
+          ],
+        );
+      },
+    );
+    return ok == true;
+  }
+
+  Widget _clearImageCacheCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Card(
+        child: ListTile(
+          leading: const Icon(Icons.image_outlined),
+          title: Text(l10n.clearImageCache),
+          subtitle: Text(l10n.clearImageCacheDesc),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () async {
+            if (!await _confirmClearCache(context)) return;
+            try {
+              PaintingBinding.instance.imageCache.clear();
+              PaintingBinding.instance.imageCache.clearLiveImages();
+
+              final root = await cross.root();
+              final dir = Directory('$root${Platform.pathSeparator}network_image');
+              if (await dir.exists()) {
+                await for (final entity in dir.list(followLinks: false)) {
+                  try {
+                    await entity.delete(recursive: true);
+                  } catch (_) {}
+                }
+              }
+
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.cacheCleared)),
+              );
+            } catch (e) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(l10n.cacheClearFailed('$e'))),
+              );
+            }
+          },
         ),
       ),
     );
@@ -599,6 +669,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               };
               if (t != null) await setDownloadSaveTarget(t);
             },
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _rememberSaveTargetCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Watch((context) {
+      final enabled = downloadSaveTargetRememberSignal.value;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Card(
+          child: SwitchListTile(
+            value: enabled,
+            onChanged: (v) => setDownloadSaveTargetRemember(v),
+            title: Text(l10n.rememberMyChoice),
+            subtitle: Text(l10n.rememberMyChoiceDesc),
           ),
         ),
       );

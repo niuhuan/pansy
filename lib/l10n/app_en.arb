@@ -27,6 +27,21 @@
   "copyLoginUrl": "Copy login url",
   "pcLoginNotice": "1. Open VPN or proxy, click \"Open login url\"\n2. Press f12 in browser, click network menu item\n3. find url pixiv:// after login \n4. copy code (code=*CODE*&via=login)",
   "settings": "Settings",
+  "cache": "Cache",
+  "confirmClearCache": "Clear cache?",
+  "clearImageCache": "Clear image cache",
+  "clearImageCacheDesc": "Removes cached Pixiv images (won't touch your downloads).",
+  "cacheCleared": "Cleared",
+  "rememberMyChoice": "Remember my choice",
+  "rememberMyChoiceDesc": "Use the last confirmed save target for downloads.",
+  "cacheClearFailed": "Failed: {error}",
+  "@cacheClearFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "network": "Network",
   "display": "Display",
   "onlyShowImages": "Images only",
