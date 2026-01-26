@@ -9,6 +9,7 @@ import 'package:pansy/basic/config/use_download_queue.dart';
 import 'package:pansy/basic/config/illust_display.dart';
 import 'package:pansy/basic/config/picture_source.dart';
 import 'package:pansy/basic/config/sni_bypass.dart';
+import 'package:pansy/basic/update_checker.dart';
 import 'package:pansy/screens/download_list_screen.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -22,6 +23,12 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   late final TextEditingController _customHostController =
       TextEditingController(text: pictureSourceSignal.value);
+
+  @override
+  void initState() {
+    super.initState();
+    refreshUpdateStatusInBackground();
+  }
 
   @override
   void dispose() {
@@ -45,9 +52,82 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _sectionTitle(context, AppLocalizations.of(context)!.network),
           _imageHostCard(context, _customHostController),
           _sniBypassCard(context),
+          _sectionTitle(context, AppLocalizations.of(context)!.app),
+          _updateCard(context),
         ],
       ),
     );
+  }
+
+  Widget _updateCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Watch((context) {
+      final status = updateStatusSignal.value;
+      final subtitle = !updateCheckEnabled
+          ? l10n.updateDisabled
+          : (status.hasUpdate ? l10n.newVersionFound(status.latestVersion) : l10n.checkUpdateDesc);
+
+      Widget icon = const Icon(Icons.system_update_alt_outlined);
+      if (status.hasUpdate) {
+        icon = Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.error,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(
+            'NEW',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onError,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        );
+      }
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Card(
+          child: Column(
+            children: [
+              ListTile(
+                title: Text(l10n.checkUpdate),
+                subtitle: Text(subtitle),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (status.hasUpdate) icon,
+                    const SizedBox(width: 8),
+                    const Icon(Icons.chevron_right),
+                  ],
+                ),
+                onTap: () async {
+                  if (!updateCheckEnabled) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.updateDisabled)),
+                    );
+                    return;
+                  }
+                  await manualCheckUpdate(context);
+                },
+              ),
+              FutureBuilder<String>(
+                future: getCurrentAppVersion(),
+                builder: (context, snapshot) {
+                  final v = snapshot.data ?? '-';
+                  return ListTile(
+                    title: Text(l10n.currentVersion),
+                    subtitle: Text(v),
+                    dense: true,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    });
   }
 
   Widget _sectionTitle(BuildContext context, String title) {

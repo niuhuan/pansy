@@ -21,9 +21,14 @@ async fn main() -> Result<()> {
 
     let target = std::env::var("TARGET")?;
 
-    let vs_code_txt = tokio::fs::read_to_string("version.code.txt").await?;
-
-    let code = vs_code_txt.trim();
+    let mut code = std::env::var("RELEASE_TAG").unwrap_or_default();
+    if code.trim().is_empty() {
+        code = tokio::fs::read_to_string("version.tag.txt").await.unwrap_or_default();
+    }
+    let code = code.trim();
+    if code.is_empty() {
+        panic!("Missing RELEASE_TAG (or ci/version.tag.txt)");
+    }
 
     let release_file_name = common::asset_name(app_name, code, target.as_str());
 

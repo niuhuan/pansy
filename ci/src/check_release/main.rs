@@ -21,11 +21,17 @@ async fn main() -> Result<()> {
         panic!("Can't got repo branch");
     }
 
-    let vs_code_txt = tokio::fs::read_to_string("version.code.txt").await?;
-    let vs_info_txt = tokio::fs::read_to_string("version.info.txt").await?;
+    let mut code = std::env::var("RELEASE_TAG").unwrap_or_default();
+    if code.trim().is_empty() {
+        code = tokio::fs::read_to_string("version.tag.txt").await.unwrap_or_default();
+    }
+    let code = code.trim();
+    if code.is_empty() {
+        panic!("Missing RELEASE_TAG (or ci/version.tag.txt)");
+    }
 
-    let code = vs_code_txt.trim();
-    let info = vs_info_txt.trim();
+    let info_txt = tokio::fs::read_to_string("changelog.txt").await?;
+    let info = info_txt.trim();
 
     let client = reqwest::ClientBuilder::new().user_agent(UA).build()?;
 

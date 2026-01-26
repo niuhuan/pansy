@@ -1,7 +1,0 @@
-v0.0.9
-
-- [x] SNI bypass
-
-v0.0.8
-
-- [x] fix android login

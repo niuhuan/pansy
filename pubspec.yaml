@@ -3,7 +3,7 @@ description: A unoffical pixiv client.
 
 publish_to: 'none'
 
-version: 0.0.9+9
+version: 0.0.10+10
 
 
 environment:
@@ -38,6 +38,7 @@ dependencies:
   app_links: ^6.4.0
   signals_flutter: ^6.0.0
   share_plus: ^11.1.0
+  package_info_plus: ^8.0.0
 
 dev_dependencies:
   flutter_test:

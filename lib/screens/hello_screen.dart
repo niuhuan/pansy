@@ -5,6 +5,7 @@ import 'package:pansy/screens/recommend_screen.dart';
 import 'package:pansy/screens/new_search_screen.dart';
 import 'package:pansy/screens/settings_screen.dart';
 import 'package:pansy/states/pixiv_login.dart';
+import 'package:pansy/basic/update_checker.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:io';
@@ -32,6 +33,11 @@ class _HelloScreenState extends State<HelloScreen> {
       const SearchScreen(),    // 搜索
       const SettingsScreen(),  // 设置
     ];
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      maybeAutoCheckUpdate(context);
+    });
   }
 
   @override

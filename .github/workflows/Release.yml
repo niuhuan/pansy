@@ -47,6 +47,14 @@ jobs:
           repository: ${{ github.event.inputs.repo }}
           path: 'pansy'
 
+      - name: Compute Release Tag
+        shell: bash
+        run: |
+          cd pansy
+          VERSION_LINE=$(grep '^version:' pubspec.yaml | head -n1 | awk '{print $2}')
+          VERSION=${VERSION_LINE%%+*}
+          echo "RELEASE_TAG=v$VERSION" >> $GITHUB_ENV
+
       - name: Cargo ci build cache
         uses: actions/cache@v3
         with:
@@ -95,6 +103,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: 'pansy'
+
+      - name: Compute Release Tag
+        shell: bash
+        run: |
+          cd pansy
+          VERSION_LINE=$(grep '^version:' pubspec.yaml | head -n1 | awk '{print $2}')
+          VERSION=${VERSION_LINE%%+*}
+          echo "RELEASE_TAG=v$VERSION" >> $GITHUB_ENV
 
       - name: Cargo cache
         uses: actions/cache@v3
@@ -182,8 +198,8 @@ jobs:
       - name: Set-Version (All)
         if: steps.check_asset.outputs.skip_build != 'true'
         run: |
-          cd pansy/ci
-          cp version.code.txt ../lib/assets/version.txt
+          cd pansy
+          echo "$RELEASE_TAG" > lib/assets/version.txt
 
       - name: Cargo native build cache
         if: steps.check_asset.outputs.skip_build != 'true'
@@ -200,7 +216,7 @@ jobs:
           cd pansy
           flutter pub get
           /usr/libexec/PlistBuddy -c 'Add :application-identifier string opensource.pansy' ios/Runner/Info.plist
-          flutter build ios --no-simulator --no-codesign --release
+          flutter build ios --no-simulator --no-codesign --release --dart-define=UPDATE_OWNER=${{ github.repository_owner }} --dart-define=UPDATE_REPO=${{ github.event.repository.name }}
           cd build
           rm -rf Payload
           mkdir Payload
@@ -215,7 +231,7 @@ jobs:
           export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
           rustup target install aarch64-linux-android
           cd pansy
-          flutter build apk --target-platform android-arm64
+          flutter build apk --target-platform android-arm64 --dart-define=UPDATE_OWNER=${{ github.repository_owner }} --dart-define=UPDATE_REPO=${{ github.event.repository.name }}
 
       - name: Install rust target and build (Android-arm32)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-arm32')
@@ -223,7 +239,7 @@ jobs:
           export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
           rustup target install armv7-linux-androideabi
           cd pansy
-          flutter build apk --target-platform android-arm
+          flutter build apk --target-platform android-arm --dart-define=UPDATE_OWNER=${{ github.repository_owner }} --dart-define=UPDATE_REPO=${{ github.event.repository.name }}
 
       - name: Install rust target and build (Android-x86_64)
         if: steps.check_asset.outputs.skip_build != 'true' && ( matrix.config.target == 'android-x86_64')
@@ -231,7 +247,7 @@ jobs:
           export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
           rustup target install x86_64-linux-android
           cd pansy
-          flutter build apk --target-platform android-x64
+          flutter build apk --target-platform android-x64 --dart-define=UPDATE_OWNER=${{ github.repository_owner }} --dart-define=UPDATE_REPO=${{ github.event.repository.name }}
 
       - name: Install dependencies and build (Linux)
         if: steps.check_asset.outputs.skip_build != 'true' && matrix.config.target == 'linux'
@@ -244,7 +260,7 @@ jobs:
           cd pansy
           flutter pub get
           flutter config --enable-linux-desktop
-          flutter build linux --release
+          flutter build linux --release --dart-define=UPDATE_OWNER=${{ github.repository_owner }} --dart-define=UPDATE_REPO=${{ github.event.repository.name }}
           mv build/linux/x64/release/bundle/{pansy,AppRun}
           cp linux/appimage/* build/linux/x64/release/bundle/
           ../appimagetool build/linux/x64/release/bundle/
@@ -256,7 +272,7 @@ jobs:
           cd pansy
           flutter pub get
           flutter config --enable-windows-desktop
-          flutter build windows
+          flutter build windows --dart-define=UPDATE_OWNER=${{ github.repository_owner }} --dart-define=UPDATE_REPO=${{ github.event.repository.name }}
           cd build/windows/x64/runner/Release
           Compress-Archive * ../../../../../build/windows.zip
           cd ../../../../..
@@ -269,7 +285,7 @@ jobs:
           flutter config --enable-macos-desktop
           cd pansy
           flutter pub get
-          flutter build macos
+          flutter build macos --dart-define=UPDATE_OWNER=${{ github.repository_owner }} --dart-define=UPDATE_REPO=${{ github.event.repository.name }}
           cd build
           mkdir appimage
           mv macos/Build/Products/Release/pansy.app appimage/

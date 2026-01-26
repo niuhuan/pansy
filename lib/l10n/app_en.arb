@@ -118,6 +118,28 @@
   "tags": "Tags",
   "clear": "Clear",
   "discover": "Discover",
+  "app": "App",
+  "checkUpdate": "Check for updates",
+  "checkUpdateDesc": "Check the latest version from GitHub Releases.",
+  "updateDisabled": "Update source not configured (owner not injected at build time).",
+  "checkingUpdate": "Checking for updates...",
+  "alreadyLatest": "You're up to date",
+  "updateAvailable": "Update available",
+  "currentVersion": "Current version",
+  "latestVersion": "Latest version",
+  "openReleasePage": "Open release page",
+  "updateCheckFailed": "Update check failed",
+  "remindInOneDay": "Remind me in 1 day",
+  "remindInOneWeek": "Remind me in 1 week",
+  "ignoreThisVersion": "Ignore this version",
+  "newVersionFound": "New version: {version}",
+  "@newVersionFound": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "public": "Public",
   "private": "Private",
   "ranking": "Ranking",

@@ -170,4 +170,26 @@
   "bookmarks": "收藏",
   "public_": "公开",
   "private_": "私密"
+  ,"app": "应用"
+  ,"checkUpdate": "检查更新"
+  ,"checkUpdateDesc": "从 GitHub Releases 获取最新版本。"
+  ,"updateDisabled": "未配置更新源（构建时未注入 owner）。"
+  ,"checkingUpdate": "正在检查更新..."
+  ,"alreadyLatest": "已是最新版本"
+  ,"updateAvailable": "发现新版本"
+  ,"currentVersion": "当前版本"
+  ,"latestVersion": "最新版本"
+  ,"openReleasePage": "打开发布页"
+  ,"updateCheckFailed": "检查更新失败"
+  ,"remindInOneDay": "1天后再提醒"
+  ,"remindInOneWeek": "1周后再提醒"
+  ,"ignoreThisVersion": "这个版本不再提醒"
+  ,"newVersionFound": "发现新版本：{version}"
+  ,"@newVersionFound": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
 }
