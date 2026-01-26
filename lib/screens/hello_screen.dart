@@ -87,13 +87,7 @@ class _HelloScreenState extends State<HelloScreen> {
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 40),
-                ElevatedButton(
-                  onPressed: () => pixivLoginAction(context),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                  ),
-                  child: Text(AppLocalizations.of(context)!.login),
-                ),
+                ..._buildLoginButtons(context),
                 const Spacer(),
               ],
             ),
@@ -121,6 +115,49 @@ class _HelloScreenState extends State<HelloScreen> {
         ],
       ),
     );
+  }
+
+  List<Widget> _buildLoginButtons(BuildContext context) {
+    final i18n = AppLocalizations.of(context)!;
+    final buttons = <Widget>[];
+    void addButton(Widget button) {
+      if (buttons.isNotEmpty) {
+        buttons.add(const SizedBox(height: 12));
+      }
+      buttons.add(button);
+    }
+
+    if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isMacOS) {
+      addButton(_LoginActionButton(
+        label: i18n.loginWithInAppWebView,
+        onPressed: () => pixivLoginAction(
+          context,
+          method: PixivLoginMethod.inAppWebView,
+        ),
+      ));
+    }
+
+    if (Platform.isAndroid || Platform.isIOS) {
+      addButton(_LoginActionButton(
+        label: i18n.loginWithExternalBrowser,
+        onPressed: () => pixivLoginAction(
+          context,
+          method: PixivLoginMethod.externalBrowser,
+        ),
+      ));
+    }
+
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      addButton(_LoginActionButton(
+        label: i18n.loginWithManualCode,
+        onPressed: () => pixivLoginAction(
+          context,
+          method: PixivLoginMethod.manualCode,
+        ),
+      ));
+    }
+
+    return buttons;
   }
 
   Widget _buildNavigationRail(BuildContext context) {
@@ -210,6 +247,30 @@ class _HelloScreenState extends State<HelloScreen> {
         });
       },
       children: _pages,
+    );
+  }
+}
+
+class _LoginActionButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onPressed;
+
+  const _LoginActionButton({
+    required this.label,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 260,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        ),
+        child: Text(label, textAlign: TextAlign.center),
+      ),
     );
   }
 }

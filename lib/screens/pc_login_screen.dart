@@ -20,7 +20,7 @@ class _PcLoginScreenState extends State<PcLoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.login),
+        title: Text(AppLocalizations.of(context)!.loginWithManualCode),
       ),
       body: ListView(children: [
         Container(
