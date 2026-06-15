@@ -7,6 +7,7 @@ import 'package:pansy/basic/config/download_dir.dart';
 import 'package:pansy/basic/config/download_save_target.dart';
 import 'package:pansy/basic/config/use_download_queue.dart';
 import 'package:pansy/basic/config/illust_display.dart';
+import 'package:pansy/basic/config/waterfall_columns.dart';
 import 'package:pansy/basic/config/picture_source.dart';
 import 'package:pansy/basic/config/sni_bypass.dart';
 import 'package:pansy/basic/update_checker.dart';
@@ -56,6 +57,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             _sectionTitle(context, AppLocalizations.of(context)!.display),
             _onlyShowImagesCard(context),
+            _waterfallColumnsCard(context),
           _sectionTitle(context, AppLocalizations.of(context)!.download),
           _downloadListEntryCard(context),
           _useDownloadQueueCard(context),
@@ -594,6 +596,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onChanged: (v) async => setIllustOnlyShowImages(v),
             title: Text(l10n.onlyShowImages),
             subtitle: Text(l10n.onlyShowImagesDesc),
+          ),
+        ),
+      );
+    });
+  }
+
+  Widget _waterfallColumnsCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Watch((context) {
+      final columns = waterfallColumnsSignal.value;
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Card(
+          child: ListTile(
+            title: Text(l10n.waterfallColumns),
+            subtitle: Text(l10n.waterfallColumnsDesc),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.remove),
+                  onPressed: columns > 1
+                      ? () => setWaterfallColumns(columns - 1)
+                      : null,
+                ),
+                Text(
+                  '$columns',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: columns < 6
+                      ? () => setWaterfallColumns(columns + 1)
+                      : null,
+                ),
+              ],
+            ),
           ),
         ),
       );

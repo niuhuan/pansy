@@ -10,6 +10,7 @@ import 'package:pansy/basic/config/download_dir.dart';
 import 'package:pansy/basic/config/download_save_target.dart';
 import 'package:pansy/basic/config/use_download_queue.dart';
 import 'package:pansy/basic/config/illust_display.dart';
+import 'package:pansy/basic/config/waterfall_columns.dart';
 import 'package:pansy/basic/cross.dart';
 import 'package:pansy/basic/download/download_service.dart';
 import 'package:pansy/screens/components/download_actions.dart';
@@ -72,19 +73,20 @@ class _IllustFlowState extends State<IllustFlow> {
   Widget build(BuildContext context) {
     return Watch((context) {
       final onlyImages = illustOnlyShowImagesSignal.value;
-      return _buildFlow(onlyImages: onlyImages);
+      final columns = waterfallColumnsSignal.value;
+      return _buildFlow(onlyImages: onlyImages, columns: columns);
     });
   }
 
-  Widget _buildFlow({required bool onlyImages}) {
+  Widget _buildFlow({required bool onlyImages, required int columns}) {
     return NotificationListener<ScrollNotification>(
       onNotification: _onScrollNotification,
       child: WaterfallFlow.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.only(top: 10, bottom: 10),
         itemCount: _data.length + 1,
-        gridDelegate: const SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
+          crossAxisCount: columns,
           crossAxisSpacing: 0,
           mainAxisSpacing: 0,
         ),

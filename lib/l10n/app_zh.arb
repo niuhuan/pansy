@@ -46,6 +46,8 @@
   "display": "显示",
   "onlyShowImages": "只显示图片",
   "onlyShowImagesDesc": "瀑布流卡片只显示图片，不显示标题/作者/数据。",
+  "waterfallColumns": "瀑布流列数",
+  "waterfallColumnsDesc": "设置瀑布流的列数（1-6）",
   "download": "下载",
   "downloadsFolder": "下载",
   "downloadDir": "下载目录",

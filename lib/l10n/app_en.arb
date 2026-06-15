@@ -46,6 +46,8 @@
   "display": "Display",
   "onlyShowImages": "Images only",
   "onlyShowImagesDesc": "Illust cards show only images (hide title/author/stats).",
+  "waterfallColumns": "Waterfall columns",
+  "waterfallColumnsDesc": "Number of columns in the waterfall layout (1-6)",
   "download": "Download",
   "downloadsFolder": "Downloads",
   "downloadDir": "Download directory",
